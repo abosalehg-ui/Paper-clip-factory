@@ -2,187 +2,416 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>مصنع مشابك الورق — محسّن بالـSVG</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>مصنع مشابك الورق</title>
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
-        html,body{height:100%}
+        html,body{height:100%;touch-action:manipulation}
         body{
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg,#0f172a 0%, #071033 60%, #0b1220 100%);
             color:#e6eef8;
-            padding:18px;
+            padding:12px;
             min-height:100vh;
             -webkit-font-smoothing:antialiased;
+            overflow-x:hidden;
         }
         .container{max-width:1200px;margin:0 auto}
-        .header{text-align:center;margin:18px 0 28px}
-        .title{font-size:2.4rem;color:#7dd3fc;font-weight:700;margin-top:8px}
-        .subtitle{color:#9aa4b2;margin-top:6px}
+        .header{text-align:center;margin:12px 0 20px}
+        .title{font-size:1.8rem;color:#7dd3fc;font-weight:700;margin-top:8px}
+        .subtitle{color:#9aa4b2;margin-top:6px;font-size:0.9rem}
+        
+        /* Guide button as icon */
         .guide-btn{
-            margin-top:14px;background:#26314a;color:#e6eef8;border:none;padding:10px 18px;border-radius:10px;cursor:pointer;
-            display:inline-flex;gap:8px;align-items:center;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,0.45);
-            transition:transform .13s ease,background .12s;
+            margin-top:12px;
+            background:linear-gradient(135deg,#1e40af,#3b82f6);
+            border:none;
+            width:60px;
+            height:60px;
+            border-radius:50%;
+            cursor:pointer;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 8px 20px rgba(59,130,246,0.4);
+            transition:transform .2s ease;
+            position:relative;
         }
-        .guide-btn:hover{transform:translateY(-3px);background:#2f4366}
+        .guide-btn:active{transform:scale(0.95)}
+        .guide-btn svg{width:32px;height:32px}
 
-        /* layout */
-        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-bottom:26px}
+        /* Stats grid - mobile optimized */
+        .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
         .stat-card{
-            background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-            padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(4px);
-            display:flex;align-items:center;gap:12px;box-shadow:0 6px 20px rgba(2,6,23,0.6)
+            background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            padding:12px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,0.06);
+            backdrop-filter:blur(4px);
+            box-shadow:0 4px 15px rgba(2,6,23,0.5);
+            text-align:center;
         }
-        .stat-icon{width:56px;height:56px;flex:0 0 56px;display:inline-grid;place-items:center;border-radius:10px;background:rgba(255,255,255,0.02)}
-        .stat-body{flex:1}
-        .stat-label{color:#9aa4b2;font-size:0.92rem;margin-bottom:6px}
-        .stat-value{font-size:1.5rem;font-weight:700}
+        .stat-icon{
+            width:48px;
+            height:48px;
+            margin:0 auto 8px;
+            display:grid;
+            place-items:center;
+            border-radius:10px;
+            background:rgba(255,255,255,0.03);
+        }
+        .stat-label{color:#9aa4b2;font-size:0.85rem;margin-bottom:4px}
+        .stat-value{font-size:1.3rem;font-weight:700}
 
-        /* main grid */
-        .main-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:26px;margin-bottom:26px}
-        .section{background:#0f1724;padding:20px;border-radius:12px;border:1px solid rgba(125,211,252,0.05)}
-        .section-title{font-size:1.25rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+        /* Main sections */
+        .main-grid{display:flex;flex-direction:column;gap:16px;margin-bottom:20px}
+        .section{
+            background:linear-gradient(145deg,#0f1724,#1a1f2e);
+            padding:16px;
+            border-radius:16px;
+            border:1px solid rgba(125,211,252,0.08);
+            box-shadow:0 8px 24px rgba(0,0,0,0.4);
+        }
+        .section-title{
+            font-size:1.1rem;
+            font-weight:700;
+            margin-bottom:14px;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            justify-content:center;
+        }
 
-        .btn{width:100%;padding:12px;border-radius:10px;border:none;font-weight:700;cursor:pointer;transition:transform .12s ease,box-shadow .12s}
-        .btn:active{transform:translateY(1px)}
-        .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
-        .btn-primary{background:linear-gradient(180deg,#2563eb,#1d4ed8);color:#fff;box-shadow:0 8px 18px rgba(21,60,145,0.35)}
-        .btn-primary:hover:not(:disabled){transform:translateY(-3px)}
-        .btn-success{background:linear-gradient(180deg,#16a34a,#0f8a3a);color:#fff}
-        .btn-warning{background:linear-gradient(180deg,#f59e0b,#d97706);color:#111}
+        /* SVG Icon Buttons */
+        .icon-btn{
+            width:100%;
+            min-height:80px;
+            border:none;
+            border-radius:16px;
+            cursor:pointer;
+            transition:all .2s ease;
+            position:relative;
+            overflow:hidden;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            padding:12px;
+            box-shadow:0 6px 20px rgba(0,0,0,0.3);
+            font-weight:700;
+            font-size:0.95rem;
+        }
+        .icon-btn:active:not(:disabled){transform:scale(0.97)}
+        .icon-btn:disabled{opacity:.4;cursor:not-allowed}
+        
+        .icon-btn svg{width:40px;height:40px;transition:transform .2s}
+        .icon-btn:active:not(:disabled) svg{transform:scale(1.1)}
 
-        .item-box{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:12px;border-radius:10px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.02)}
-        .item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+        /* Button variants */
+        .btn-make{
+            background:linear-gradient(135deg,#2563eb,#1d4ed8);
+            color:#fff;
+        }
+        .btn-make:before{
+            content:'';
+            position:absolute;
+            inset:0;
+            background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);
+            opacity:0;
+            transition:opacity .2s;
+        }
+        .btn-make:active:not(:disabled):before{opacity:1}
 
-        .price-control{display:flex;gap:10px;margin-top:8px}
-        .price-control .btn{padding:8px 10px;width:auto}
+        .btn-sell{
+            background:linear-gradient(135deg,#16a34a,#15803d);
+            color:#fff;
+        }
 
-        .toggle-btn{padding:8px 14px;border-radius:8px;border:none;cursor:pointer}
-        .toggle-on{background:#10b981;color:#fff}
-        .toggle-off{background:#475569;color:#fff}
+        .btn-buy{
+            background:linear-gradient(135deg,#f59e0b,#d97706);
+            color:#fff;
+        }
 
-        /* icons animation */
+        .btn-upgrade{
+            background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+            color:#fff;
+        }
+
+        .btn-marketing{
+            background:linear-gradient(135deg,#a855f7,#9333ea);
+            color:#fff;
+        }
+
+        .btn-secondary{
+            background:linear-gradient(135deg,#1e3a8a,#1e40af);
+            color:#fff;
+        }
+
+        /* Item boxes */
+        .item-box{
+            background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
+            padding:12px;
+            border-radius:12px;
+            margin-bottom:12px;
+            border:1px solid rgba(255,255,255,0.04);
+        }
+        .item-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:10px;
+            font-size:0.9rem;
+        }
+        .item-info{
+            color:#9aa4b2;
+            font-size:0.85rem;
+            margin-bottom:10px;
+            text-align:center;
+        }
+
+        /* Price controls */
+        .price-display{
+            text-align:center;
+            margin-bottom:12px;
+            padding:12px;
+            background:rgba(16,185,129,0.1);
+            border-radius:10px;
+            border:1px solid rgba(16,185,129,0.2);
+        }
+        .price-label{color:#9aa4b2;font-size:0.85rem;margin-bottom:4px}
+        .price-value{font-size:1.8rem;font-weight:700;color:#10b981}
+
+        .price-control{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        .price-btn{
+            min-height:60px;
+            border:none;
+            border-radius:12px;
+            background:linear-gradient(135deg,#0d9488,#0f766e);
+            color:#fff;
+            font-size:1.2rem;
+            font-weight:700;
+            cursor:pointer;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:4px;
+            box-shadow:0 4px 12px rgba(13,148,136,0.3);
+            transition:transform .2s;
+        }
+        .price-btn:active{transform:scale(0.95)}
+        .price-btn svg{width:28px;height:28px}
+        .price-btn span{font-size:0.85rem;opacity:0.9}
+
+        /* Toggle button */
+        .toggle-container{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:12px;
+            background:rgba(255,255,255,0.02);
+            border-radius:10px;
+            margin-bottom:12px;
+        }
+        .toggle-btn{
+            width:70px;
+            height:40px;
+            border-radius:20px;
+            border:none;
+            cursor:pointer;
+            position:relative;
+            transition:background .3s;
+            box-shadow:inset 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .toggle-on{background:#10b981}
+        .toggle-off{background:#475569}
+        .toggle-btn:after{
+            content:'';
+            position:absolute;
+            width:32px;
+            height:32px;
+            border-radius:50%;
+            background:#fff;
+            top:4px;
+            transition:right .3s;
+            box-shadow:0 2px 6px rgba(0,0,0,0.3);
+        }
+        .toggle-off:after{right:34px}
+        .toggle-on:after{right:4px}
+
+        /* Stats section */
+        .stats-section{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:12px;
+        }
+        .stat-item{text-align:center;padding:10px}
+        .stat-item-label{color:#9aa4b2;font-size:0.8rem;margin-bottom:4px}
+        .stat-item-value{font-size:1.2rem;font-weight:700}
+
+        /* Animations */
         .pulse{animation:pulse 2s infinite}
         @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
         .float{animation:float 3.4s ease-in-out infinite}
         @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
-        .spin-slow{animation:spin 6s linear infinite}
-        @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        .glow-update{animation:glow .9s ease}
+        @keyframes glow{0%{box-shadow:0 0 0 rgba(125,211,252,0)}50%{box-shadow:0 0 20px rgba(125,211,252,0.4)}100%{box-shadow:0 0 0 rgba(125,211,252,0)}}
 
-        /* modal */
-        .modal{display:none;position:fixed;inset:0;background:linear-gradient(180deg,rgba(2,6,23,0.8),rgba(2,6,23,0.9));align-items:center;justify-content:center;padding:18px;z-index:60}
+        /* Modal */
+        .modal{
+            display:none;
+            position:fixed;
+            inset:0;
+            background:rgba(2,6,23,0.95);
+            align-items:center;
+            justify-content:center;
+            padding:16px;
+            z-index:60;
+            backdrop-filter:blur(8px);
+        }
         .modal.active{display:flex}
-        .modal-content{background:#071022;padding:22px;border-radius:12px;border:2px solid rgba(125,211,252,0.06);max-width:820px;width:100%;max-height:92vh;overflow:auto}
+        .modal-content{
+            background:linear-gradient(145deg,#071022,#0a1628);
+            padding:20px;
+            border-radius:16px;
+            border:2px solid rgba(125,211,252,0.1);
+            max-width:500px;
+            width:100%;
+            max-height:90vh;
+            overflow:auto;
+        }
+        .modal-title{
+            text-align:center;
+            color:#7dd3fc;
+            margin-bottom:16px;
+            font-size:1.5rem;
+        }
+        .guide-section{
+            background:#061427;
+            padding:14px;
+            border-radius:12px;
+            margin-bottom:12px;
+            border:1px solid rgba(255,255,255,0.04);
+        }
+        .guide-section h3{
+            color:#60a5fa;
+            margin-bottom:8px;
+            font-size:1rem;
+        }
+        .guide-section ul{
+            list-style:none;
+            padding:0;
+            color:#cbd5e1;
+            font-size:0.9rem;
+            line-height:1.6;
+        }
+        .guide-section ul li{margin-bottom:6px}
 
-        /* guide lists */
-        .guide-section{background:#061427;padding:12px;border-radius:10px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.02)}
-        .dev-info{text-align:center;padding:12px;border-radius:10px;background:linear-gradient(90deg,#071433,#0b1b2c);border:1px solid rgba(125,211,252,0.04);margin-top:12px}
-
-        /* responsive tweaks */
-        @media (max-width:768px){
-            .main-grid{grid-template-columns:1fr}
-            .stat-icon{width:48px;height:48px}
-            .title{font-size:1.8rem}
+        .dev-info{
+            text-align:center;
+            padding:12px;
+            border-radius:10px;
+            background:linear-gradient(90deg,#071433,#0b1b2c);
+            border:1px solid rgba(125,211,252,0.06);
+            margin-top:12px;
+            font-size:0.9rem;
         }
 
-        /* small visual cues on update */
-        .glow-update{animation:glow .9s ease}
-        @keyframes glow{0%{box-shadow:0 0 0 rgba(125,211,252,0)}50%{box-shadow:0 12px 30px rgba(125,211,252,0.08)}100%{box-shadow:0 0 0 rgba(125,211,252,0)}}
-
-        /* helper inline svg styling */
-        .svg-icon{width:24px;height:24px;vertical-align:middle;display:inline-block}
-        .svg-large{width:40px;height:40px}
-        .title-icon{width:30px;height:30px;opacity:.98}
+        /* Tablet & Desktop */
+        @media (min-width:768px){
+            .stats-grid{grid-template-columns:repeat(4,1fr);gap:16px}
+            .main-grid{grid-template-columns:repeat(2,1fr);gap:20px}
+            .title{font-size:2.2rem}
+            .stats-section{grid-template-columns:repeat(4,1fr)}
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <!-- big svg paperclip logo -->
-            <svg class="title-icon float" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <svg class="title-icon float" width="50" height="50" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
                         <stop offset="0" stop-color="#7dd3fc"/>
                         <stop offset="1" stop-color="#60a5fa"/>
                     </linearGradient>
                 </defs>
-                <rect x="0" y="0" width="64" height="64" rx="12" fill="transparent"/>
                 <path d="M20 14 C20 10,24 10,26 10 L44 10 C50 10,52 14,52 18 L52 46 C52 56,42 58,36 52 L30 46 C26 42,26 36,30 32 L42 20" fill="none" stroke="url(#g1)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <h1 class="title">مصنع مشابك الورق</h1>
-            <p class="subtitle">اصنع — ارفع — وادير السوق بحزم</p>
-            <div style="margin-top:12px">
-                <button class="guide-btn" onclick="toggleGuide()">
-                    <!-- small help SVG -->
-                    <svg class="svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                        <circle cx="12" cy="12" r="10" fill="#0b1430"/>
-                        <path d="M10.5 9.2c0-1 1-1.8 2.2-1.8.9 0 1.6.5 1.6 1.4 0 1.2-1.6 1.4-1.6 2.7M12 16h.01" stroke="#7dd3fc" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    </svg>
-                    شرح اللعبة
-                </button>
-            </div>
+            <p class="subtitle">اصنع — ارفع — وادِر السوق بحزم</p>
+            <button class="guide-btn" onclick="toggleGuide()">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="2"/>
+                    <path d="M12 16v-4M12 8h.01" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
         </div>
 
-        <!-- stats -->
+        <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card" id="card-clips">
                 <div class="stat-icon">
-                    <!-- clip icon -->
-                    <svg class="svg-large" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M44 16 C44 12,40 10,36 12 L24 18 C18 21,18 30,24 33 L36 38 C44 43,52 36,44 28 L28 12" stroke="#60a5fa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg width="36" height="36" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M44 16 C44 12,40 10,36 12 L24 18 C18 21,18 30,24 33 L36 38 C44 43,52 36,44 28 L28 12" stroke="#60a5fa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </div>
-                <div class="stat-body">
-                    <div class="stat-label">المشابك</div>
-                    <div class="stat-value" id="clips">0</div>
-                </div>
+                <div class="stat-label">المشابك</div>
+                <div class="stat-value" id="clips">0</div>
             </div>
 
             <div class="stat-card" id="card-money">
                 <div class="stat-icon">
-                    <!-- money bag -->
-                    <svg class="svg-large" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M20 18 C20 14,26 12,32 12 C38 12,44 14,44 18 C44 22,40 26,32 28 C24 30,20 26,20 18 Z" fill="#10b981" opacity="0.95"/><path d="M24 28 L40 28 L44 52 C44 56,40 58,36 58 L28 58 C24 58,20 56,20 52 L24 28 Z" stroke="#083015" stroke-width="0.6" fill="#0f8a6a" /></svg>
+                    <svg width="36" height="36" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="20" fill="#10b981" opacity="0.3"/>
+                        <text x="32" y="40" font-size="28" font-weight="bold" fill="#10b981" text-anchor="middle">$</text>
+                    </svg>
                 </div>
-                <div class="stat-body">
-                    <div class="stat-label">المال</div>
-                    <div class="stat-value">$<span id="money">0.00</span></div>
-                </div>
+                <div class="stat-label">المال</div>
+                <div class="stat-value">$<span id="money">0.00</span></div>
             </div>
 
             <div class="stat-card" id="card-wire">
                 <div class="stat-icon">
-                    <!-- wire spool -->
-                    <svg class="svg-large" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="28" r="12" fill="#f59e0b"/><circle cx="32" cy="28" r="7" fill="#0b1320"/></svg>
+                    <svg width="36" height="36" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="28" r="12" fill="#f59e0b"/>
+                        <circle cx="32" cy="28" r="7" fill="#0b1320"/>
+                    </svg>
                 </div>
-                <div class="stat-body">
-                    <div class="stat-label">السلك المتبقي</div>
-                    <div class="stat-value" id="wire">1000</div>
-                </div>
+                <div class="stat-label">السلك</div>
+                <div class="stat-value" id="wire">1000</div>
             </div>
 
             <div class="stat-card" id="card-demand">
                 <div class="stat-icon">
-                    <!-- demand chart -->
-                    <svg class="svg-large" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><polyline points="12,44 24,30 36,36 50,20" fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="20" r="3.4" fill="#a78bfa"/></svg>
+                    <svg width="36" height="36" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="12,44 24,30 36,36 50,20" fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="50" cy="20" r="3.4" fill="#a78bfa"/>
+                    </svg>
                 </div>
-                <div class="stat-body">
-                    <div class="stat-label">الطلب</div>
-                    <div class="stat-value" id="demand">50</div>
-                </div>
+                <div class="stat-label">الطلب</div>
+                <div class="stat-value" id="demand">50</div>
             </div>
         </div>
 
-        <!-- main -->
+        <!-- Main sections -->
         <div class="main-grid">
+            <!-- Production -->
             <div class="section">
                 <div class="section-title" style="color:#7dd3fc">
-                    <!-- production icon -->
-                    <svg class="svg-icon title-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 13h6v8H3zM15 3h6v18h-6zM9 7h6v14H9z" fill="#7dd3fc" opacity="0.14"/><rect x="2" y="6" width="7" height="2" rx="0.8" fill="#60a5fa"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 13h6v8H3zM15 3h6v18h-6zM9 7h6v14H9z" fill="#7dd3fc" opacity="0.3"/>
+                    </svg>
                     الإنتاج
                 </div>
 
-                <button id="makeBtn" class="btn btn-primary" onclick="makeClip()">
-                    <!-- hand-make icon -->
-                    <svg class="svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 12h12" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
-                    صنع مشبك (متاح)
+                <button id="makeBtn" class="icon-btn btn-make" onclick="makeClip()">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <circle cx="32" cy="32" r="24" fill="rgba(255,255,255,0.1)"/>
+                        <path d="M20 32h24M32 20v24" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                    <span id="makeBtnText">صنع مشبك</span>
                 </button>
 
                 <div class="item-box">
@@ -190,13 +419,17 @@
                         <span>آلات صنع تلقائي</span>
                         <span style="color:#60a5fa;font-weight:700" id="autoClippers">0</span>
                     </div>
-                    <div style="color:#9aa4b2;font-size:0.95rem;margin-bottom:8px">
+                    <div class="item-info">
                         معدل الإنتاج: <span id="autoRate">0</span>/ثانية
                     </div>
-                    <button id="autoClipperBtn" class="btn" style="background:#1e3a8a;color:#fff" onclick="buyAutoClipper()">
-                        <!-- machine svg -->
-                        <svg class="svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="6" width="18" height="12" rx="2" fill="#60a5fa"/></svg>
-                        شراء آلة ($<span id="autoClipperCost">5.00</span>)
+                    <button id="autoClipperBtn" class="icon-btn btn-secondary" onclick="buyAutoClipper()">
+                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="12" y="20" width="40" height="28" rx="4" fill="rgba(255,255,255,0.2)"/>
+                            <circle cx="24" cy="34" r="6" fill="#60a5fa"/>
+                            <circle cx="44" cy="34" r="6" fill="#60a5fa"/>
+                            <rect x="28" y="28" width="8" height="12" fill="#fff"/>
+                        </svg>
+                        <span>شراء آلة $<span id="autoClipperCost">5.00</span></span>
                     </button>
                 </div>
 
@@ -205,43 +438,57 @@
                         <span>شراء سلك (1000 وحدة)</span>
                         <span style="color:#f59e0b;font-weight:700">$<span id="wireCost">20.00</span></span>
                     </div>
-                    <button id="wireBtn" class="btn btn-warning" onclick="buyWire()">
-                        <!-- spool icon -->
-                        <svg class="svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="10" r="5" fill="#f59e0b"/></svg>
-                        شراء
+                    <button id="wireBtn" class="icon-btn btn-buy" onclick="buyWire()">
+                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="32" cy="28" r="16" fill="#f59e0b" opacity="0.3"/>
+                            <circle cx="32" cy="28" r="12" fill="#f59e0b"/>
+                            <circle cx="32" cy="28" r="7" fill="#d97706"/>
+                        </svg>
+                        <span>شراء سلك</span>
                     </button>
                 </div>
             </div>
 
+            <!-- Sales -->
             <div class="section">
                 <div class="section-title" style="color:#86efac">
-                    <!-- sales icon -->
-                    <svg class="svg-icon title-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 7h16v2H4zM4 11h12v2H4z" fill="#86efac" opacity="0.18"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 7h16M4 11h12" stroke="#86efac" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
                     المبيعات
                 </div>
 
-                <div style="margin-bottom:18px">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                        <span>السعر</span>
-                        <span style="color:#10b981;font-weight:700">$<span id="price">0.25</span></span>
-                    </div>
-                    <div class="price-control">
-                        <button class="btn" onclick="adjustPrice(-0.01)">- $0.01</button>
-                        <button class="btn" onclick="adjustPrice(0.01)">+ $0.01</button>
-                    </div>
+                <div class="price-display">
+                    <div class="price-label">السعر</div>
+                    <div class="price-value">$<span id="price">0.25</span></div>
                 </div>
 
-                <button id="sellBtn" class="btn btn-success" onclick="sellClips()">
-                    <!-- sell icon -->
-                    <svg class="svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 12h10" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
-                    بيع المشابك (متوفر: <span id="availableClips">0</span>)
+                <div class="price-control">
+                    <button class="price-btn" onclick="adjustPrice(-0.01)">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                            <path d="M5 12h14" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                        <span>تخفيض</span>
+                    </button>
+                    <button class="price-btn" onclick="adjustPrice(0.01)">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                            <path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                        <span>زيادة</span>
+                    </button>
+                </div>
+
+                <button id="sellBtn" class="icon-btn btn-sell" onclick="sellClips()" style="margin-top:12px">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <path d="M12 32h40" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M40 20l12 12-12 12" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>بيع المشابك (متوفر: <span id="availableClips">0</span>)</span>
                 </button>
 
-                <div class="item-box">
-                    <div class="item-header">
-                        <span>بيع تلقائي</span>
-                        <button id="autoSellBtn" class="toggle-btn toggle-off" onclick="toggleAutoSell()">معطّل</button>
-                    </div>
+                <div class="toggle-container">
+                    <span>بيع تلقائي</span>
+                    <button id="autoSellBtn" class="toggle-btn toggle-off" onclick="toggleAutoSell()"></button>
                 </div>
 
                 <div class="item-box">
@@ -249,20 +496,23 @@
                         <span>ترقية التسويق</span>
                         <span style="color:#a78bfa;font-weight:700">المستوى <span id="marketingLevel">1</span></span>
                     </div>
-                    <button id="marketingBtn" class="btn" style="background:#6d28d9;color:#fff" onclick="increaseMarketing()">
-                        <!-- megaphone -->
-                        <svg class="svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 11h4l8-5v14l-8-5H3z" fill="#a78bfa"/></svg>
-                        ترقية ($<span id="marketingCost">100.00</span>)
+                    <button id="marketingBtn" class="icon-btn btn-marketing" onclick="increaseMarketing()">
+                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 28h12l16-12v32l-16-12H12z" fill="rgba(255,255,255,0.2)"/>
+                            <path d="M44 20c8 4 8 20 0 24M50 16c12 6 12 28 0 34" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>ترقية $<span id="marketingCost">100.00</span></span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- upgrades -->
+        <!-- Upgrades -->
         <div class="section">
             <div class="section-title" style="color:#fbbf24">
-                <!-- upgrades icon -->
-                <svg class="svg-icon title-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v18" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round"/><path d="M3 12h18" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 3l9 9-9 9-9-9z" fill="#fbbf24" opacity="0.3"/>
+                </svg>
                 الترقيات
             </div>
 
@@ -271,56 +521,62 @@
                     <span>كفاءة السلك</span>
                     <span style="color:#fbbf24;font-weight:700">×<span id="wireEfficiency">1.0</span></span>
                 </div>
-                <p style="color:#9aa4b2;margin:8px 0 12px">احصل على المزيد من السلك عند الشراء</p>
-                <button id="efficiencyBtn" class="btn btn-warning" onclick="buyWireEfficiency()">
-                    <!-- efficiency gear -->
-                    <svg class="svg-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 7v10M7 12h10" stroke="#111" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="#f59e0b"/></svg>
-                    ترقية ($<span id="efficiencyCost">1000.00</span>)
+                <p class="item-info">احصل على المزيد من السلك عند الشراء</p>
+                <button id="efficiencyBtn" class="icon-btn btn-upgrade" onclick="buyWireEfficiency()">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="20" fill="rgba(255,255,255,0.2)"/>
+                        <path d="M32 18v28M18 32h28" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="32" cy="32" r="8" fill="rgba(255,255,255,0.3)"/>
+                    </svg>
+                    <span>ترقية $<span id="efficiencyCost">1000.00</span></span>
                 </button>
             </div>
         </div>
 
-        <!-- statistics -->
-        <div class="section" style="margin-top:18px">
+        <!-- Statistics -->
+        <div class="section">
             <div class="section-title" style="color:#cbd5e1">
-                <!-- stats icon -->
-                <svg class="svg-icon title-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="8" width="4" height="13" rx="1" fill="#93c5fd"/><rect x="10" y="3" width="4" height="18" rx="1" fill="#60a5fa"/><rect x="17" y="12" width="4" height="9" rx="1" fill="#7dd3fc"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="8" width="4" height="13" rx="1" fill="#93c5fd"/>
+                    <rect x="10" y="3" width="4" height="18" rx="1" fill="#60a5fa"/>
+                    <rect x="17" y="12" width="4" height="9" rx="1" fill="#7dd3fc"/>
+                </svg>
                 الإحصائيات
             </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px">
-                <div>
-                    <div style="color:#9aa4b2;font-size:0.9rem">إجمالي الإنتاج</div>
-                    <div style="font-size:1.25rem;font-weight:700" id="totalClips">0</div>
+            <div class="stats-section">
+                <div class="stat-item">
+                    <div class="stat-item-label">إجمالي الإنتاج</div>
+                    <div class="stat-item-value" id="totalClips">0</div>
                 </div>
-                <div>
-                    <div style="color:#9aa4b2;font-size:0.9rem">إجمالي المبيعات</div>
-                    <div style="font-size:1.25rem;font-weight:700" id="totalSold">0</div>
+                <div class="stat-item">
+                    <div class="stat-item-label">إجمالي المبيعات</div>
+                    <div class="stat-item-value" id="totalSold">0</div>
                 </div>
-                <div>
-                    <div style="color:#9aa4b2;font-size:0.9rem">الآلات</div>
-                    <div style="font-size:1.25rem;font-weight:700" id="totalMachines">0</div>
+                <div class="stat-item">
+                    <div class="stat-item-label">الآلات</div>
+                    <div class="stat-item-value" id="totalMachines">0</div>
                 </div>
-                <div>
-                    <div style="color:#9aa4b2;font-size:0.9rem">معدل الإنتاج</div>
-                    <div style="font-size:1.25rem;font-weight:700"><span id="productionRate">0</span>/ثانية</div>
+                <div class="stat-item">
+                    <div class="stat-item-label">معدل الإنتاج</div>
+                    <div class="stat-item-value"><span id="productionRate">0</span>/ث</div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Guide Modal -->
-    <div id="guideModal" class="modal" aria-hidden="true">
+    <div id="guideModal" class="modal">
         <div class="modal-content">
-            <h2 style="text-align:center;color:#7dd3fc;margin-bottom:12px">شرح اللعبة</h2>
+            <h2 class="modal-title">شرح اللعبة</h2>
 
             <div class="guide-section">
-                <h3 style="color:#60a5fa">🎯 الهدف</h3>
+                <h3>🎯 الهدف</h3>
                 <p>ابنِ مصنع مشابك ناجح: اصنع، استثمر في آلات، نوّع التسويق وزد أرباحك.</p>
             </div>
 
             <div class="guide-section">
-                <h3 style="color:#10b981">🎮 كيفية اللعب</h3>
-                <ul style="list-style:none;padding-right:0;color:#cbd5e1">
+                <h3>🎮 كيفية اللعب</h3>
+                <ul>
                     <li>• اضغط صنع مشبك لصنع مشبك واحد (يستهلك سلك).</li>
                     <li>• بيع المشابك لتحصل على مال. السعر يؤثر على الطلب.</li>
                     <li>• اشترِ سلك وآلات لترتفع الإنتاجية.</li>
@@ -328,16 +584,16 @@
             </div>
 
             <div class="guide-section">
-                <h3 style="color:#a78bfa">⚡ الأتمتة</h3>
-                <ul style="list-style:none;padding-right:0;color:#cbd5e1">
-                    <li>• آلات صنع تلقائي تنتج مشابك لكل ثانية.</li>
+                <h3>⚡ الأتمتة</h3>
+                <ul>
+                    <li>• آلات صنع تلقائي تنتج مشابك كل ثانية.</li>
                     <li>• فعّل البيع التلقائي لبيع بدون ضغط منك.</li>
                 </ul>
             </div>
 
             <div class="guide-section">
-                <h3 style="color:#fbbf24">🚀 الترقيات</h3>
-                <ul style="list-style:none;padding-right:0;color:#cbd5e1">
+                <h3>🚀 الترقيات</h3>
+                <ul>
                     <li>• زيادة كفاءة السلك تعطيك سلك أكثر عند الشراء.</li>
                     <li>• التسويق يزيد الطلب على منتجاتك.</li>
                 </ul>
@@ -348,14 +604,18 @@
                 <div style="margin-top:6px"><a href="mailto:abo.saleh.g@gmail.com" style="color:#60a5fa;text-decoration:none">abo.saleh.g@gmail.com</a></div>
             </div>
 
-            <div style="display:flex;justify-content:center;margin-top:14px">
-                <button class="btn btn-primary" onclick="toggleGuide()">ابدأ اللعب</button>
+            <div style="margin-top:16px">
+                <button class="icon-btn btn-make" onclick="toggleGuide()" style="width:100%">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>ابدأ اللعب</span>
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- نفس منطق اللعبة بدون تغيير جوهري ---
         let gameState = {
             clips: 0,
             money: 0,
@@ -373,7 +633,6 @@
             totalSold: 0
         };
 
-        // UI Update with small visual cue on change
         function flash(id){
             const el = document.getElementById(id);
             if(!el) return;
@@ -401,15 +660,9 @@
             document.getElementById('totalMachines').textContent = gameState.autoClippers;
             document.getElementById('productionRate').textContent = gameState.autoClipperRate;
 
-            document.getElementById('makeBtn').disabled = gameState.wire < 1;
-            document.getElementById('makeBtn').textContent = gameState.wire < 1 ? 'صنع مشبك (لا يوجد سلك)' : 'صنع مشبك (متاح)';
-            // keep icon when changing text
-            if(!document.getElementById('makeBtn').querySelector('svg')){
-                const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-                svg.setAttribute('class','svg-icon'); svg.setAttribute('viewBox','0 0 24 24');
-                svg.innerHTML = '<path d="M6 12h12" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>';
-                document.getElementById('makeBtn').prepend(svg);
-            }
+            const makeBtn = document.getElementById('makeBtn');
+            makeBtn.disabled = gameState.wire < 1;
+            document.getElementById('makeBtnText').textContent = gameState.wire < 1 ? 'لا يوجد سلك' : 'صنع مشبك';
 
             document.getElementById('sellBtn').disabled = gameState.clips === 0;
             document.getElementById('autoClipperBtn').disabled = gameState.money < gameState.autoClipperCost;
@@ -420,8 +673,11 @@
 
         function makeClip(){
             if(gameState.wire >= 1){
-                gameState.clips++; gameState.totalClips++; gameState.wire--;
-                flash('card-clips'); flash('card-wire');
+                gameState.clips++;
+                gameState.totalClips++;
+                gameState.wire--;
+                flash('card-clips');
+                flash('card-wire');
                 updateUI();
             }
         }
@@ -433,7 +689,8 @@
                 gameState.money += sellAmount * gameState.price;
                 gameState.totalSold += sellAmount;
                 gameState.demand = Math.max(10, gameState.demand - Math.floor(sellAmount * 0.1));
-                flash('card-money'); flash('card-clips');
+                flash('card-money');
+                flash('card-clips');
                 updateUI();
             }
         }
@@ -442,7 +699,8 @@
             if(gameState.money >= gameState.wireCost){
                 gameState.money -= gameState.wireCost;
                 gameState.wire += 1000 * gameState.wireEfficiency;
-                flash('card-wire'); flash('card-money');
+                flash('card-wire');
+                flash('card-money');
                 updateUI();
             }
         }
@@ -452,15 +710,18 @@
                 gameState.money -= gameState.autoClipperCost;
                 gameState.autoClippers++;
                 gameState.autoClipperCost = Math.floor(gameState.autoClipperCost * 1.15);
+                flash('card-clips');
+                flash('card-money');
                 updateUI();
-                flash('card-clips'); flash('card-money');
             }
         }
 
         function adjustPrice(delta){
             gameState.price = Math.max(0.01, Math.round((gameState.price + delta)*100)/100);
-            if(delta > 0) gameState.demand = Math.max(5, gameState.demand - 5); else gameState.demand +=5;
-            flash('card-demand'); updateUI();
+            if(delta > 0) gameState.demand = Math.max(5, gameState.demand - 5);
+            else gameState.demand += 5;
+            flash('card-demand');
+            updateUI();
         }
 
         function increaseMarketing(){
@@ -469,7 +730,9 @@
                 gameState.money -= cost;
                 gameState.marketingLevel++;
                 gameState.demand += 20;
-                updateUI(); flash('card-demand'); flash('card-money');
+                flash('card-demand');
+                flash('card-money');
+                updateUI();
             }
         }
 
@@ -478,15 +741,16 @@
             if(gameState.money >= cost){
                 gameState.money -= cost;
                 gameState.wireEfficiency += 0.5;
-                updateUI(); flash('card-wire'); flash('card-money');
+                flash('card-wire');
+                flash('card-money');
+                updateUI();
             }
         }
 
         function toggleAutoSell(){
             gameState.autoSellEnabled = !gameState.autoSellEnabled;
             const btn = document.getElementById('autoSellBtn');
-            if(gameState.autoSellEnabled){ btn.textContent='مفعّل'; btn.className='toggle-btn toggle-on'; }
-            else { btn.textContent='معطّل'; btn.className='toggle-btn toggle-off'; }
+            btn.className = gameState.autoSellEnabled ? 'toggle-btn toggle-on' : 'toggle-btn toggle-off';
         }
 
         function toggleGuide(){
@@ -494,14 +758,16 @@
             modal.classList.toggle('active');
         }
 
-        // Auto production every second
+        // Auto production
         setInterval(()=>{
             if(gameState.autoClippers > 0 && gameState.wire >= gameState.autoClippers){
                 gameState.clips += gameState.autoClippers;
                 gameState.totalClips += gameState.autoClippers;
                 gameState.wire -= gameState.autoClippers;
                 gameState.autoClipperRate = gameState.autoClippers;
-                updateUI(); flash('card-clips'); flash('card-wire');
+                flash('card-clips');
+                flash('card-wire');
+                updateUI();
             }
         },1000);
 
@@ -512,7 +778,9 @@
                 gameState.clips -= sellAmount;
                 gameState.money += sellAmount * gameState.price;
                 gameState.totalSold += sellAmount;
-                updateUI(); flash('card-money'); flash('card-clips');
+                flash('card-money');
+                flash('card-clips');
+                updateUI();
             }
         },2000);
 
@@ -522,7 +790,6 @@
             updateUI();
         },3000);
 
-        // initial
         updateUI();
     </script>
 </body>
