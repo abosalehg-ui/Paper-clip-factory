@@ -357,7 +357,8 @@
             z-index: 50;
             display: none; /* مخفي افتراضياً */
             animation: bounceIn 0.8s ease-out forwards;
-            
+            background: transparent;
+
             /* خصائص PNG */
             background-size: 25px 25px; /* حجم الأيقونة الداخلية - كان 25px للسفج */
             background-repeat: no-repeat;
@@ -366,17 +367,17 @@
 
         /* Bronze Trophy Icon - Use background-image for PNG and gradient for color */
         #trophyBronzeIcon {
-            background-image: url('trophy-bronze.png'), linear-gradient(135deg, #b08d57, #966f33); /* Image over gradient */
+            background-image: url('trophy-bronze.png');
         }
 
         /* Silver Trophy Icon */
         #trophySilverIcon {
-            background-image: url('trophy-silver.png'), linear-gradient(135deg, #c0c0c0, #a8a8a8);
+            background-image: url('trophy-silver.png');
         }
 
         /* Gold Trophy Icon */
         #trophyGoldIcon {
-            background-image: url('trophy-gold.png'), linear-gradient(135deg, #ffd700, #daa520);
+            background-image: url('trophy-gold.png');
         }
 
         @keyframes bounceIn {
@@ -597,17 +598,16 @@
 
             <div class="item-box">
                 <div class="item-header">
-                    <span>توسعة المصنع</span>
+                    <span>توسعة المصنع لـ 100 آلة جديدة</span>
                     <span style="color:#7dd3fc;font-weight:700">الحد الأقصى: <span id="maxClippers">100</span></span>
                 </div>
-                <p class="item-info">يتيح مساحة لـ 100 آلة جديدة.</p>
                 <button id="expansionBtn" class="icon-btn btn-secondary" onclick="buyExpansion()">
                     <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
                         <rect x="8" y="10" width="48" height="44" rx="4" stroke="#fff" stroke-width="3" opacity="0.4"/>
                         <rect x="18" y="20" width="28" height="24" rx="2" stroke="#fff" stroke-width="3" fill="#60a5fa" opacity="0.7"/>
                         <path d="M32 10v44M8 32h48" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
                     </svg>
-                    <span>توسعة $<span id="expansionCost">2000.00</span></span>
+                    <span> $<span id="expansionCost">2000.00</span></span>
                 </button>
             </div>
             
@@ -623,16 +623,15 @@
                         <circle cx="40" cy="32" r="4" fill="#fff"/>
                         <path d="M48 20l4-4M48 44l4 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
                     </svg>
-                    <span>ترقية $<span id="marketingCost">100.00</span></span>
+                    <span> $<span id="marketingCost">100.00</span></span>
                 </button>
             </div>
             <div class="item-box">
                 <div class="item-header">
-                    <span>تأمين المصنع من الحوادث</span>
+                    <span>تأمين المصنع من الحوادث لمدة 5 دقائق</span>
                     <span style="color:#8b5cf6;font-weight:700">المستوى <span id="insuranceLevel">0</span></span>
                 </div>
                 <div id="insuranceTimer"></div>
-                <p class="item-info">يحمي المصنع من الحوادث العشوائية لمدة 5 دقائق لكل ترقية.</p>
                 <button id="insuranceBtn" class="icon-btn btn-upgrade" onclick="buyInsurance()">
                     <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
                         <path d="M32 54C46.3594 54 58 42.3594 58 28V10L32 6L6 10V28C6 42.3594 17.6406 54 32 54Z" fill="#8b5cf6" opacity="0.3"/>
@@ -640,22 +639,21 @@
                         <path d="M32 30V40" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
                         <circle cx="32" cy="24" r="3" fill="#fff"/>
                     </svg>
-                    <span>تأمين المصنع $<span id="insuranceCost">1000.00</span></span>
+                    <span> $<span id="insuranceCost">1000.00</span></span>
                 </button>
             </div>
             <div class="item-box">
                 <div class="item-header">
-                    <span>كفاءة السلك</span>
+                    <span>زيادة كفاءة السلك</span>
                     <span style="color:#fbbf24;font-weight:700">×<span id="wireEfficiency">1.0</span></span>
                 </div>
-                <p class="item-info">احصل على المزيد من السلك عند الشراء</p>
                 <button id="efficiencyBtn" class="icon-btn btn-upgrade" onclick="buyWireEfficiency()">
                     <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
                         <path d="M32 12v-4M32 56v-4M12 32h-4M56 32h-4M16 16l-3-3M51 51l-3-3M16 48l-3 3M51 13l-3 3" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
                         <circle cx="32" cy="32" r="14" stroke="#fff" stroke-width="4"/>
                         <circle cx="32" cy="32" r="5" fill="#fff"/>
                     </svg>
-                    <span>ترقية $<span id="efficiencyCost">1000.00</span></span>
+                    <span> $<span id="efficiencyCost">1000.00</span></span>
                 </button>
             </div>
         </div>
