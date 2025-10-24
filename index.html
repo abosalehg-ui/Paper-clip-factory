@@ -303,7 +303,7 @@
         /* تعديل تصميم مودال الحوادث ليتطابق مع modal الرئيسي */
         #challengeModal .modal-content {
             border: 2px solid rgba(239, 68, 68, 0.4); /* لون أحمر باهت للحافة */
-            background: linear-gradient(145deg, #071022, #0a1628); /* نفس خلفية المودال الرئيسية */
+            background: linear-gradient(145deg, #071022,#0a1628); /* نفس خلفية المودال الرئيسية */
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); /* ظل أحمر للتنبيه */
         }
         #challengeModal .modal-title {
@@ -335,7 +335,7 @@
             box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.9), inset 0 0 40px rgba(255, 215, 0, 0.7);
         }
 
-        /* TROPHY Icon Styles */
+        /* TROPHY Icon Styles (PNG Version) */
         .trophy-icon {
             position: fixed;
             top: 15px;
@@ -350,35 +350,26 @@
             z-index: 50;
             display: none; /* مخفي افتراضياً */
             animation: bounceIn 0.8s ease-out forwards;
+            
+            /* خصائص PNG */
+            background-size: 25px 25px; /* حجم الأيقونة الداخلية - كان 25px للسفج */
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
-        .trophy-icon svg {
-            width: 25px;
-            height: 25px;
-        }
-
-        /* Bronze Trophy Icon */
+        /* Bronze Trophy Icon - Use background-image for PNG and gradient for color */
         #trophyBronzeIcon {
-            background: linear-gradient(135deg, #b08d57, #966f33); /* ألوان برونزية */
-        }
-        #trophyBronzeIcon svg path {
-            fill: #e8c49e; /* لون الكأس الداخلي */
+            background-image: url('trophy-bronze.png'), linear-gradient(135deg, #b08d57, #966f33); /* Image over gradient */
         }
 
         /* Silver Trophy Icon */
         #trophySilverIcon {
-            background: linear-gradient(135deg, #c0c0c0, #a8a8a8); /* ألوان فضية */
-        }
-        #trophySilverIcon svg path {
-            fill: #e0e0e0; /* لون الكأس الداخلي */
+            background-image: url('trophy-silver.png'), linear-gradient(135deg, #c0c0c0, #a8a8a8);
         }
 
         /* Gold Trophy Icon */
         #trophyGoldIcon {
-            background: linear-gradient(135deg, #ffd700, #daa520); /* ألوان ذهبية */
-        }
-        #trophyGoldIcon svg path {
-            fill: #ffeb3b; /* لون الكأس الداخلي */
+            background-image: url('trophy-gold.png'), linear-gradient(135deg, #ffd700, #daa520);
         }
 
         @keyframes bounceIn {
@@ -428,36 +419,9 @@
     <audio id="trophySound" src="Trophy.Mp3" preload="auto"></audio>
     <audio id="warningSound" src="warning.mp3" preload="auto"></audio>
     <audio id="fireSound" src="fire.mp3" preload="auto"></audio>
-    <div id="trophyBronzeIcon" class="trophy-icon">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C9.79086 2 8 3.79086 8 6V11C8 13.2091 9.79086 15 12 15C14.2091 15 16 13.2091 16 11V6C16 3.79086 14.2091 2 12 2Z" />
-            <path d="M8 6C6.51866 6.35414 5.37894 7.21855 4.79004 8.29177C4.20114 9.36499 4.19565 10.6052 4.78187 11.6811" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M16 6C17.4813 6.35414 18.6211 7.21855 19.2099 8.29177C19.7989 9.36499 19.8044 10.6052 19.2181 11.6811" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M5 22H19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M7 20H17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M10 18H14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-    </div>
-    <div id="trophySilverIcon" class="trophy-icon">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C9.79086 2 8 3.79086 8 6V11C8 13.2091 9.79086 15 12 15C14.2091 15 16 13.2091 16 11V6C16 3.79086 14.2091 2 12 2Z" />
-            <path d="M8 6C6.51866 6.35414 5.37894 7.21855 4.79004 8.29177C4.20114 9.36499 4.19565 10.6052 4.78187 11.6811" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M16 6C17.4813 6.35414 18.6211 7.21855 19.2099 8.29177C19.7989 9.36499 19.8044 10.6052 19.2181 11.6811" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M5 22H19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M7 20H17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M10 18H14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-    </div>
-    <div id="trophyGoldIcon" class="trophy-icon">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C9.79086 2 8 3.79086 8 6V11C8 13.2091 9.79086 15 12 15C14.2091 15 16 13.2091 16 11V6C16 3.79086 14.2091 2 12 2Z" />
-            <path d="M8 6C6.51866 6.35414 5.37894 7.21855 4.79004 8.29177C4.20114 9.36499 4.19565 10.6052 4.78187 11.6811" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M16 6C17.4813 6.35414 18.6211 7.21855 19.2099 8.29177C19.7989 9.36499 19.8044 10.6052 19.2181 11.6811" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M5 22H19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M7 20H17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M10 18H14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-    </div>
+    <div id="trophyBronzeIcon" class="trophy-icon"></div>
+    <div id="trophySilverIcon" class="trophy-icon"></div>
+    <div id="trophyGoldIcon" class="trophy-icon"></div>
 
     <div class="container">
         <div class="header">
@@ -1081,19 +1045,19 @@
                 return; 
             }
             
-            // فرصة 5% لوقوع حادث عشوائي
-            if (Math.random() < 0.05) { 
+            // فرصة 30% لوقوع حادث عشوائي
+            if (Math.random() < 0.30) { 
                 
                 let isMoneyLoss = false;
                 let isClipsLoss = false;
 
-                // سرقة: إذا كان المال > 2500
-                if (gameState.money >= 2500 && Math.random() < 0.5) { 
+                // سرقة: إذا كان المال > 3500
+                if (gameState.money >= 3500 && Math.random() < 0.5) { 
                     isMoneyLoss = true;
                 } 
                 
-                // حريق: إذا كانت المشابك > 3500
-                else if (gameState.clips >= 3500) {
+                // حريق: إذا كانت المشابك > 4500
+                else if (gameState.clips >= 4500) {
                     isClipsLoss = true;
                 }
 
