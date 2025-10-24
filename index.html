@@ -313,6 +313,13 @@
         #challengeModal .modal-content strong {
             color: #fca5a5;
         }
+        
+        /* Game Over Modal Styles - New */
+        #gameOverModal .modal-content {
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            background: linear-gradient(145deg, #071022,#0a1628);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
 
         #insuranceTimer {
             text-align: center;
@@ -419,7 +426,7 @@
     <audio id="trophySound" src="Trophy.Mp3" preload="auto"></audio>
     <audio id="warningSound" src="warning.mp3" preload="auto"></audio>
     <audio id="fireSound" src="fire.mp3" preload="auto"></audio>
-    <div id="trophyBronzeIcon" class="trophy-icon"></div>
+    <audio id="failSound" src="fail.mp3" preload="auto"></audio> <div id="trophyBronzeIcon" class="trophy-icon"></div>
     <div id="trophySilverIcon" class="trophy-icon"></div>
     <div id="trophyGoldIcon" class="trophy-icon"></div>
 
@@ -590,6 +597,22 @@
 
             <div class="item-box">
                 <div class="item-header">
+                    <span>توسعة المصنع</span>
+                    <span style="color:#7dd3fc;font-weight:700">الحد الأقصى: <span id="maxClippers">100</span></span>
+                </div>
+                <p class="item-info">يتيح مساحة لـ 100 آلة جديدة.</p>
+                <button id="expansionBtn" class="icon-btn btn-secondary" onclick="buyExpansion()">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <rect x="8" y="10" width="48" height="44" rx="4" stroke="#fff" stroke-width="3" opacity="0.4"/>
+                        <rect x="18" y="20" width="28" height="24" rx="2" stroke="#fff" stroke-width="3" fill="#60a5fa" opacity="0.7"/>
+                        <path d="M32 10v44M8 32h48" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                    <span>توسعة $<span id="expansionCost">2000.00</span></span>
+                </button>
+            </div>
+            
+            <div class="item-box">
+                <div class="item-header">
                     <span>ترقية التسويق</span>
                     <span style="color:#a78bfa;font-weight:700">المستوى <span id="marketingLevel">1</span></span>
                 </div>
@@ -667,6 +690,25 @@
         </div>
     </div>
 
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title" style="color: #ef4444;">انتهت اللعبة! 🛑</h2>
+            <p style="text-align:center;color:#cbd5e1;margin-bottom:15px;" id="gameOverMessage">
+                لقد نفد منك السلك ولا تملك المال الكافي لشراء المزيد، ولا يوجد لديك مشابك لبيعها.
+            </p>
+            <div class="dev-info" style="margin-top:0; border:none; background:none;">
+                <div style="font-weight:700;color:#e6eef8">النقاط النهائية: $<span id="finalMoney">0.00</span></div>
+                <div style="margin-top:3px; font-size:0.75rem; color:#9aa4b2">تم بيع: <span id="finalSold">0</span> مشبك</div>
+            </div>
+            <button class="icon-btn btn-make" onclick="location.reload()" style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8); margin-top:15px;">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="M12 4v16M5 11l7-7 7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>إعادة اللعب</span>
+            </button>
+        </div>
+    </div>
+    
     <div id="challengeModal" class="modal">
         <div class="modal-content">
             <h2 class="modal-title" id="challengeTitle">حادث!</h2>
@@ -681,6 +723,7 @@
             </button>
         </div>
     </div>
+    
     <div id="guideModal" class="modal">
         <div class="modal-content">
             <h2 class="modal-title">شرح اللعبة</h2>
@@ -695,7 +738,7 @@
                 <ul>
                     <li>• اضغط صنع مشبك لصنع مشبك واحد (يستهلك سلك).</li>
                     <li>• بع المشابك لتحصل على المال. السعر يؤثر على الطلب.</li>
-                    <li>• اشترِ سلك وآلات لترفع الإنتاجية.</li>
+                    <li>• اشترِ سلك وآلات لترفع الإنتاجية، ووسع مصنعك.</li>
                 </ul>
             </div>
 
@@ -713,6 +756,7 @@
                     <li>• زيادة كفاءة السلك تعطيك سلك أكثر عند الشراء.</li>
                     <li>• التسويق يزيد الطلب على منتجاتك.</li>
                     <li>• التأمين يقفل الحوادث العشوائية مؤقتاً.</li>
+                    <li>• توسعة المصنع تتيح مساحة لآلات صنع تلقائي إضافية.</li>
                 </ul>
             </div>
             
@@ -757,6 +801,8 @@
             insuranceLevel: 0,
             insuranceCost: 1000,
             insuranceEndTime: 0, // Timestamp of when insurance expires
+            maxClippersLimit: 100, // NEW: الحد الأقصى لآلات الصنع
+            expansionCost: 2000, // NEW: تكلفة التوسعة الأولية
             // حالة الإنجازات
             trophyBronze: false,
             trophySilver: false,
@@ -769,6 +815,7 @@
         const trophySound = document.getElementById('trophySound');
         const warningSound = document.getElementById('warningSound');
         const fireSound = document.getElementById('fireSound');
+        const failSound = document.getElementById('failSound'); // NEW: Fail Sound
 
 
         // عناصر الكؤوس
@@ -781,6 +828,11 @@
         const challengeTitle = document.getElementById('challengeTitle');
         const challengeMessage = document.getElementById('challengeMessage');
         const insuranceTimerEl = document.getElementById('insuranceTimer');
+        
+        // عناصر الخسارة (NEW)
+        const gameOverModal = document.getElementById('gameOverModal');
+        const finalMoneyEl = document.getElementById('finalMoney');
+        const finalSoldEl = document.getElementById('finalSold');
 
         function playSound(audioElement) {
             audioElement.currentTime = 0;
@@ -792,6 +844,28 @@
             if(!el) return;
             el.classList.add('glow-update');
             setTimeout(()=>el.classList.remove('glow-update'),900);
+        }
+        
+        // NEW: Game Over Check
+        function checkGameOver() {
+            // شرط الخسارة: لا يوجد سلك AND المال < تكلفة السلك AND لا يوجد مشابك للبيع
+            if (gameState.wire === 0 && gameState.money < gameState.wireCost && gameState.clips === 0) {
+                
+                finalMoneyEl.textContent = gameState.money.toFixed(2);
+                finalSoldEl.textContent = gameState.totalSold.toLocaleString();
+                
+                gameOverModal.classList.add('active');
+                playSound(failSound); // تشغيل صوت الخسارة
+                
+                // إيقاف جميع الأزرار لمنع أي تفاعل آخر عدا "إعادة اللعب"
+                document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+                document.getElementById('autoSellBtn').disabled = true;
+                document.querySelector('.guide-btn').style.display = 'none';
+
+                console.log("Game Over: Stuck without clips or wire!");
+                return true;
+            }
+            return false;
         }
 
         function checkTrophy(newTotalSold) {
@@ -902,6 +976,10 @@
             document.getElementById('insuranceLevel').textContent = gameState.insuranceLevel;
             document.getElementById('insuranceCost').textContent = gameState.insuranceCost.toFixed(2);
             
+            // NEW: تحديث عناصر التوسعة
+            document.getElementById('maxClippers').textContent = gameState.maxClippersLimit.toLocaleString();
+            document.getElementById('expansionCost').textContent = gameState.expansionCost.toFixed(2);
+            
             updateInsuranceTimer(); // تحديث خاص بحالة التأمين والزر
             
             const makeBtn = document.getElementById('makeBtn');
@@ -909,10 +987,14 @@
             document.getElementById('makeBtnText').textContent = gameState.wire < 1 ? 'لا يوجد سلك' : 'صنع مشبك';
 
             document.getElementById('sellBtn').disabled = gameState.clips === 0;
-            document.getElementById('autoClipperBtn').disabled = gameState.money < gameState.autoClipperCost;
+            // NEW: الحد الأقصى للآلات
+            document.getElementById('autoClipperBtn').disabled = gameState.money < gameState.autoClipperCost || gameState.autoClippers >= gameState.maxClippersLimit;
             document.getElementById('wireBtn').disabled = gameState.money < gameState.wireCost;
             document.getElementById('efficiencyBtn').disabled = gameState.money < gameState.wireEfficiency * 1000;
             document.getElementById('marketingBtn').disabled = gameState.money < gameState.marketingLevel * 100;
+            document.getElementById('expansionBtn').disabled = gameState.money < gameState.expansionCost; // NEW: زر التوسعة
+            
+            checkGameOver(); // NEW: فحص الخسارة
         }
 
         function makeClip(){
@@ -958,10 +1040,18 @@
         }
 
         function buyAutoClipper(){
-            if(gameState.money >= gameState.autoClipperCost){
+            // NEW: إضافة شرط الحد الأقصى
+            if(gameState.money >= gameState.autoClipperCost && gameState.autoClippers < gameState.maxClippersLimit){
                 gameState.money -= gameState.autoClipperCost;
                 gameState.autoClippers++;
-                gameState.autoClipperCost = Math.floor(gameState.autoClipperCost * 1.15);
+                // يتم زيادة التكلفة بشكل طبيعي إذا لم نصل للحد الأقصى الحالي
+                if (gameState.autoClippers % 100 !== 0) {
+                    gameState.autoClipperCost = Math.floor(gameState.autoClipperCost * 1.15);
+                } else {
+                    // إذا وصلنا للحد الأقصى، تثبيت التكلفة مؤقتاً
+                    // عند التوسعة، سيعاد تعيين التكلفة وفقاً لمنطق اللعبة
+                }
+                
                 playSound(buySound); // صوت شراء آلة
                 flash('card-clips');
                 flash('card-money');
@@ -997,6 +1087,26 @@
                 gameState.wireEfficiency += 0.5;
                 playSound(buySound); 
                 flash('card-wire');
+                flash('card-money');
+                updateUI();
+            }
+        }
+        
+        // NEW: وظيفة توسعة المصنع
+        function buyExpansion(){
+            const cost = gameState.expansionCost;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.maxClippersLimit += 100; // زيادة الحد الأقصى بمقدار 100
+                gameState.expansionCost = Math.floor(gameState.expansionCost * 2); // مضاعفة تكلفة التوسعة
+                
+                // إعادة تعيين تكلفة الآلة التلقائية لآلة البداية الجديدة بعد التوسعة
+                if (gameState.autoClippers === gameState.maxClippersLimit - 100) {
+                    // يمكن هنا تعيين تكلفة الآلة الأولى في التوسعة الجديدة إذا لزم الأمر
+                    // لكن المنطق الحالي لزيادة التكلفة يكفي
+                }
+                
+                playSound(buySound); 
                 flash('card-money');
                 updateUI();
             }
@@ -1045,8 +1155,8 @@
                 return; 
             }
             
-            // فرصة 30% لوقوع حادث عشوائي
-            if (Math.random() < 0.30) { 
+            // NEW: فرصة 10% لوقوع حادث عشوائي
+            if (Math.random() < 0.10) { 
                 
                 let isMoneyLoss = false;
                 let isClipsLoss = false;
@@ -1089,6 +1199,9 @@
 
         // Auto production
         setInterval(()=>{
+            // NEW: إذا كانت اللعبة قد انتهت، لا تكمل الإنتاج
+            if (checkGameOver()) return;
+            
             if(gameState.autoClippers > 0 && gameState.wire >= gameState.autoClippers){
                 gameState.clips += gameState.autoClippers;
                 gameState.totalClips += gameState.autoClippers;
@@ -1102,6 +1215,9 @@
 
         // Auto sell
         setInterval(()=>{
+            // NEW: إذا كانت اللعبة قد انتهت، لا تكمل البيع
+            if (checkGameOver()) return;
+            
             if(gameState.autoSellEnabled && gameState.clips > 0){
                 const sellAmount = Math.min(gameState.clips, Math.max(1, Math.floor(gameState.demand * 0.1)), 10);
                 gameState.clips -= sellAmount;
@@ -1121,6 +1237,9 @@
 
         // Restore demand and check random challenges
         setInterval(()=>{
+            // NEW: إذا كانت اللعبة قد انتهت، لا تكمل التحديثات
+            if (checkGameOver()) return;
+            
             // تحديث الطلب
             gameState.demand = Math.min(100 * gameState.marketingLevel, gameState.demand + gameState.marketingLevel);
             
