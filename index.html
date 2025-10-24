@@ -62,6 +62,15 @@
         }
         .guide-btn:active{transform:scale(0.95)}
         .guide-btn svg{width:18px;height:18px} /* زيادة حجم الأيقونة */
+        
+        /* Emoji Icon Styling */
+        .emoji-icon{
+            font-size: 20px; /* حجم الإيموجي في الأزرار */
+            line-height: 1; /* لضمان التوسيط العمودي */
+            transition: transform .2s;
+        }
+        .icon-btn:active:not(:disabled) .emoji-icon{transform:scale(1.1)}
+
 
         /* Stats grid - 4 items in one row */
         .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px}
@@ -83,6 +92,9 @@
             border-radius:6px;
             background:rgba(255,255,255,0.03);
         }
+        .stat-icon .emoji-icon-stat{
+            font-size: 16px; /* حجم الإيموجي في إحصائيات الأيقونة */
+        }
         .stat-label{color:#9aa4b2;font-size:0.6rem;margin-bottom:2px}
         .stat-value{font-size:0.85rem;font-weight:700}
 
@@ -103,6 +115,9 @@
             align-items:center;
             gap:5px;
             justify-content:center;
+        }
+        .section-title .emoji-icon-section{
+            font-size: 14px;
         }
 
         /* Buttons */
@@ -127,7 +142,7 @@
         }
         .icon-btn:active:not(:disabled){transform:scale(0.97)}
         .icon-btn:disabled{opacity:.4;cursor:not-allowed}
-        .icon-btn svg{width:22px;height:22px;transition:transform .2s}
+        .icon-btn svg{width:22px;height:22px;transition:transform .2s} /* الإبقاء على الأنماط الخاصة بـ SVG لأزرار المودال والدليل فقط */
         .icon-btn:active:not(:disabled) svg{transform:scale(1.1)}
 
         .btn-make{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff}
@@ -192,7 +207,7 @@
             transition:transform .2s;
         }
         .price-btn:active{transform:scale(0.95)}
-        .price-btn svg{width:18px;height:18px}
+        .price-btn .emoji-icon{font-size: 16px;}
         .price-btn span{font-size:0.65rem;opacity:0.9}
 
         /* Toggle */
@@ -414,14 +429,16 @@
             .stats-grid{gap:12px}
             .stat-card{padding:10px}
             .stat-icon{width:40px;height:40px;margin-bottom:6px}
+            .stat-icon .emoji-icon-stat{font-size: 24px;}
             .stat-label{font-size:0.8rem;margin-bottom:3px}
             .stat-value{font-size:1.2rem}
             .main-grid{grid-template-columns:repeat(2,1fr);gap:16px}
             .section{padding:14px}
             .title{font-size:2rem}
             .icon-btn{min-height:70px;font-size:0.9rem}
-            .icon-btn svg{width:35px;height:35px}
+            .icon-btn .emoji-icon{font-size: 30px;}
             .section-title{font-size:1rem}
+            .section-title .emoji-icon-section{font-size: 20px;}
         }
     </style>
 </head>
@@ -444,24 +461,14 @@
 
     <div class="container">
         <div class="header">
-            <svg class="title-icon float" width="32" height="32" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
-                        <stop offset="0" stop-color="#7dd3fc"/>
-                        <stop offset="1" stop-color="#60a5fa"/>
-                    </linearGradient>
-                </defs>
-                <path d="M20 14 C20 10,24 10,26 10 L44 10 C50 10,52 14,52 18 L52 46 C52 56,42 58,36 52 L30 46 C26 42,26 36,30 32 L42 20" fill="none" stroke="url(#g1)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <span class="title-icon float emoji-icon" style="font-size: 32px; margin-right: 8px;">📎</span>
             <h1 class="title">مصنع مشابك الورق</h1>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card" id="card-clips">
                 <div class="stat-icon">
-                    <svg width="20" height="20" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M44 16 C44 12,40 10,36 12 L24 18 C18 21,18 30,24 33 L36 38 C44 43,52 36,44 28 L28 12" stroke="#60a5fa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <span class="emoji-icon-stat">📎</span>
                 </div>
                 <div class="stat-label">المشابك</div>
                 <div class="stat-value" id="clips">0</div>
@@ -469,10 +476,7 @@
 
             <div class="stat-card" id="card-money">
                 <div class="stat-icon">
-                    <svg width="20" height="20" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="32" cy="32" r="20" fill="#10b981" opacity="0.3"/>
-                        <text x="32" y="40" font-size="28" font-weight="bold" fill="#10b981" text-anchor="middle">$</text>
-                    </svg>
+                    <span class="emoji-icon-stat">💵</span>
                 </div>
                 <div class="stat-label">المال</div>
                 <div class="stat-value">$<span id="money">0.00</span></div>
@@ -480,10 +484,7 @@
 
             <div class="stat-card" id="card-wire">
                 <div class="stat-icon">
-                    <svg width="20" height="20" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="32" cy="28" r="12" fill="#f59e0b"/>
-                        <circle cx="32" cy="28" r="7" fill="#0b1320"/>
-                    </svg>
+                    <span class="emoji-icon-stat">🧵</span>
                 </div>
                 <div class="stat-label">السلك</div>
                 <div class="stat-value" id="wire">1000</div>
@@ -491,10 +492,7 @@
 
             <div class="stat-card" id="card-demand">
                 <div class="stat-icon">
-                    <svg width="20" height="20" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                        <polyline points="12,44 24,30 36,36 50,20" fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="50" cy="20" r="3.4" fill="#a78bfa"/>
-                    </svg>
+                    <span class="emoji-icon-stat">📈</span>
                 </div>
                 <div class="stat-label">الطلب</div>
                 <div class="stat-value" id="demand">50</div>
@@ -504,16 +502,12 @@
         <div class="main-grid">
             <div class="section">
                 <div class="section-title" style="color:#7dd3fc">
-                    <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 13h6v8H3zM15 3h6v18h-6zM9 7h6v14H9z" fill="#7dd3fc" opacity="0.3"/>
-                    </svg>
+                    <span class="emoji-icon-section">🏭</span>
                     الإنتاج
                 </div>
 
                 <button id="makeBtn" class="icon-btn btn-make" onclick="makeClip()">
-                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
-                        <path d="M20 14 C20 10,24 10,26 10 L44 10 C50 10,52 14,52 18 L52 46 C52 56,42 58,36 52 L30 46 C26 42,26 36,30 32 L42 20" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <span class="emoji-icon">🔨</span>
                     <span id="makeBtnText">صنع مشبك</span>
                 </button>
 
@@ -522,17 +516,8 @@
                         <span>آلات صنع تلقائي</span>
                         <span style="color:#60a5fa;font-weight:700" id="autoClippers">0</span>
                     </div>
-                    <div class="item-info">
-                        معدل الإنتاج: <span id="autoRate">0</span>/ثانية
-                    </div>
                     <button id="autoClipperBtn" class="icon-btn btn-secondary" onclick="buyAutoClipper()">
-                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="10" y="22" width="44" height="20" rx="4" fill="rgba(255,255,255,0.2)"/>
-                            <rect x="18" y="28" width="28" height="8" fill="#60a5fa"/>
-                            <circle cx="14" cy="46" r="6" fill="#60a5fa"/>
-                            <circle cx="50" cy="46" r="6" fill="#60a5fa"/>
-                            <path d="M26 22l-4-8h20l-4 8" fill="#fff"/>
-                        </svg>
+                        <span class="emoji-icon">🤖</span>
                         <span>شراء آلة $<span id="autoClipperCost">5.00</span></span>
                     </button>
                 </div>
@@ -543,12 +528,7 @@
                         <span style="color:#f59e0b;font-weight:700">$<span id="wireCost">20.00</span></span>
                     </div>
                     <button id="wireBtn" class="icon-btn btn-buy" onclick="buyWire()">
-                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M32 10c11 0 20 9 20 20 0 11-9 20-20 20S12 41 12 30c0-11 9-20 20-20z" fill="#f59e0b" opacity="0.3"/>
-                            <path d="M44 30A12 12 0 0132 42V30h12z" fill="#d97706"/>
-                            <path d="M32 18A12 12 0 0032 42V18z" stroke="#fff" stroke-width="2" fill="none"/>
-                            <circle cx="32" cy="30" r="4" fill="#fff"/>
-                        </svg>
+                        <span class="emoji-icon">📦</span>
                         <span>شراء سلك (1000 وحدة)</span>
                     </button>
                 </div>
@@ -556,9 +536,7 @@
 
             <div class="section">
                 <div class="section-title" style="color:#86efac">
-                    <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 7h16M4 11h12" stroke="#86efac" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
+                    <span class="emoji-icon-section">🛒</span>
                     المبيعات
                 </div>
 
@@ -569,26 +547,17 @@
 
                 <div class="price-control">
                     <button class="price-btn" onclick="adjustPrice(-0.01)">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
-                            <path d="M5 12h14" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-                        </svg>
+                        <span class="emoji-icon">📉</span>
                         <span>تخفيض</span>
                     </button>
                     <button class="price-btn" onclick="adjustPrice(0.01)">
-                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
-                            <path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-                        </svg>
+                        <span class="emoji-icon">📈</span>
                         <span>زيادة</span>
                     </button>
                 </div>
 
                 <button id="sellBtn" class="icon-btn btn-sell" onclick="sellClips()" style="margin-top:6px">
-                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
-                        <rect x="10" y="16" width="44" height="38" rx="4" fill="rgba(255,255,255,0.1)"/>
-                        <path d="M14 16v-6h36v6M32 40v-8M24 40v-8M40 40v-8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-                        <rect x="28" y="24" width="8" height="8" fill="#fff"/>
-                        <path d="M10 54h44" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-                    </svg>
+                    <span class="emoji-icon">💰</span>
                     <span>بيع المشابك (متوفر: <span id="availableClips">0</span>)</span>
                 </button>
 
@@ -601,10 +570,30 @@
 
         <div class="section">
             <div class="section-title" style="color:#fbbf24">
-                <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 3l9 9-9 9-9-9z" fill="#fbbf24" opacity="0.3"/>
-                </svg>
+                <span class="emoji-icon-section">✨</span>
                 الترقيات
+            </div>
+
+            <div class="item-box">
+                <div class="item-header">
+                    <span>ترقية التسويق</span>
+                    <span style="color:#a78bfa;font-weight:700">المستوى <span id="marketingLevel">1</span></span>
+                </div>
+                <button id="marketingBtn" class="icon-btn btn-marketing" onclick="increaseMarketing()">
+                    <span class="emoji-icon">📣</span>
+                    <span> $<span id="marketingCost">100.00</span></span>
+                </button>
+            </div>
+            
+            <div class="item-box">
+                <div class="item-header">
+                    <span>زيادة كفاءة السلك</span>
+                    <span style="color:#fbbf24;font-weight:700">×<span id="wireEfficiency">1.0</span></span>
+                </div>
+                <button id="efficiencyBtn" class="icon-btn btn-upgrade" onclick="buyWireEfficiency()">
+                    <span class="emoji-icon">⚙️</span>
+                    <span> $<span id="efficiencyCost">1000.00</span></span>
+                </button>
             </div>
 
             <div class="item-box">
@@ -613,30 +602,11 @@
                     <span style="color:#7dd3fc;font-weight:700">الحد الأقصى: <span id="maxClippers">100</span></span>
                 </div>
                 <button id="expansionBtn" class="icon-btn btn-secondary" onclick="buyExpansion()">
-                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
-                        <rect x="8" y="10" width="48" height="44" rx="4" stroke="#fff" stroke-width="3" opacity="0.4"/>
-                        <rect x="18" y="20" width="28" height="24" rx="2" stroke="#fff" stroke-width="3" fill="#60a5fa" opacity="0.7"/>
-                        <path d="M32 10v44M8 32h48" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-                    </svg>
+                    <span class="emoji-icon">🏗️</span>
                     <span> $<span id="expansionCost">2000.00</span></span>
                 </button>
             </div>
-            
-            <div class="item-box">
-                <div class="item-header">
-                    <span>ترقية التسويق</span>
-                    <span style="color:#a78bfa;font-weight:700">المستوى <span id="marketingLevel">1</span></span>
-                </div>
-                <button id="marketingBtn" class="icon-btn btn-marketing" onclick="increaseMarketing()">
-                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
-                        <path d="M12 36l8-8 12 12-8 8z" fill="rgba(255,255,255,0.2)"/>
-                        <path d="M20 28l-8 8v-8h8zM40 28l12-12v32L40 40v-4" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="40" cy="32" r="4" fill="#fff"/>
-                        <path d="M48 20l4-4M48 44l4 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    <span> $<span id="marketingCost">100.00</span></span>
-                </button>
-            </div>
+
             <div class="item-box">
                 <div class="item-header">
                     <span>تأمين المصنع من الحوادث لمدة 5 دقائق</span>
@@ -644,38 +614,16 @@
                 </div>
                 <div id="insuranceTimer"></div>
                 <button id="insuranceBtn" class="icon-btn btn-upgrade" onclick="buyInsurance()">
-                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
-                        <path d="M32 54C46.3594 54 58 42.3594 58 28V10L32 6L6 10V28C6 42.3594 17.6406 54 32 54Z" fill="#8b5cf6" opacity="0.3"/>
-                        <path d="M32 54C46.3594 54 58 42.3594 58 28M32 54C17.6406 54 6 42.3594 6 28" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M32 30V40" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-                        <circle cx="32" cy="24" r="3" fill="#fff"/>
-                    </svg>
+                    <span class="emoji-icon">🛡️</span>
                     <span> $<span id="insuranceCost">1000.00</span></span>
                 </button>
             </div>
-            <div class="item-box">
-                <div class="item-header">
-                    <span>زيادة كفاءة السلك</span>
-                    <span style="color:#fbbf24;font-weight:700">×<span id="wireEfficiency">1.0</span></span>
-                </div>
-                <button id="efficiencyBtn" class="icon-btn btn-upgrade" onclick="buyWireEfficiency()">
-                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
-                        <path d="M32 12v-4M32 56v-4M12 32h-4M56 32h-4M16 16l-3-3M51 51l-3-3M16 48l-3 3M51 13l-3 3" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-                        <circle cx="32" cy="32" r="14" stroke="#fff" stroke-width="4"/>
-                        <circle cx="32" cy="32" r="5" fill="#fff"/>
-                    </svg>
-                    <span> $<span id="efficiencyCost">1000.00</span></span>
-                </button>
-            </div>
+
         </div>
 
         <div class="section">
             <div class="section-title" style="color:#cbd5e1">
-                <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="3" y="8" width="4" height="13" rx="1" fill="#93c5fd"/>
-                    <rect x="10" y="3" width="4" height="18" rx="1" fill="#60a5fa"/>
-                    <rect x="17" y="12" width="4" height="9" rx="1" fill="#7dd3fc"/>
-                </svg>
+                <span class="emoji-icon-section">📊</span>
                 الإحصائيات
             </div>
             <div class="stats-section">
@@ -957,7 +905,8 @@
             document.getElementById('demand').textContent = gameState.demand;
             document.getElementById('price').textContent = gameState.price.toFixed(2);
             document.getElementById('autoClippers').textContent = gameState.autoClippers;
-            document.getElementById('autoRate').textContent = gameState.autoClipperRate;
+            // تم حذف تحديث 'autoRate' من هنا أيضاً لأنه تم حذف العنصر من HTML
+            // document.getElementById('autoRate').textContent = gameState.autoClipperRate; 
             document.getElementById('autoClipperCost').textContent = gameState.autoClipperCost.toFixed(2);
             document.getElementById('wireCost').textContent = gameState.wireCost.toFixed(2);
             document.getElementById('wireEfficiency').textContent = gameState.wireEfficiency.toFixed(1);
