@@ -539,7 +539,7 @@
 
                 <div class="item-box">
                     <div class="item-header">
-                        <span>شراء سلك (1000 وحدة)</span>
+                        <span>شراء سلك</span>
                         <span style="color:#f59e0b;font-weight:700">$<span id="wireCost">20.00</span></span>
                     </div>
                     <button id="wireBtn" class="icon-btn btn-buy" onclick="buyWire()">
@@ -549,7 +549,7 @@
                             <path d="M32 18A12 12 0 0032 42V18z" stroke="#fff" stroke-width="2" fill="none"/>
                             <circle cx="32" cy="30" r="4" fill="#fff"/>
                         </svg>
-                        <span>شراء سلك</span>
+                        <span>شراء سلك (1000 وحدة)</span>
                     </button>
                 </div>
             </div>
@@ -593,7 +593,7 @@
                 </button>
 
                 <div class="toggle-container">
-                    <span>بيع تلقائي</span>
+                    <span>بيع تلقائي للمشابك</span>
                     <button id="autoSellBtn" class="toggle-btn toggle-off" onclick="toggleAutoSell()"></button>
                 </div>
             </div>
@@ -1159,13 +1159,13 @@
                 let isMoneyLoss = false;
                 let isClipsLoss = false;
 
-                // سرقة: إذا كان المال > 3500
-                if (gameState.money >= 3500 && Math.random() < 0.5) { 
+                // سرقة: إذا كان المال > 4500
+                if (gameState.money >= 4500 && Math.random() < 0.5) { 
                     isMoneyLoss = true;
                 } 
                 
-                // حريق: إذا كانت المشابك > 4500
-                else if (gameState.clips >= 4500) {
+                // حريق: إذا كانت المشابك > 7500
+                else if (gameState.clips >= 7500) {
                     isClipsLoss = true;
                 }
 
@@ -1174,7 +1174,7 @@
                     gameState.money = Math.max(0, gameState.money - lossAmount);
                     
                     challengeTitle.textContent = "⚠️ حادث: سرقة!";
-                    challengeMessage.innerHTML = `حدثت سرقة في المصنع! تم حسم <strong>$${lossAmount.toFixed(2)}</strong> من أموالك.`;
+                    challengeMessage.innerHTML = `حدثت سرقة في المصنع! سُرق <strong>$${lossAmount.toFixed(2)}</strong> من أموالك.`;
                     
                     challengeModal.classList.add('active');
                     playSound(warningSound); // تشغيل نغمة التحذير
@@ -1184,7 +1184,7 @@
                     gameState.clips = Math.max(0, gameState.clips - lossAmount);
                     
                     challengeTitle.textContent = "🔥 حادث: حريق!";
-                    challengeMessage.innerHTML = `اندلع حريق في المخزن! تم حسم <strong>${lossAmount.toLocaleString()}</strong> مشبك ورقي.`;
+                    challengeMessage.innerHTML = `اندلع حريق في المخزن! تلف <strong>${lossAmount.toLocaleString()}</strong> مشبك ورقي.`;
                     
                     challengeModal.classList.add('active');
                     playSound(fireSound); // تشغيل نغمة الحريق
