@@ -298,6 +298,31 @@
             margin-top:10px;
             font-size:0.8rem;
         }
+        
+        /* New Challenge Modal Styles */
+        /* تعديل تصميم مودال الحوادث ليتطابق مع modal الرئيسي */
+        #challengeModal .modal-content {
+            border: 2px solid rgba(239, 68, 68, 0.4); /* لون أحمر باهت للحافة */
+            background: linear-gradient(145deg, #071022, #0a1628); /* نفس خلفية المودال الرئيسية */
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); /* ظل أحمر للتنبيه */
+        }
+        #challengeModal .modal-title {
+            color: #ef4444; /* لون أحمر للعنوان */
+            font-weight: 700;
+        }
+        #challengeModal .modal-content strong {
+            color: #fca5a5;
+        }
+
+        #insuranceTimer {
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #fca5a5;
+            margin-top: -6px;
+            margin-bottom: 6px;
+        }
+
 
         /* TROPHY Styles - Full Page Glow */
         .trophy-bronze {
@@ -401,7 +426,8 @@
     <audio id="cashSound" src="cash.mp3" preload="auto"></audio>
     <audio id="buySound" src="buy.mp3" preload="auto"></audio>
     <audio id="trophySound" src="Trophy.Mp3" preload="auto"></audio>
-
+    <audio id="warningSound" src="warning.mp3" preload="auto"></audio>
+    <audio id="fireSound" src="fire.mp3" preload="auto"></audio>
     <div id="trophyBronzeIcon" class="trophy-icon">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2C9.79086 2 8 3.79086 8 6V11C8 13.2091 9.79086 15 12 15C14.2091 15 16 13.2091 16 11V6C16 3.79086 14.2091 2 12 2Z" />
@@ -445,7 +471,6 @@
                 <path d="M20 14 C20 10,24 10,26 10 L44 10 C50 10,52 14,52 18 L52 46 C52 56,42 58,36 52 L30 46 C26 42,26 36,30 32 L42 20" fill="none" stroke="url(#g1)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <h1 class="title">مصنع مشابك الورق</h1>
-            <p class="subtitle">اصنع — ارفع — وادِر السوق بحزم</p>
         </div>
 
         <div class="stats-grid">
@@ -588,22 +613,6 @@
                     <span>بيع تلقائي</span>
                     <button id="autoSellBtn" class="toggle-btn toggle-off" onclick="toggleAutoSell()"></button>
                 </div>
-
-                <div class="item-box">
-                    <div class="item-header">
-                        <span>ترقية التسويق</span>
-                        <span style="color:#a78bfa;font-weight:700">المستوى <span id="marketingLevel">1</span></span>
-                    </div>
-                    <button id="marketingBtn" class="icon-btn btn-marketing" onclick="increaseMarketing()">
-                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
-                            <path d="M12 36l8-8 12 12-8 8z" fill="rgba(255,255,255,0.2)"/>
-                            <path d="M20 28l-8 8v-8h8zM40 28l12-12v32L40 40v-4" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                            <circle cx="40" cy="32" r="4" fill="#fff"/>
-                            <path d="M48 20l4-4M48 44l4 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        <span>ترقية $<span id="marketingCost">100.00</span></span>
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -615,6 +624,38 @@
                 الترقيات
             </div>
 
+            <div class="item-box">
+                <div class="item-header">
+                    <span>ترقية التسويق</span>
+                    <span style="color:#a78bfa;font-weight:700">المستوى <span id="marketingLevel">1</span></span>
+                </div>
+                <button id="marketingBtn" class="icon-btn btn-marketing" onclick="increaseMarketing()">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <path d="M12 36l8-8 12 12-8 8z" fill="rgba(255,255,255,0.2)"/>
+                        <path d="M20 28l-8 8v-8h8zM40 28l12-12v32L40 40v-4" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="40" cy="32" r="4" fill="#fff"/>
+                        <path d="M48 20l4-4M48 44l4 4" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>ترقية $<span id="marketingCost">100.00</span></span>
+                </button>
+            </div>
+            <div class="item-box">
+                <div class="item-header">
+                    <span>تأمين المصنع من الحوادث</span>
+                    <span style="color:#8b5cf6;font-weight:700">المستوى <span id="insuranceLevel">0</span></span>
+                </div>
+                <div id="insuranceTimer"></div>
+                <p class="item-info">يحمي المصنع من الحوادث العشوائية لمدة 5 دقائق لكل ترقية.</p>
+                <button id="insuranceBtn" class="icon-btn btn-upgrade" onclick="buyInsurance()">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <path d="M32 54C46.3594 54 58 42.3594 58 28V10L32 6L6 10V28C6 42.3594 17.6406 54 32 54Z" fill="#8b5cf6" opacity="0.3"/>
+                        <path d="M32 54C46.3594 54 58 42.3594 58 28M32 54C17.6406 54 6 42.3594 6 28" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M32 30V40" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="32" cy="24" r="3" fill="#fff"/>
+                    </svg>
+                    <span>تأمين المصنع $<span id="insuranceCost">1000.00</span></span>
+                </button>
+            </div>
             <div class="item-box">
                 <div class="item-header">
                     <span>كفاءة السلك</span>
@@ -662,6 +703,20 @@
         </div>
     </div>
 
+    <div id="challengeModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="challengeTitle">حادث!</h2>
+            <p style="text-align:center;color:#cbd5e1;margin-bottom:15px;" id="challengeMessage">
+                تمت سرقة 500 دولار من المصنع بسبب ثغرة أمنية!
+            </p>
+            <button class="icon-btn btn-make" onclick="closeChallengeModal()" style="width:100%;background:linear-gradient(135deg,#ef4444,#dc2626)">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="M6 18L18 6M6 6l12 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>حسناً</span>
+            </button>
+        </div>
+    </div>
     <div id="guideModal" class="modal">
         <div class="modal-content">
             <h2 class="modal-title">شرح اللعبة</h2>
@@ -675,16 +730,16 @@
                 <h3>🎮 كيفية اللعب</h3>
                 <ul>
                     <li>• اضغط صنع مشبك لصنع مشبك واحد (يستهلك سلك).</li>
-                    <li>• بيع المشابك لتحصل على مال. السعر يؤثر على الطلب.</li>
-                    <li>• اشترِ سلك وآلات لترتفع الإنتاجية.</li>
+                    <li>• بع المشابك لتحصل على المال. السعر يؤثر على الطلب.</li>
+                    <li>• اشترِ سلك وآلات لترفع الإنتاجية.</li>
                 </ul>
             </div>
 
             <div class="guide-section">
                 <h3>⚡ الأتمتة</h3>
                 <ul>
-                    <li>• آلات صنع تلقائي تنتج مشابك كل ثانية.</li>
-                    <li>• فعّل البيع التلقائي لبيع بدون ضغط منك.</li>
+                    <li>• الآلة تنتج مشابك كل ثانية.</li>
+                    <li>• فعّل البيع التلقائي للبيع بدون ضغط منك.</li>
                 </ul>
             </div>
 
@@ -693,7 +748,13 @@
                 <ul>
                     <li>• زيادة كفاءة السلك تعطيك سلك أكثر عند الشراء.</li>
                     <li>• التسويق يزيد الطلب على منتجاتك.</li>
+                    <li>• التأمين يقفل الحوادث العشوائية مؤقتاً.</li>
                 </ul>
+            </div>
+            
+            <div class="guide-section">
+                <h3>⚠️ التحديات الجديدة</h3>
+                <p>بعد تزايد أعمالك، قد تحدث حوادث عشوائية (سرقة، حريق) تؤدي لخسارة المال أو المشابك.</p>
             </div>
 
             <div class="dev-info">
@@ -728,6 +789,10 @@
             autoSellEnabled: false,
             totalClips: 0,
             totalSold: 0,
+            // الإضافات الجديدة
+            insuranceLevel: 0,
+            insuranceCost: 1000,
+            insuranceEndTime: 0, // Timestamp of when insurance expires
             // حالة الإنجازات
             trophyBronze: false,
             trophySilver: false,
@@ -738,11 +803,20 @@
         const cashSound = document.getElementById('cashSound');
         const buySound = document.getElementById('buySound');
         const trophySound = document.getElementById('trophySound');
+        const warningSound = document.getElementById('warningSound');
+        const fireSound = document.getElementById('fireSound');
+
 
         // عناصر الكؤوس
         const trophyBronzeIcon = document.getElementById('trophyBronzeIcon');
         const trophySilverIcon = document.getElementById('trophySilverIcon');
         const trophyGoldIcon = document.getElementById('trophyGoldIcon');
+        
+        // عناصر الحوادث
+        const challengeModal = document.getElementById('challengeModal');
+        const challengeTitle = document.getElementById('challengeTitle');
+        const challengeMessage = document.getElementById('challengeMessage');
+        const insuranceTimerEl = document.getElementById('insuranceTimer');
 
         function playSound(audioElement) {
             audioElement.currentTime = 0;
@@ -813,6 +887,32 @@
             }
         }
 
+        // تحديث عرض مؤقت التأمين
+        function updateInsuranceTimer() {
+            const remainingTime = gameState.insuranceEndTime - Date.now();
+            const insuranceBtn = document.getElementById('insuranceBtn');
+            const insuranceCostSpan = document.getElementById('insuranceCost');
+
+            if (remainingTime > 0) {
+                const minutes = Math.floor(remainingTime / 60000);
+                const seconds = Math.floor((remainingTime % 60000) / 1000);
+                insuranceTimerEl.textContent = `التأمين نشط: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                insuranceTimerEl.style.display = 'block';
+                // أثناء نشاط التأمين، لا يمكن الشراء ولكنه لا يزال يظهر التكلفة التالية
+                insuranceBtn.disabled = true;
+            } else {
+                gameState.insuranceEndTime = 0; // تأكد من أن الوقت ينتهي
+                insuranceTimerEl.textContent = '';
+                insuranceTimerEl.style.display = 'none';
+                insuranceBtn.disabled = gameState.money < gameState.insuranceCost; // أعد تفعيل الزر إذا كان لديه مال
+            }
+            
+            insuranceCostSpan.textContent = gameState.insuranceCost.toFixed(2);
+        }
+        
+        // مؤقت تحديث التأمين
+        setInterval(updateInsuranceTimer, 1000);
+
 
         function updateUI(){
             document.getElementById('clips').textContent = gameState.clips.toLocaleString();
@@ -833,7 +933,13 @@
             document.getElementById('totalSold').textContent = gameState.totalSold.toLocaleString();
             document.getElementById('totalMachines').textContent = gameState.autoClippers;
             document.getElementById('productionRate').textContent = gameState.autoClipperRate;
-
+            
+            // تحديث عناصر التأمين الجديدة
+            document.getElementById('insuranceLevel').textContent = gameState.insuranceLevel;
+            document.getElementById('insuranceCost').textContent = gameState.insuranceCost.toFixed(2);
+            
+            updateInsuranceTimer(); // تحديث خاص بحالة التأمين والزر
+            
             const makeBtn = document.getElementById('makeBtn');
             makeBtn.disabled = gameState.wire < 1;
             document.getElementById('makeBtnText').textContent = gameState.wire < 1 ? 'لا يوجد سلك' : 'صنع مشبك';
@@ -931,6 +1037,25 @@
                 updateUI();
             }
         }
+        
+        // وظيفة شراء التأمين الجديدة
+        function buyInsurance(){
+            const cost = gameState.insuranceCost;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.insuranceLevel++;
+                gameState.insuranceCost = gameState.insuranceLevel * 1000;
+                
+                // إضافة 5 دقائق (300,000 مللي ثانية)
+                const now = Date.now();
+                // إذا كان التأمين نشطاً، يتم تمديد الوقت. إذا لم يكن نشطاً، يبدأ الآن.
+                gameState.insuranceEndTime = Math.max(gameState.insuranceEndTime, now) + 300000; 
+                
+                playSound(buySound); 
+                flash('card-money');
+                updateUI();
+            }
+        }
 
         function toggleAutoSell(){
             gameState.autoSellEnabled = !gameState.autoSellEnabled;
@@ -941,6 +1066,61 @@
         function toggleGuide(){
             const modal = document.getElementById('guideModal');
             modal.classList.toggle('active');
+        }
+        
+        function closeChallengeModal(){
+             challengeModal.classList.remove('active');
+             updateUI();
+        }
+        
+        // منطق الحوادث العشوائية
+        function triggerRandomChallenge() {
+            // تحقق ما إذا كان التأمين نشطًا
+            if (gameState.insuranceEndTime > Date.now()) {
+                console.log("Challenge blocked by insurance!");
+                return; 
+            }
+            
+            // فرصة 5% لوقوع حادث عشوائي
+            if (Math.random() < 0.05) { 
+                
+                let isMoneyLoss = false;
+                let isClipsLoss = false;
+
+                // سرقة: إذا كان المال > 2500
+                if (gameState.money >= 2500 && Math.random() < 0.5) { 
+                    isMoneyLoss = true;
+                } 
+                
+                // حريق: إذا كانت المشابك > 3500
+                else if (gameState.clips >= 3500) {
+                    isClipsLoss = true;
+                }
+
+                if (isMoneyLoss) {
+                    const lossAmount = 500;
+                    gameState.money = Math.max(0, gameState.money - lossAmount);
+                    
+                    challengeTitle.textContent = "⚠️ حادث: سرقة!";
+                    challengeMessage.innerHTML = `حدثت سرقة في المصنع! تم حسم <strong>$${lossAmount.toFixed(2)}</strong> من أموالك.`;
+                    
+                    challengeModal.classList.add('active');
+                    playSound(warningSound); // تشغيل نغمة التحذير
+                    flash('card-money');
+                } else if (isClipsLoss) {
+                    const lossAmount = 500;
+                    gameState.clips = Math.max(0, gameState.clips - lossAmount);
+                    
+                    challengeTitle.textContent = "🔥 حادث: حريق!";
+                    challengeMessage.innerHTML = `اندلع حريق في المخزن! تم حسم <strong>${lossAmount.toLocaleString()}</strong> مشبك ورقي.`;
+                    
+                    challengeModal.classList.add('active');
+                    playSound(fireSound); // تشغيل نغمة الحريق
+                    flash('card-clips');
+                }
+                
+                updateUI();
+            }
         }
 
         // Auto production
@@ -975,15 +1155,24 @@
             }
         },2000);
 
-        // Restore demand
+        // Restore demand and check random challenges
         setInterval(()=>{
+            // تحديث الطلب
             gameState.demand = Math.min(100 * gameState.marketingLevel, gameState.demand + gameState.marketingLevel);
+            
+            // تحقق من الحوادث العشوائية كل 3 ثوان (بالتزامن مع تحديث الطلب)
+            triggerRandomChallenge();
+            
             updateUI();
         },3000);
 
-        updateUI();
-        // لضمان عرض أي كأس تم تحقيقه بعد تحميل الصفحة (إذا كانت البيانات محفوظة)
-        checkTrophy(gameState.totalSold); 
+        // قم بفتح نافذة الدليل عند أول تحميل
+        window.onload = function() {
+            toggleGuide();
+            // لضمان عرض أي كأس تم تحقيقه بعد تحميل الصفحة (إذا كانت البيانات محفوظة)
+            checkTrophy(gameState.totalSold); 
+            updateUI();
+        }
     </script>
 </body>
 </html>
