@@ -28,7 +28,7 @@
             max-width:1200px;
             margin:0 auto;
             /* لتعويض المساحة المأخوذة من الـ fixed stats */
-            padding-top: 55px; /* تم تخفيض القيمة لرفع المحتوى أسفل شاشة الإحصائيات */
+            padding-top: 35px;
         }
         .header{
             display: flex; /* يجعل العناصر (الأيقونة والنص) على سطر واحد */
@@ -102,7 +102,7 @@
         }
         .stat-card{
             background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-            padding:5px;
+            padding:2px;
             border-radius:8px;
             border:1px solid rgba(255,255,255,0.06);
             backdrop-filter:blur(4px);
@@ -110,19 +110,19 @@
             text-align:center;
         }
         .stat-icon{
-            width:24px;
-            height:24px;
-            margin:0 auto 3px;
+            width:16px;
+            height:16px;
+            margin:0 auto 2px;
             display:grid;
             place-items:center;
             border-radius:6px;
             background:rgba(255,255,255,0.03);
         }
         .stat-icon .emoji-icon-stat{
-            font-size: 16px; /* حجم الإيموجي في إحصائيات الأيقونة */
+            font-size: 12px; /* حجم الإيموجي في إحصائيات الأيقونة */
         }
-        .stat-label{color:#9aa4b2;font-size:0.6rem;margin-bottom:2px}
-        .stat-value{font-size:0.85rem;font-weight:700}
+        .stat-label{color:#9aa4b2;font-size:0.50rem;margin-bottom:1px}
+        .stat-value{font-size:0.70rem;font-weight:700}
 
         /* Main sections */
         .main-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
@@ -461,18 +461,18 @@
         /* Tablet & Desktop */
         @media (min-width:768px){
             .stats-grid{
-                gap:12px;
-                padding: 10px 8px; /* Increase padding for fixed header on desktop */
+                gap:8px;
+                padding: 6px 8px; /* Increase padding for fixed header on desktop */
                 top: 8px; /* Keep the top position the same for fixed header */
             }
             .container{
-                padding-top: 70px; /* Increase compensation for fixed header on desktop */
+                padding-top: 55px; /* Increase compensation for fixed header on desktop */
             }
-            .stat-card{padding:10px}
-            .stat-icon{width:40px;height:40px;margin-bottom:6px}
-            .stat-icon .emoji-icon-stat{font-size: 24px;}
-            .stat-label{font-size:0.8rem;margin-bottom:3px}
-            .stat-value{font-size:1.2rem}
+            .stat-card{padding:5px}
+            .stat-icon{width:30px;height:30px;margin-bottom:4px}
+            .stat-icon .emoji-icon-stat{font-size: 18px;}
+            .stat-label{font-size:0.7rem;margin-bottom:2px}
+            .stat-value{font-size:1rem}
             .main-grid{grid-template-columns:repeat(2,1fr);gap:16px}
             .section{padding:14px}
             .title{font-size:2rem}
