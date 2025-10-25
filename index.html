@@ -14,8 +14,8 @@
             background-attachment: fixed;
             background-repeat: no-repeat;
             background-position: center center;
-            background-color: #071033;
-            background-blend-mode: multiply;
+            background-color: #0b1736;
+            background-blend-mode: overlay;
             color:#e6eef8;
             padding:8px;
             min-height:100vh;
@@ -28,7 +28,7 @@
             max-width:1200px;
             margin:0 auto;
             /* لتعويض المساحة المأخوذة من الـ fixed stats */
-            padding-top: 35px;
+            padding-top: 30px;
         }
         .header{
             display: flex; /* يجعل العناصر (الأيقونة والنص) على سطر واحد */
@@ -110,8 +110,8 @@
             text-align:center;
         }
         .stat-icon{
-            width:16px;
-            height:16px;
+            width:12px;
+            height:12px;
             margin:0 auto 2px;
             display:grid;
             place-items:center;
@@ -119,7 +119,7 @@
             background:rgba(255,255,255,0.03);
         }
         .stat-icon .emoji-icon-stat{
-            font-size: 12px; /* حجم الإيموجي في إحصائيات الأيقونة */
+            font-size: 10px; /* حجم الإيموجي في إحصائيات الأيقونة */
         }
         .stat-label{color:#9aa4b2;font-size:0.50rem;margin-bottom:1px}
         .stat-value{font-size:0.70rem;font-weight:700}
@@ -461,17 +461,17 @@
         /* Tablet & Desktop */
         @media (min-width:768px){
             .stats-grid{
-                gap:8px;
-                padding: 6px 8px; /* Increase padding for fixed header on desktop */
+                gap:6px;
+                padding: 4px 6px; /* Increase padding for fixed header on desktop */
                 top: 8px; /* Keep the top position the same for fixed header */
             }
             .container{
-                padding-top: 55px; /* Increase compensation for fixed header on desktop */
+                padding-top: 50px; /* Increase compensation for fixed header on desktop */
             }
             .stat-card{padding:5px}
-            .stat-icon{width:30px;height:30px;margin-bottom:4px}
-            .stat-icon .emoji-icon-stat{font-size: 18px;}
-            .stat-label{font-size:0.7rem;margin-bottom:2px}
+            .stat-icon{width:20px;height:20px;margin-bottom:2px}
+            .stat-icon .emoji-icon-stat{font-size: 16px;}
+            .stat-label{font-size:0.6rem;margin-bottom:2px}
             .stat-value{font-size:1rem}
             .main-grid{grid-template-columns:repeat(2,1fr);gap:16px}
             .section{padding:14px}
@@ -548,7 +548,7 @@
             <div class="section">
                 <div class="section-title" style="color:#7dd3fc">
                     <span class="emoji-icon-section">🏭</span>
-                    الإنتاج
+                    مصنع مشابك الورق
                 </div>
 
                 <button id="makeBtn" class="icon-btn btn-make" onclick="makeClip()">
@@ -745,7 +745,7 @@
                 <h3>🎮 كيفية اللعب</h3>
                 <ul>
                     <li>• اضغط صنع مشبك لصنع مشبك واحد (يستهلك سلك).</li>
-                    <li>• بع المشابك لتحصل على المال. السعر يؤثر على الطلب.</li>
+                    <li>• بيع المشابك لتحصل على المال. السعر يؤثر على الطلب.</li>
                     <li>• اشترِ سلك وآلات لترفع الإنتاجية، ووسع مصنعك.</li>
                 </ul>
             </div>
