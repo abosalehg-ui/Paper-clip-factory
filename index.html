@@ -24,7 +24,12 @@
             transition: box-shadow 1s ease-in-out; /* خاصية الانتقال لتأثيرات الإنجاز */
             position: relative; /* لتمكين وضع الكؤوس بشكل مطلق */
         }
-        .container{max-width:1200px;margin:0 auto}
+        .container{
+            max-width:1200px;
+            margin:0 auto;
+            /* لتعويض المساحة المأخوذة من الـ fixed stats */
+            padding-top: 55px; /* تم تخفيض القيمة لرفع المحتوى أسفل شاشة الإحصائيات */
+        }
         .header{
             display: flex; /* يجعل العناصر (الأيقونة والنص) على سطر واحد */
             justify-content: center; /* لتوسيط الأيقونة والنص معاً أفقياً */
@@ -72,8 +77,29 @@
         .icon-btn:active:not(:disabled) .emoji-icon{transform:scale(1.1)}
 
 
-        /* Stats grid - 4 items in one row */
-        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px}
+        /* Stats grid - FIXED Position */
+        .stats-grid{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:5px;
+            /* تم تعديل Margin-bottom لتسهيل الـ Fixed */
+            /* margin-bottom:10px; */
+
+            /* NEW: Fixed Position Styles */
+            position: fixed;
+            top: 8px; /* نفس مستوى زر الدليل والكأس */
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 16px); /* 100% minus 8px padding on each side of body */
+            max-width: 1200px;
+            z-index: 50; /* Above regular content */
+            /* الشفافية المطلوبة */
+            background: #071033e6; /* Semi-transparent background to blend with body but be visible */
+            padding: 5px 8px; /* Top/Bottom padding for the fixed container */
+            border-radius: 8px; /* تم تعديل الزوايا لتكون مربعة من جميع الجهات */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            /* End NEW: Fixed Position Styles */
+        }
         .stat-card{
             background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
             padding:5px;
@@ -177,10 +203,16 @@
         }
 
         /* Price controls */
+        .price-container{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5px; /* Spacing between button and display */
+        }
         .price-display{
+            flex-grow: 1; /* Allow price display to take up available space */
             text-align:center;
-            margin-bottom:6px;
-            padding:6px;
+            padding:4px;
             background:rgba(16,185,129,0.1);
             border-radius:8px;
             border:1px solid rgba(16,185,129,0.2);
@@ -188,9 +220,10 @@
         .price-label{color:#9aa4b2;font-size:0.65rem;margin-bottom:2px}
         .price-value{font-size:1.2rem;font-weight:700;color:#10b981}
 
-        .price-control{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+        /* Price control buttons - now single buttons */
         .price-btn{
-            min-height:40px;
+            width: 50px;
+            min-height:50px;
             border:none;
             border-radius:8px;
             background:linear-gradient(135deg,#0d9488,#0f766e);
@@ -207,8 +240,9 @@
             transition:transform .2s;
         }
         .price-btn:active{transform:scale(0.95)}
-        .price-btn .emoji-icon{font-size: 16px;}
-        .price-btn span{font-size:0.65rem;opacity:0.9}
+        /* NEW: SVG styling for price buttons */
+        .price-btn svg{width:20px;height:20px;stroke:#fff}
+        .price-btn span{font-size:0.65rem;opacity:0.9; display: none;} /* Hide the label */
 
         /* Toggle */
         .toggle-container{
@@ -426,7 +460,14 @@
 
         /* Tablet & Desktop */
         @media (min-width:768px){
-            .stats-grid{gap:12px}
+            .stats-grid{
+                gap:12px;
+                padding: 10px 8px; /* Increase padding for fixed header on desktop */
+                top: 8px; /* Keep the top position the same for fixed header */
+            }
+            .container{
+                padding-top: 70px; /* Increase compensation for fixed header on desktop */
+            }
             .stat-card{padding:10px}
             .stat-icon{width:40px;height:40px;margin-bottom:6px}
             .stat-icon .emoji-icon-stat{font-size: 24px;}
@@ -439,6 +480,10 @@
             .icon-btn .emoji-icon{font-size: 30px;}
             .section-title{font-size:1rem}
             .section-title .emoji-icon-section{font-size: 20px;}
+            .price-btn {
+                width: 60px; /* Wider button for desktop */
+            }
+            .price-btn svg{width:25px;height:25px;} /* Larger SVG for desktop */
         }
     </style>
 </head>
@@ -453,16 +498,16 @@
     <audio id="cashSound" src="cash.mp3" preload="auto"></audio>
     <audio id="buySound" src="buy.mp3" preload="auto"></audio>
     <audio id="trophySound" src="Trophy.Mp3" preload="auto"></audio>
-    <audio id="warningSound" src="warning.mp3" preload="auto"></audio>
+    <audio id="warningSound" src="warning.mpu" preload="auto"></audio>
     <audio id="fireSound" src="fire.mp3" preload="auto"></audio>
-    <audio id="failSound" src="fail.mp3" preload="auto"></audio> <div id="trophyBronzeIcon" class="trophy-icon"></div>
+    <audio id="failSound" src="fail.mp3" preload="auto"></audio>
+    <div id="trophyBronzeIcon" class="trophy-icon"></div>
     <div id="trophySilverIcon" class="trophy-icon"></div>
     <div id="trophyGoldIcon" class="trophy-icon"></div>
 
     <div class="container">
         <div class="header">
-            <span class="title-icon float emoji-icon" style="font-size: 32px; margin-right: 8px;">📎</span>
-            <h1 class="title">مصنع مشابك الورق</h1>
+            <h1 class="title"></h1> 
         </div>
 
         <div class="stats-grid">
@@ -507,7 +552,7 @@
                 </div>
 
                 <button id="makeBtn" class="icon-btn btn-make" onclick="makeClip()">
-                    <span class="emoji-icon">🔨</span>
+                    <span class="emoji-icon">📎</span>
                     <span id="makeBtnText">صنع مشبك</span>
                 </button>
 
@@ -539,23 +584,35 @@
                     <span class="emoji-icon-section">🛒</span>
                     المبيعات
                 </div>
-
-                <div class="price-display">
-                    <div class="price-label">السعر</div>
-                    <div class="price-value">$<span id="price">0.25</span></div>
-                </div>
-
-                <div class="price-control">
-                    <button class="price-btn" onclick="adjustPrice(-0.01)">
-                        <span class="emoji-icon">📉</span>
-                        <span>تخفيض</span>
+                
+                <div class="price-container">
+                    <button id="decreasePriceBtn" class="price-btn" 
+                            onmousedown="startPriceAdjust(-0.01)" 
+                            ontouchstart="startPriceAdjust(-0.01)" 
+                            onmouseup="stopPriceAdjust()" 
+                            ontouchend="stopPriceAdjust()"
+                            ontouchcancel="stopPriceAdjust()">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
+                            <path d="M12 5v14M19 12l-7 7-7-7"/>
+                        </svg>
                     </button>
-                    <button class="price-btn" onclick="adjustPrice(0.01)">
-                        <span class="emoji-icon">📈</span>
-                        <span>زيادة</span>
+                    
+                    <div class="price-display">
+                        <div class="price-label">السعر</div>
+                        <div class="price-value">$<span id="price">0.25</span></div>
+                    </div>
+
+                    <button id="increasePriceBtn" class="price-btn" 
+                            onmousedown="startPriceAdjust(0.01)" 
+                            ontouchstart="startPriceAdjust(0.01)" 
+                            onmouseup="stopPriceAdjust()" 
+                            ontouchend="stopPriceAdjust()"
+                            ontouchcancel="stopPriceAdjust()">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
+                            <path d="M12 19V5M5 12l7-7 7 7"/>
+                        </svg>
                     </button>
                 </div>
-
                 <button id="sellBtn" class="icon-btn btn-sell" onclick="sellClips()" style="margin-top:6px">
                     <span class="emoji-icon">💰</span>
                     <span>بيع المشابك (متوفر: <span id="availableClips">0</span>)</span>
@@ -779,6 +836,9 @@
         const gameOverModal = document.getElementById('gameOverModal');
         const finalMoneyEl = document.getElementById('finalMoney');
         const finalSoldEl = document.getElementById('finalSold');
+        
+        // NEW: Price Control Variables for Hold-down
+        let priceAdjustInterval = null;
 
         function playSound(audioElement) {
             audioElement.currentTime = 0;
@@ -1013,6 +1073,24 @@
             flash('card-demand');
             updateUI();
         }
+        
+        // NEW: Price Adjust with Hold-down logic
+        function startPriceAdjust(delta) {
+            adjustPrice(delta); // Run once immediately
+            // Clear any existing interval to prevent overlapping
+            if (priceAdjustInterval) clearInterval(priceAdjustInterval);
+            // Set a new interval for continuous adjustment
+            priceAdjustInterval = setInterval(() => {
+                adjustPrice(delta);
+            }, 150); // تم تخفيف الحساسية إلى 150ms
+        }
+
+        function stopPriceAdjust() {
+            if (priceAdjustInterval) {
+                clearInterval(priceAdjustInterval);
+                priceAdjustInterval = null;
+            }
+        }
 
         function increaseMarketing(){
             const cost = gameState.marketingLevel * 100;
@@ -1203,6 +1281,12 @@
             checkTrophy(gameState.totalSold); 
             updateUI();
         }
+        
+        // Ensure price adjustment stops when mouse/touch leaves button area
+        document.addEventListener('mouseup', stopPriceAdjust);
+        document.addEventListener('touchend', stopPriceAdjust);
+        document.addEventListener('touchcancel', stopPriceAdjust);
+
     </script>
 </body>
 </html>
