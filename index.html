@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1459,13 +1458,20 @@
                 localStorage.removeItem(STORAGE_KEY);
             } catch(e){ console.error(e); }
             updateUI();
-            // feedback صغير
+
+            // عرض إشعار مخصص لإعادة التعيين فقط
+            const originalText = recordNotificationEl.querySelector('span:nth-child(2)').textContent;
             recordNotificationEl.querySelector('span:nth-child(2)').textContent = 'تمت إعادة تعيين النتائج المحلية.';
             playSound(completionSound);
             showRecordNotification();
-            // استرجع النص الأصلي بعد 1.5 ثانية
+            // استعادة النص الأصلي بعد 1.5 ثانية فقط إذا لم تكن رسالة إعادة تعيين
             setTimeout(()=>{
-                recordNotificationEl.querySelector('span:nth-child(2)').textContent = '🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!';
+                const currentText = recordNotificationEl.querySelector('span:nth-child(2)').textContent;
+                if (currentText === 'تمت إعادة تعيين النتائج المحلية.') {
+                    // نتركها كما هي ولا نعيد النص القديم
+                    return;
+                }
+                recordNotificationEl.querySelector('span:nth-child(2)').textContent = originalText;
             }, 1400);
         }
 
