@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -268,7 +269,7 @@
         .toggle-on{background:#10b981}
         .toggle-off{background:#475569}
         .toggle-btn:after{
-            content:'';
+            content:''; 
             position:absolute;
             width:18px;
             height:18px;
@@ -458,6 +459,42 @@
             }
         }
 
+        /* Record Notification (Gold gradient, slide + fade) */
+        .record-notification {
+            position: fixed;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #facc15, #ca8a04);
+            color: #1b1b1b;
+            padding: 12px 20px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            box-shadow: 0 8px 30px rgba(202,138,4,0.25);
+            z-index: 999;
+            transition: top 0.45s cubic-bezier(.2,.9,.2,1), opacity 0.9s ease;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            gap:10px;
+            border: 1px solid rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .record-notification.show {
+            top: 12px;
+            opacity: 1;
+        }
+        .record-notification.fade-out {
+            opacity: 0;
+            top: -40px;
+        }
+        .record-notification .emoji {
+            font-size:1.2rem;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+        }
+
+        /* TROPHY Icon Styles (PNG Version) */
         /* Tablet & Desktop */
         @media (min-width:768px){
             .stats-grid{
@@ -501,9 +538,18 @@
     <audio id="warningSound" src="warning.mp3" preload="auto"></audio>
     <audio id="fireSound" src="fire.mp3" preload="auto"></audio>
     <audio id="failSound" src="fail.mp3" preload="auto"></audio>
+    <!-- Completion sound requested -->
+    <audio id="completionSound" src="completion.mp3" preload="auto"></audio>
+
     <div id="trophyBronzeIcon" class="trophy-icon"></div>
     <div id="trophySilverIcon" class="trophy-icon"></div>
     <div id="trophyGoldIcon" class="trophy-icon"></div>
+
+    <!-- Record Notification (hidden by default) -->
+    <div id="recordNotification" class="record-notification" aria-live="polite" role="status">
+        <span class="emoji">🎉</span>
+        <span>🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!</span>
+    </div>
 
     <div class="container">
         <div class="header">
@@ -702,6 +748,37 @@
                 </div>
             </div>
         </div>
+
+        <!-- New: Local Leaderboard Section (Independent at bottom) -->
+        <div class="section" id="localLeaderboardSection" style="margin-top:12px;">
+            <div class="section-title" style="color:#ffd166">
+                <span class="emoji-icon-section">🏅</span>
+                أفضل النتائج المحلية
+            </div>
+
+            <div class="item-box" style="text-align:center;">
+                <div style="font-weight:700; font-size:1rem; color:#fff; margin-bottom:6px;">🥇 أفضل نتيجة</div>
+                <div id="bestInfo" style="color:#cbd5e1; font-size:0.95rem;">
+                    <div>المبيعات: <span id="bestTotalSold">0</span> مشبك</div>
+                    <div style="margin-top:6px;">المال عند تحقيقها: $<span id="bestMoney">0.00</span></div>
+                    <div style="margin-top:6px; color:#9aa4b2; font-size:0.8rem;">التاريخ: <span id="bestDate">—</span></div>
+                </div>
+
+                <div style="display:flex; gap:8px; margin-top:12px;">
+                    <button class="icon-btn btn-secondary" onclick="resetBestScore()" style="flex:1; min-height:44px;">
+                        إعادة تعيين النتائج المحلية
+                    </button>
+                    <button class="icon-btn btn-make" onclick="exportBestScore()" style="flex:1; min-height:44px;">
+                        تصدير (نسخ)
+                    </button>
+                </div>
+
+                <div style="margin-top:10px; color:#9aa4b2; font-size:0.75rem;">
+                    تُبنى اللوحة على إجمالي المبيعات <strong>(totalSold)</strong>. يتم حفظ المال عند تحطيم رقم قياسي.
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div id="gameOverModal" class="modal">
@@ -812,6 +889,13 @@
             trophyGold: false
         };
 
+        // Best local score object (loaded from localStorage)
+        let bestLocalScore = {
+            totalSold: 0,
+            money: 0,
+            date: null
+        };
+
         const clickSound = document.getElementById('clickSound');
         const cashSound = document.getElementById('cashSound');
         const buySound = document.getElementById('buySound');
@@ -819,7 +903,7 @@
         const warningSound = document.getElementById('warningSound');
         const fireSound = document.getElementById('fireSound');
         const failSound = document.getElementById('failSound'); // NEW: Fail Sound
-
+        const completionSound = document.getElementById('completionSound'); // NEW: completion.mp3
 
         // عناصر الكؤوس
         const trophyBronzeIcon = document.getElementById('trophyBronzeIcon');
@@ -836,13 +920,22 @@
         const gameOverModal = document.getElementById('gameOverModal');
         const finalMoneyEl = document.getElementById('finalMoney');
         const finalSoldEl = document.getElementById('finalSold');
-        
+
+        // عناصر اللوحة المحلية
+        const recordNotificationEl = document.getElementById('recordNotification');
+        const bestTotalSoldEl = document.getElementById('bestTotalSold');
+        const bestMoneyEl = document.getElementById('bestMoney');
+        const bestDateEl = document.getElementById('bestDate');
+
         // NEW: Price Control Variables for Hold-down
         let priceAdjustInterval = null;
 
         function playSound(audioElement) {
-            audioElement.currentTime = 0;
-            audioElement.play().catch(e => console.error("Error playing sound:", e));
+            if(!audioElement) return;
+            try{
+                audioElement.currentTime = 0;
+                audioElement.play().catch(e => {/*ignore autoplay issues*/});
+            }catch(e){}
         }
 
         function flash(id){
@@ -854,7 +947,7 @@
         
         // NEW: Game Over Check
         function checkGameOver() {
-            // شرط الخسارة: لا يوجد سلك AND المال < تكلفة السلك AND لا يوجد مشابك للبيع
+            // شرط الخسارة: لا يوجد سلك AND المال < تكلفة السلك AND لا يوجد مشابك لبيعها
             if (gameState.wire === 0 && gameState.money < gameState.wireCost && gameState.clips === 0) {
                 
                 finalMoneyEl.textContent = gameState.money.toFixed(2);
@@ -1001,6 +1094,11 @@
             document.getElementById('marketingBtn').disabled = gameState.money < gameState.marketingLevel * 100;
             document.getElementById('expansionBtn').disabled = gameState.money < gameState.expansionCost; // NEW: زر التوسعة
             
+            // تحديث واجهة أفضل نتيجة محلية
+            bestTotalSoldEl.textContent = bestLocalScore.totalSold.toLocaleString();
+            bestMoneyEl.textContent = parseFloat(bestLocalScore.money || 0).toFixed(2);
+            bestDateEl.textContent = bestLocalScore.date ? new Date(bestLocalScore.date).toLocaleString() : '—';
+            
             checkGameOver(); // NEW: فحص الخسارة
         }
 
@@ -1020,13 +1118,15 @@
             if(gameState.clips > 0){
                 const sellAmount = Math.min(gameState.clips, gameState.demand);
                 gameState.clips -= sellAmount;
-                gameState.money += sellAmount * gameState.price;
+                const revenue = sellAmount * gameState.price;
+                gameState.money += revenue;
                 gameState.totalSold += sellAmount;
                 gameState.demand = Math.max(10, gameState.demand - Math.floor(sellAmount * 0.1));
                 
                 if (sellAmount > 0) {
                     playSound(cashSound); // صوت بيع المشابك
                     checkTrophy(gameState.totalSold);
+                    checkLocalRecord(); // NEW: فحص وتحديث لوحة المتصدرين المحلية
                 }
                 
                 flash('card-money');
@@ -1082,7 +1182,7 @@
             // Set a new interval for continuous adjustment
             priceAdjustInterval = setInterval(() => {
                 adjustPrice(delta);
-            }, 150); // تم تخفيف الحساسية إلى 150ms
+            }, 180); // تم تخفيف الحساسية إلى 180ms
         }
 
         function stopPriceAdjust() {
@@ -1201,8 +1301,7 @@
                     gameState.money = Math.max(0, gameState.money - lossAmount);
                     
                     challengeTitle.textContent = "⚠️ حادث: سرقة!";
-                    challengeMessage.innerHTML = `حدثت سرقة في المصنع! سُرق <strong>$${lossAmount.toFixed(2)}</strong> من أموالك.`;
-                    
+                    challengeMessage.innerHTML = `حدثت سرقة في المصنع! سُرق <strong>$${lossAmount.toFixed(2)}</strong> من أموالك.`;                    
                     challengeModal.classList.add('active');
                     playSound(warningSound); // تشغيل نغمة التحذير
                     flash('card-money');
@@ -1252,6 +1351,7 @@
                 if (sellAmount > 0) {
                     playSound(cashSound); // صوت بيع المشابك للبيع التلقائي
                     checkTrophy(gameState.totalSold);
+                    checkLocalRecord(); // NEW: فحص وتحديث لوحة المتصدرين المحلية
                 }
 
                 flash('card-money');
@@ -1274,9 +1374,126 @@
             updateUI();
         },3000);
 
+        // ========== Local Leaderboard: load / save / notify ==========
+        const STORAGE_KEY = 'bestLocalScore';
+
+        function loadBestScore() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed.totalSold !== 'undefined') {
+                        bestLocalScore.totalSold = parsed.totalSold || 0;
+                        bestLocalScore.money = parsed.money || 0;
+                        bestLocalScore.date = parsed.date || null;
+                    }
+                }
+            } catch(e){
+                console.error("Error loading bestLocalScore:", e);
+            }
+        }
+
+        function saveBestScore() {
+            try {
+                const payload = {
+                    totalSold: bestLocalScore.totalSold,
+                    money: bestLocalScore.money,
+                    date: bestLocalScore.date
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+            } catch(e){
+                console.error("Error saving bestLocalScore:", e);
+            }
+        }
+
+       function checkLocalRecord() {
+           const previousBest = bestLocalScore.totalSold || 0;
+
+            if (gameState.totalSold > previousBest + 1000) {
+                bestLocalScore.totalSold = gameState.totalSold;
+                bestLocalScore.money = parseFloat(gameState.money.toFixed(2));
+                bestLocalScore.date = new Date().toISOString();
+                saveBestScore();
+
+                showRecordNotification();
+                playSound(completionSound);
+                flash('card-clips');
+                flash('card-money');
+                console.log("New local record saved:", bestLocalScore);
+                updateUI();
+            }
+        }
+
+        let recordTimeouts = [];
+        function showRecordNotification() {
+            // إظهار الإشعار، ثم تلاشيه تدريجيًا بعد 4 ثوانٍ
+            try {
+                // إيقاف أي مؤقتات سابقة لإعادة الضبط
+                recordTimeouts.forEach(t => clearTimeout(t));
+                recordTimeouts = [];
+
+                recordNotificationEl.classList.remove('fade-out');
+                // Force reflow for reliable animation restart
+                void recordNotificationEl.offsetWidth;
+                recordNotificationEl.classList.add('show');
+
+                // بعد 4 ثوانٍ نضيف فئة fade-out لبدء التلاشي
+                const t1 = setTimeout(()=>{
+                    recordNotificationEl.classList.add('fade-out');
+                    recordNotificationEl.classList.remove('show');
+                }, 4000);
+
+                // بعد مدة إضافية نزيل كل الفئات لضمان الحالة الافتراضية
+                const t2 = setTimeout(()=>{
+                    recordNotificationEl.classList.remove('fade-out');
+                    recordNotificationEl.classList.remove('show');
+                }, 4800);
+
+                recordTimeouts.push(t1, t2);
+            } catch(e){ console.error(e); }
+        }
+
+        function resetBestScore() {
+            bestLocalScore = { totalSold: 0, money: 0, date: null };
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch(e){ console.error(e); }
+            updateUI();
+            // feedback صغير
+            recordNotificationEl.querySelector('span:nth-child(2)').textContent = 'تمت إعادة تعيين النتائج المحلية.';
+            playSound(completionSound);
+            showRecordNotification();
+            // استرجع النص الأصلي بعد 1.5 ثانية
+            setTimeout(()=>{
+                recordNotificationEl.querySelector('span:nth-child(2)').textContent = '🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!';
+            }, 1400);
+        }
+
+        // تصدير سريع للنتيجة (نسخ للنص)
+        function exportBestScore() {
+            const text = `أفضل مبيعات محلية: ${bestLocalScore.totalSold.toLocaleString()} مشبك — المال: $${parseFloat(bestLocalScore.money || 0).toFixed(2)} — التاريخ: ${bestLocalScore.date ? new Date(bestLocalScore.date).toLocaleString() : '—'}`;
+            try {
+                navigator.clipboard.writeText(text).then(()=> {
+                    recordNotificationEl.querySelector('span:nth-child(2)').textContent = 'تم نسخ أفضل نتيجة إلى الحافظة!';
+                    playSound(completionSound);
+                    showRecordNotification();
+                    setTimeout(()=>{
+                        recordNotificationEl.querySelector('span:nth-child(2)').textContent = '🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!';
+                    },1400);
+                }).catch(()=> {
+                    // fallback: alert
+                    alert(text);
+                });
+            } catch(e){
+                alert(text);
+            }
+        }
+
         // قم بفتح نافذة الدليل عند أول تحميل
         window.onload = function() {
             toggleGuide();
+            // حمل أفضل نتيجة محلية
+            loadBestScore();
             // لضمان عرض أي كأس تم تحقيقه بعد تحميل الصفحة (إذا كانت البيانات محفوظة)
             checkTrophy(gameState.totalSold); 
             updateUI();
