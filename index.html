@@ -759,7 +759,7 @@
                 <div style="font-weight:700; font-size:1rem; color:#fff; margin-bottom:6px;">🥇 أفضل نتيجة</div>
                 <div id="bestInfo" style="color:#cbd5e1; font-size:0.95rem;">
                     <div>المبيعات: <span id="bestTotalSold">0</span> مشبك</div>
-                    <div style="margin-top:6px;">المال عند تحقيقها: $<span id="bestMoney">0.00</span></div>
+                    <div style="margin-top:6px;">المال: $<span id="bestMoney">0.00</span></div>
                     <div style="margin-top:6px; color:#9aa4b2; font-size:0.8rem;">التاريخ: <span id="bestDate">—</span></div>
                 </div>
 
@@ -1458,20 +1458,13 @@
                 localStorage.removeItem(STORAGE_KEY);
             } catch(e){ console.error(e); }
             updateUI();
-
-            // عرض إشعار مخصص لإعادة التعيين فقط
-            const originalText = recordNotificationEl.querySelector('span:nth-child(2)').textContent;
+            // feedback صغير
             recordNotificationEl.querySelector('span:nth-child(2)').textContent = 'تمت إعادة تعيين النتائج المحلية.';
             playSound(completionSound);
             showRecordNotification();
-            // استعادة النص الأصلي بعد 1.5 ثانية فقط إذا لم تكن رسالة إعادة تعيين
+            // استرجع النص الأصلي بعد 1.5 ثانية
             setTimeout(()=>{
-                const currentText = recordNotificationEl.querySelector('span:nth-child(2)').textContent;
-                if (currentText === 'تمت إعادة تعيين النتائج المحلية.') {
-                    // نتركها كما هي ولا نعيد النص القديم
-                    return;
-                }
-                recordNotificationEl.querySelector('span:nth-child(2)').textContent = originalText;
+                recordNotificationEl.querySelector('span:nth-child(2)').textContent = '🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!';
             }, 1400);
         }
 
