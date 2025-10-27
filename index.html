@@ -956,6 +956,7 @@
                 document.querySelectorAll('button').forEach(btn => btn.disabled = true);
                 document.getElementById('autoSellBtn').disabled = true;
                 document.querySelector('.guide-btn').style.display = 'none';
+                document.querySelector('#gameOverModal button').disabled = false;
 
                 console.log("Game Over: Stuck without clips or wire!");
                 return true;
