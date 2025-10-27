@@ -537,14 +537,12 @@
     <audio id="warningSound" src="warning.mp3" preload="auto"></audio>
     <audio id="fireSound" src="fire.mp3" preload="auto"></audio>
     <audio id="failSound" src="fail.mp3" preload="auto"></audio>
-    <!-- Completion sound requested -->
     <audio id="completionSound" src="completion.mp3" preload="auto"></audio>
 
     <div id="trophyBronzeIcon" class="trophy-icon"></div>
     <div id="trophySilverIcon" class="trophy-icon"></div>
     <div id="trophyGoldIcon" class="trophy-icon"></div>
 
-    <!-- Record Notification (hidden by default) -->
     <div id="recordNotification" class="record-notification" aria-live="polite" role="status">
         <span class="emoji">🎉</span>
         <span>🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!</span>
@@ -748,7 +746,6 @@
             </div>
         </div>
 
-        <!-- New: Local Leaderboard Section (Independent at bottom) -->
         <div class="section" id="localLeaderboardSection" style="margin-top:12px;">
             <div class="section-title" style="color:#ffd166">
                 <span class="emoji-icon-section">🏅</span>
@@ -1279,43 +1276,80 @@
                 return; 
             }
             
-            // NEW: فرصة 10% لوقوع حادث عشوائي
+            // فرصة 10% لوقوع حادث عشوائي
             if (Math.random() < 0.10) { 
                 
                 let isMoneyLoss = false;
                 let isClipsLoss = false;
+                let isClipperLoss = false; // NEW
+                let isDemandLoss = false; // NEW
+                let challengeType = null;
 
-                // سرقة: إذا كان المال > 4500
-                if (gameState.money >= 4500 && Math.random() < 0.5) { 
-                    isMoneyLoss = true;
+                // تحدي 1: سرقة المال (إذا كان المال > 4500)
+                if (gameState.money >= 4500 && Math.random() < 0.25) { 
+                    challengeType = 'money';
                 } 
                 
-                // حريق: إذا كانت المشابك > 7500
-                else if (gameState.clips >= 7500) {
-                    isClipsLoss = true;
+                // تحدي 2: حريق المشابك (إذا كانت المشابك > 7500)
+                else if (gameState.clips >= 7500 && Math.random() < 0.25) {
+                    challengeType = 'clips';
                 }
+                
+                // تحدي 3: تلف الآلات (إذا كان لديك 100 آلة أو أكثر) - NEW REQUIREMENT 1
+                else if (gameState.autoClippers >= 100 && Math.random() < 0.25) {
+                    challengeType = 'clippers';
+                }
+                
+                // تحدي 4: دعاية سلبية (إذا كان الطلب 100 أو أكثر) - NEW REQUIREMENT 2
+                else if (gameState.demand >= 100 && Math.random() < 0.25) {
+                    challengeType = 'demand';
+                }
+                
+                // إذا لم يتحقق أي شرط، لا يتم تشغيل التحدي
+                if (!challengeType) return;
 
-                if (isMoneyLoss) {
+
+                if (challengeType === 'money') {
                     const lossAmount = 500;
                     gameState.money = Math.max(0, gameState.money - lossAmount);
                     
                     challengeTitle.textContent = "⚠️ حادث: سرقة!";
                     challengeMessage.innerHTML = `حدثت سرقة في المصنع! سُرق <strong>$${lossAmount.toFixed(2)}</strong> من أموالك.`;                    
-                    challengeModal.classList.add('active');
                     playSound(warningSound); // تشغيل نغمة التحذير
                     flash('card-money');
-                } else if (isClipsLoss) {
+
+                } else if (challengeType === 'clips') {
                     const lossAmount = 500;
                     gameState.clips = Math.max(0, gameState.clips - lossAmount);
                     
                     challengeTitle.textContent = "🔥 حادث: حريق!";
                     challengeMessage.innerHTML = `اندلع حريق في المخزن! تلف <strong>${lossAmount.toLocaleString()}</strong> مشبك ورقي.`;
                     
-                    challengeModal.classList.add('active');
                     playSound(fireSound); // تشغيل نغمة الحريق
                     flash('card-clips');
+
+                } else if (challengeType === 'clippers') { // NEW: Clipper Loss Challenge
+                    const lossAmount = 20;
+                    gameState.autoClippers = Math.max(0, gameState.autoClippers - lossAmount);
+                    
+                    challengeTitle.textContent = "⚙️ حادث: تلف آلات!";
+                    challengeMessage.innerHTML = `حدث عطل فني كبير! تعطلت <strong>${lossAmount}</strong> آلة صنع تلقائي.`;
+                    
+                    playSound(fireSound); // استخدام صوت الحريق/خسارة (يمكن تغيير الصوت)
+                    flash('autoClippers');
+
+                } else if (challengeType === 'demand') { // NEW: Negative Publicity Challenge
+                    const oldDemand = gameState.demand;
+                    gameState.demand = 1; // تخفيض الطلب إلى 1
+                    
+                    challengeTitle.textContent = "📉 تحدي: دعاية سلبية!";
+                    challengeMessage.innerHTML = `انتشرت إشاعات سلبية عن منتجاتك! انخفض الطلب من <strong>${oldDemand}</strong> إلى <strong>${gameState.demand}</strong>.`;
+                    
+                    playSound(warningSound); // استخدام صوت التحذير
+                    flash('card-demand');
                 }
                 
+                challengeModal.classList.add('active');
                 updateUI();
             }
         }
@@ -1440,7 +1474,7 @@
                 const t1 = setTimeout(()=>{
                     recordNotificationEl.classList.add('fade-out');
                     recordNotificationEl.classList.remove('show');
-                }, 4000);
+                }, 2000);
 
                 // بعد مدة إضافية نزيل كل الفئات لضمان الحالة الافتراضية
                 const t2 = setTimeout(()=>{
