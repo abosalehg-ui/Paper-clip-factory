@@ -585,7 +585,7 @@
                 <div class="stat-icon">
                     <span class="emoji-icon-stat">📎</span>
                 </div>
-                <div class="stat-label">المشابك (<span id="clipsLimit">5,000</span>)</div>
+                <div class="stat-label">المشابك <span id="clipsLimit" style="display:none">(5,000)</span></div>
                 <div class="stat-value" id="clips">0</div>
             </div>
 
@@ -1185,7 +1185,7 @@
                 gameState.wire--;
                 
                 // **إضافة تأثير تطاير المشابك**
-                createFloatingEmoji(makeBtn, '📎', 5);
+                createFloatingEmoji(makeBtn, '📎', 1);
 
                 playSound(clickSound); // صوت صنع مشبك
                 flash('card-clips');
