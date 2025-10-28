@@ -298,6 +298,33 @@
         @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-5px)}100%{transform:translateY(0)}}
         .glow-update{animation:glow .9s ease}
         @keyframes glow{0%{box-shadow:0 0 0 rgba(125,211,252,0)}50%{box-shadow:0 0 15px rgba(125,211,252,0.4)}100%{box-shadow:0 0 0 rgba(125,211,252,0)}}
+        
+        /* تأثيرات الإيموجي المتطايرة - تمت الإضافة هنا */
+        .floating-emoji {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0;
+            pointer-events: none;
+            user-select: none;
+            z-index: 100;
+            animation: floatAndFade 1.2s ease-out forwards;
+        }
+
+        @keyframes floatAndFade {
+            0% {
+                transform: translate(-50%, 0) scale(0.7);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -100%) scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -200%) scale(0.5);
+                opacity: 0;
+            }
+        }
+        /* نهاية تأثيرات الإيموجي المتطايرة */
 
         /* Modal */
         .modal{
@@ -922,6 +949,9 @@
         const bestTotalSoldEl = document.getElementById('bestTotalSold');
         const bestMoneyEl = document.getElementById('bestMoney');
         const bestDateEl = document.getElementById('bestDate');
+        
+        const makeBtn = document.getElementById('makeBtn'); // تم جلب زر الصنع
+        const sellBtn = document.getElementById('sellBtn'); // تم جلب زر البيع
 
         // NEW: Price Control Variables for Hold-down
         let priceAdjustInterval = null;
@@ -939,6 +969,30 @@
             if(!el) return;
             el.classList.add('glow-update');
             setTimeout(()=>el.classList.remove('glow-update'),900);
+        }
+        
+        // **وظيفة جديدة: إنشاء وتطاير الإيموجي**
+        function createFloatingEmoji(buttonElement, emoji, count = 5) {
+            const rect = buttonElement.getBoundingClientRect();
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('span');
+                particle.textContent = emoji;
+                particle.classList.add('floating-emoji');
+                
+                // تحديد موضع البدء بشكل عشوائي داخل حدود الزر
+                const x = rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width * 0.4;
+                const y = rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height * 0.4;
+                
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                document.body.appendChild(particle);
+
+                // إزالة الإيموجي بعد انتهاء الحركة
+                setTimeout(() => {
+                    particle.remove();
+                }, 1200); 
+            }
         }
         
         // NEW: Game Over Check
@@ -1079,11 +1133,12 @@
             
             updateInsuranceTimer(); // تحديث خاص بحالة التأمين والزر
             
-            const makeBtn = document.getElementById('makeBtn');
+            // const makeBtn = document.getElementById('makeBtn'); // تم نقلها إلى نطاق أوسع
             makeBtn.disabled = gameState.wire < 1;
             document.getElementById('makeBtnText').textContent = gameState.wire < 1 ? 'لا يوجد سلك' : 'صنع مشبك';
 
-            document.getElementById('sellBtn').disabled = gameState.clips === 0;
+            // const sellBtn = document.getElementById('sellBtn'); // تم نقلها إلى نطاق أوسع
+            sellBtn.disabled = gameState.clips === 0;
             // NEW: الحد الأقصى للآلات
             document.getElementById('autoClipperBtn').disabled = gameState.money < gameState.autoClipperCost || gameState.autoClippers >= gameState.maxClippersLimit;
             document.getElementById('wireBtn').disabled = gameState.money < gameState.wireCost;
@@ -1104,6 +1159,10 @@
                 gameState.clips++;
                 gameState.totalClips++;
                 gameState.wire--;
+                
+                // **إضافة تأثير تطاير المشابك**
+                createFloatingEmoji(makeBtn, '📎', 5);
+
                 playSound(clickSound); // صوت صنع مشبك
                 flash('card-clips');
                 flash('card-wire');
@@ -1121,6 +1180,9 @@
                 gameState.demand = Math.max(10, gameState.demand - Math.floor(sellAmount * 0.1));
                 
                 if (sellAmount > 0) {
+                    // **إضافة تأثير تطاير الأوراق النقدية**
+                    createFloatingEmoji(sellBtn, '💵', Math.min(sellAmount, 8)); // يتطاير 8 كحد أقصى
+
                     playSound(cashSound); // صوت بيع المشابك
                     checkTrophy(gameState.totalSold);
                     checkLocalRecord(); // NEW: فحص وتحديث لوحة المتصدرين المحلية
@@ -1383,6 +1445,7 @@
                 gameState.totalSold += sellAmount;
                 
                 if (sellAmount > 0) {
+                    // ملاحظة: البيع التلقائي لا يضيف تأثير التطاير لأنه يحدث في الخلفية
                     playSound(cashSound); // صوت بيع المشابك للبيع التلقائي
                     checkTrophy(gameState.totalSold);
                     checkLocalRecord(); // NEW: فحص وتحديث لوحة المتصدرين المحلية
