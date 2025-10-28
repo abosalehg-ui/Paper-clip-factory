@@ -585,7 +585,7 @@
                 <div class="stat-icon">
                     <span class="emoji-icon-stat">📎</span>
                 </div>
-                <div class="stat-label">المشابك</div>
+                <div class="stat-label">المشابك (<span id="clipsLimit">5,000</span>)</div>
                 <div class="stat-value" id="clips">0</div>
             </div>
 
@@ -640,11 +640,11 @@
                 <div class="item-box">
                     <div class="item-header">
                         <span>شراء سلك</span>
-                        <span style="color:#f59e0b;font-weight:700">$<span id="wireCost">20.00</span></span>
+                        <span style="color:#f59e0b;font-weight:700">شراء سلك (1000 وحدة)</span>
                     </div>
                     <button id="wireBtn" class="icon-btn btn-buy" onclick="buyWire()">
                         <span class="emoji-icon">📦</span>
-                        <span>شراء سلك (1000 وحدة)</span>
+                        <span>$<span id="wireCost">20.00</span></span>
                     </button>
                 </div>
             </div>
@@ -712,6 +712,16 @@
                 </button>
             </div>
             
+            <div class="item-box">
+                <div class="item-header">
+                    <span>ترقية المستودع لـ 5,000 مشبك إضافية</span>
+                    <span style="color:#f59e0b;font-weight:700">الحد الأقصى: <span id="clipsLimitCurrent">5,000</span></span>
+                </div>
+                <button id="warehouseBtn" class="icon-btn btn-upgrade" onclick="upgradeWarehouse()">
+                    <span class="emoji-icon">📦</span>
+                    <span> $<span id="warehouseCost">50.00</span></span>
+                </button>
+            </div>
             <div class="item-box">
                 <div class="item-header">
                     <span>زيادة كفاءة السلك</span>
@@ -864,7 +874,7 @@
                     <li>• زيادة كفاءة السلك تعطيك سلك أكثر عند الشراء.</li>
                     <li>• التسويق يزيد الطلب على منتجاتك.</li>
                     <li>• التأمين يقفل الحوادث السرقة والحريق مؤقتاً.</li>
-                    <li>• توسعة المصنع تتيح مساحة لآلات صنع تلقائي إضافية.</li>
+                    <li>• توسعة المصنع وترقية المستودع تتيح مساحة إضافية.</li>
                 </ul>
             </div>
 
@@ -904,8 +914,13 @@
             insuranceLevel: 0,
             insuranceCost: 1000,
             insuranceEndTime: 0, // Timestamp of when insurance expires
-            maxClippersLimit: 100, // NEW: الحد الأقصى لآلات الصنع
-            expansionCost: 2000, // NEW: تكلفة التوسعة الأولية
+            maxClippersLimit: 100, // الحد الأقصى لآلات الصنع
+            expansionCost: 2000, // تكلفة التوسعة الأولية
+            
+            // NEW: توسعة المستودع
+            maxClipsLimit: 5000, // الحد الأقصى المبدئي للمشابك
+            warehouseCost: 100, // تكلفة ترقية المستودع المبدئية
+            
             // حالة الإنجازات
             trophyBronze: false,
             trophySilver: false,
@@ -1131,11 +1146,18 @@
             document.getElementById('maxClippers').textContent = gameState.maxClippersLimit.toLocaleString();
             document.getElementById('expansionCost').textContent = gameState.expansionCost.toFixed(2);
             
+            // NEW: تحديث عناصر المستودع
+            document.getElementById('clipsLimit').textContent = gameState.maxClipsLimit.toLocaleString();
+            document.getElementById('clipsLimitCurrent').textContent = gameState.maxClipsLimit.toLocaleString();
+            document.getElementById('warehouseCost').textContent = gameState.warehouseCost.toFixed(2);
+            
             updateInsuranceTimer(); // تحديث خاص بحالة التأمين والزر
             
             // const makeBtn = document.getElementById('makeBtn'); // تم نقلها إلى نطاق أوسع
-            makeBtn.disabled = gameState.wire < 1;
-            document.getElementById('makeBtnText').textContent = gameState.wire < 1 ? 'لا يوجد سلك' : 'صنع مشبك';
+            // NEW: يجب أن يتعطل زر الصنع إذا نفد السلك أو إذا امتلأ المستودع
+            makeBtn.disabled = gameState.wire < 1 || gameState.clips >= gameState.maxClipsLimit;
+            document.getElementById('makeBtnText').textContent = gameState.wire < 1 ? 'لا يوجد سلك' : 
+                                                               gameState.clips >= gameState.maxClipsLimit ? 'المستودع ممتلئ' : 'صنع مشبك';
 
             // const sellBtn = document.getElementById('sellBtn'); // تم نقلها إلى نطاق أوسع
             sellBtn.disabled = gameState.clips === 0;
@@ -1145,6 +1167,7 @@
             document.getElementById('efficiencyBtn').disabled = gameState.money < gameState.wireEfficiency * 1000;
             document.getElementById('marketingBtn').disabled = gameState.money < gameState.marketingLevel * 100;
             document.getElementById('expansionBtn').disabled = gameState.money < gameState.expansionCost; // NEW: زر التوسعة
+            document.getElementById('warehouseBtn').disabled = gameState.money < gameState.warehouseCost; // NEW: زر المستودع
             
             // تحديث واجهة أفضل نتيجة محلية
             bestTotalSoldEl.textContent = bestLocalScore.totalSold.toLocaleString();
@@ -1155,7 +1178,8 @@
         }
 
         function makeClip(){
-            if(gameState.wire >= 1){
+            // NEW: فحص الحد الأقصى للمشابك
+            if(gameState.wire >= 1 && gameState.clips < gameState.maxClipsLimit){
                 gameState.clips++;
                 gameState.totalClips++;
                 gameState.wire--;
@@ -1206,7 +1230,7 @@
         }
 
         function buyAutoClipper(){
-            // NEW: إضافة شرط الحد الأقصى
+            // NEW: إضافة شرط الحد الأقصى للآلات
             if(gameState.money >= gameState.autoClipperCost && gameState.autoClippers < gameState.maxClippersLimit){
                 gameState.money -= gameState.autoClipperCost;
                 gameState.autoClippers++;
@@ -1228,7 +1252,7 @@
         function adjustPrice(delta){
             gameState.price = Math.max(0.01, Math.round((gameState.price + delta)*100)/100);
             if(delta > 0) gameState.demand = Math.max(5, gameState.demand - 5);
-            else gameState.demand += 5;
+            else gameState.demand = Math.min(100 * gameState.marketingLevel, gameState.demand + 5); // ضمان عدم تجاوز الحد الأقصى
             flash('card-demand');
             updateUI();
         }
@@ -1256,9 +1280,24 @@
             if(gameState.money >= cost){
                 gameState.money -= cost;
                 gameState.marketingLevel++;
-                gameState.demand += 20;
+                gameState.demand = Math.min(100 * gameState.marketingLevel, gameState.demand + 20); // ضمان عدم تجاوز الحد الأقصى للمستوى الجديد
                 playSound(buySound); 
                 flash('card-demand');
+                flash('card-money');
+                updateUI();
+            }
+        }
+
+        // NEW: دالة ترقية المستودع
+        function upgradeWarehouse(){
+            const cost = gameState.warehouseCost;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.maxClipsLimit += 5000; // إضافة 5000 مشبك للحد الأقصى
+                gameState.warehouseCost = Math.floor(gameState.warehouseCost * 1.5); // زيادة التكلفة بنسبة 50%
+                
+                playSound(buySound); 
+                flash('card-clips');
                 flash('card-money');
                 updateUI();
             }
@@ -1283,12 +1322,6 @@
                 gameState.money -= cost;
                 gameState.maxClippersLimit += 100; // زيادة الحد الأقصى بمقدار 100
                 gameState.expansionCost = Math.floor(gameState.expansionCost * 2); // مضاعفة تكلفة التوسعة
-                
-                // إعادة تعيين تكلفة الآلة التلقائية لآلة البداية الجديدة بعد التوسعة
-                if (gameState.autoClippers === gameState.maxClippersLimit - 100) {
-                    // يمكن هنا تعيين تكلفة الآلة الأولى في التوسعة الجديدة إذا لزم الأمر
-                    // لكن المنطق الحالي لزيادة التكلفة يكفي
-                }
                 
                 playSound(buySound); 
                 flash('card-money');
@@ -1423,13 +1456,24 @@
             if (checkGameOver()) return;
             
             if(gameState.autoClippers > 0 && gameState.wire >= gameState.autoClippers){
-                gameState.clips += gameState.autoClippers;
-                gameState.totalClips += gameState.autoClippers;
-                gameState.wire -= gameState.autoClippers;
-                gameState.autoClipperRate = gameState.autoClippers;
-                flash('card-clips');
-                flash('card-wire');
-                updateUI();
+                
+                // NEW: حساب المشابك التي سيتم صنعها مع الأخذ في الاعتبار الحد الأقصى للمستودع
+                let potentialClips = gameState.autoClippers;
+                let availableSpace = gameState.maxClipsLimit - gameState.clips;
+                let clipsMade = Math.min(potentialClips, availableSpace);
+
+                if (clipsMade > 0) {
+                    gameState.clips += clipsMade;
+                    gameState.totalClips += clipsMade;
+                    gameState.wire -= clipsMade;
+                    gameState.autoClipperRate = gameState.autoClippers;
+                    flash('card-clips');
+                    flash('card-wire');
+                    updateUI();
+                } else if (gameState.clips >= gameState.maxClipsLimit) {
+                    gameState.autoClipperRate = 0; // معدل إنتاج صفر إذا كان ممتلئاً
+                    updateUI();
+                }
             }
         },1000);
 
