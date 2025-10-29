@@ -87,8 +87,7 @@
 
             /* NEW: Fixed Position Styles */
             position: fixed;
-            /* تم تعديل الـ Top ليظهر تحت شريط التنبيه الجديد */
-            top: 45px; 
+            top: 8px; /* نفس مستوى زر الدليل والكأس */
             left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 16px); /* 100% minus 8px padding on each side of body */
@@ -324,811 +323,1337 @@
                 transform: translate(-50%, -200%) scale(0.5);
                 opacity: 0;
             }
-        } 
+        }
         /* نهاية تأثيرات الإيموجي المتطايرة */
 
-        /* Modal - تم الإبقاء على أنماط المودال الرئيسية لأنها تستخدم للدليل ونهاية اللعبة */
-        .modal{ display:none; position:fixed; inset:0; background:rgba(2,6,23,0.95); align-items:center; justify-content:center; padding:12px; z-index:60; backdrop-filter:blur(8px); }
+        /* Modal */
+        .modal{
+            display:none;
+            position:fixed;
+            inset:0;
+            background:rgba(2,6,23,0.95);
+            align-items:center;
+            justify-content:center;
+            padding:12px;
+            z-index:60;
+            backdrop-filter:blur(8px);
+        }
         .modal.active{display:flex}
-        .modal-content{ background:linear-gradient(145deg,#071022,#0a1628); padding:16px; border-radius:12px; border:2px solid rgba(125,211,252,0.1); max-width:500px; width:100%; max-height:90vh; overflow:auto; }
-        .modal-title{ text-align:center; color:#7dd3fc; margin-bottom:12px; font-size:1.3rem; }
-        .guide-section{ background:#061427; padding:10px; border-radius:10px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.04); }
-        .guide-section h3{ color:#60a5fa; margin-bottom:6px; font-size:0.9rem; }
-        .guide-section ul,.guide-section p{ list-style:none; padding:0; color:#cbd5e1; font-size:0.8rem; line-height:1.5; }
+        .modal-content{
+            background:linear-gradient(145deg,#071022,#0a1628);
+            padding:16px;
+            border-radius:12px;
+            border:2px solid rgba(125,211,252,0.1);
+            max-width:500px;
+            width:100%;
+            max-height:90vh;
+            overflow:auto;
+        }
+        .modal-title{
+            text-align:center;
+            color:#7dd3fc;
+            margin-bottom:12px;
+            font-size:1.3rem;
+        }
+        .guide-section{
+            background:#061427;
+            padding:10px;
+            border-radius:10px;
+            margin-bottom:10px;
+            border:1px solid rgba(255,255,255,0.04);
+        }
+        .guide-section h3{
+            color:#60a5fa;
+            margin-bottom:6px;
+            font-size:0.9rem;
+        }
+        .guide-section ul,.guide-section p{
+            list-style:none;
+            padding:0;
+            color:#cbd5e1;
+            font-size:0.8rem;
+            line-height:1.5;
+        }
         .guide-section ul li{margin-bottom:5px}
-        .dev-info{ text-align:center; padding:10px; border-radius:8px; background:linear-gradient(90deg,#071433,#0b1b2c); border:1px solid rgba(125,211,252,0.06); margin-top:10px; font-size:0.8rem; }
+
+        .dev-info{
+            text-align:center;
+            padding:10px;
+            border-radius:8px;
+            background:linear-gradient(90deg,#071433,#0b1b2c);
+            border:1px solid rgba(125,211,252,0.06);
+            margin-top:10px;
+            font-size:0.8rem;
+        }
         
-        /* تم حذف أنماط #challengeModal القديمة */
+        /* New Challenge Modal Styles (تم إلغاء استخدامها واستبدالها بشريط الأخبار) */
+        #challengeModal, #gameOverModal {
+            display: none !important; 
+        }
         
         /* Game Over Modal Styles - New */
-        #gameOverModal .modal-content { border: 2px solid rgba(255, 255, 255, 0.4); background: linear-gradient(145deg, #071022,#0a1628); box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
-        #insuranceTimer { text-align: center; font-size: 0.8rem; font-weight: bold; color: #fca5a5; margin-top: -6px; margin-bottom: 6px; } 
-        
+        /* #gameOverModal .modal-content {
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            background: linear-gradient(145deg, #071022,#0a1628);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        } */
+
+        #insuranceTimer {
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #fca5a5;
+            margin-top: -6px;
+            margin-bottom: 6px;
+        }
+
+
         /* TROPHY Styles - Full Page Glow */
-        .trophy-bronze { box-shadow: 0 0 30px 10px rgba(176, 141, 87, 0.7), inset 0 0 20px rgba(176, 141, 87, 0.5); }
-        
-        /* ---------------------------------------------------------------------- */
-        /* NEW: Challenge/Event News Ticker (Alert Bar) */
-        /* ---------------------------------------------------------------------- */
-        .alert-bar {
+        .trophy-bronze {
+            box-shadow: 0 0 30px 10px rgba(176, 141, 87, 0.7), inset 0 0 20px rgba(176, 141, 87, 0.5);
+        }
+        .trophy-silver {
+            box-shadow: 0 0 40px 15px rgba(192, 192, 192, 0.8), inset 0 0 30px rgba(192, 192, 192, 0.6);
+        }
+        .trophy-gold {
+            box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.9), inset 0 0 40px rgba(255, 215, 0, 0.7);
+        }
+
+        /* TROPHY Icon Styles (PNG Version) */
+        .trophy-icon {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 35px; /* ارتفاع الشريط */
-            background-color: #dc2626; /* خلفية حمراء داكنة */
-            color: #fff;
+            top: 8px;
+            right: 8px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 10px;
-            overflow: hidden;
-            z-index: 99; /* أعلى من stats-grid (50) والمودالات الأخرى (60) */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            font-size: 0.85rem;
-            font-weight: 600;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            z-index: 56;
+            display: none; /* مخفي افتراضياً */
+            animation: bounceIn 0.8s ease-out forwards;
+            background: transparent;
+
+            /* خصائص PNG */
+            background-size: 25px 25px; /* حجم الأيقونة الداخلية - كان 25px للسفج */
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* Bronze Trophy Icon - Use background-image for PNG and gradient for color */
+        #trophyBronzeIcon {
+            background-image: url('trophy-bronze.png');
+        }
+
+        /* Silver Trophy Icon */
+        #trophySilverIcon {
+            background-image: url('trophy-silver.png');
+        }
+
+        /* Gold Trophy Icon */
+        #trophyGoldIcon {
+            background-image: url('trophy-gold.png');
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* --- شريط الأخبار الجديد (للتحديات والأرقام القياسية) --- */
+        #newsTicker {
+            position: fixed;
+            bottom: -50px; /* يبدأ من تحت الشاشة */
+            left: 0;
+            width: 100%;
+            background: linear-gradient(90deg, #ef4444, #dc2626); /* خلفية حمراء */
+            color: #fff;
+            padding: 10px 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
             text-align: center;
-            /* الوضع الافتراضي - خارج الشاشة ومخفي تماماً */
-            transform: translateX(-100%);
-            transition: none;
-            visibility: hidden;
+            z-index: 100; /* لضمان ظهوره فوق كل شيء */
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.4s ease-out; /* حركة ظهور الشريط */
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        #newsTicker.show {
+            transform: translateY(-100%); /* الانتقال إلى داخل الشاشة بمقدار ارتفاعه */
+        }
+        #newsTicker .emoji {
+            font-size: 1.1rem;
+            margin-left: 8px;
+        }
+        /* --- نهاية شريط الأخبار الجديد --- */
+
+        /* Record Notification (OLD - يتم إخفاؤه) */
+        .record-notification {
+            display: none !important;
         }
 
-        /* Keyframes for the slide-in/slide-out animation (من اليسار لليمين) */
-        @keyframes slideInAndOut {
-            /* 0% - 10%: Slide in from left */
-            0% { transform: translateX(-100%); opacity: 1; }
-            10% { transform: translateX(0); opacity: 1; }
-            /* 90% - 100%: Slide out to right */
-            90% { transform: translateX(0); opacity: 1; }
-            100% { transform: translateX(100%); opacity: 0; }
-        }
 
-        .alert-bar.animate {
-            /* مدة الحركة الكلية (ثواني) */
-            animation: slideInAndOut 4s forwards; 
-            visibility: visible;
+        /* TROPHY Icon Styles (PNG Version) */
+        /* Tablet & Desktop */
+        @media (min-width:768px){
+            .stats-grid{
+                gap:6px;
+                padding: 4px 6px; /* Increase padding for fixed header on desktop */
+                top: 8px; /* Keep the top position the same for fixed header */
+            }
+            .container{
+                padding-top: 50px; /* Increase compensation for fixed header on desktop */
+            }
+            .stat-card{padding:5px}
+            .stat-icon{width:20px;height:20px;margin-bottom:2px}
+            .stat-icon .emoji-icon-stat{font-size: 16px;}
+            .stat-label{font-size:0.6rem;margin-bottom:2px}
+            .stat-value{font-size:1rem}
+            .main-grid{grid-template-columns:repeat(2,1fr);gap:16px}
+            .section{padding:14px}
+            .title{font-size:2rem}
+            .icon-btn{min-height:70px;font-size:0.9rem}
+            .icon-btn .emoji-icon{font-size: 30px;}
+            .section-title{font-size:1rem}
+            .section-title .emoji-icon-section{font-size: 20px;}
+            .price-btn {
+                width: 60px; /* Wider button for desktop */
+            }
+            .price-btn svg{width:25px;height:25px;} /* Larger SVG for desktop */
         }
-        /* ---------------------------------------------------------------------- */
-        /* END: Challenge/Event News Ticker (Alert Bar) */
-        /* ---------------------------------------------------------------------- */
     </style>
 </head>
 <body>
+            <button class="guide-btn" onclick="toggleGuide()">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="2"/>
+                    <path d="M12 16v-4M12 8h.01" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+    <audio id="clickSound" src="click.mp3" preload="auto"></audio>
+    <audio id="cashSound" src="cash.mp3" preload="auto"></audio>
+    <audio id="buySound" src="buy.mp3" preload="auto"></audio>
+    <audio id="trophySound" src="Trophy.mp3" preload="auto"></audio>
+    <audio id="warningSound" src="warning.mp3" preload="auto"></audio>
+    <audio id="fireSound" src="fire.mp3" preload="auto"></audio>
+    <audio id="failSound" src="fail.mp3" preload="auto"></audio>
+    <audio id="completionSound" src="completion.mp3" preload="auto"></audio>
 
-    <div id="challengeAlertBar" class="alert-bar">
-        <span class="alert-content" id="challengeAlertText"></span>
+    <div id="trophyBronzeIcon" class="trophy-icon"></div>
+    <div id="trophySilverIcon" class="trophy-icon"></div>
+    <div id="trophyGoldIcon" class="trophy-icon"></div>
+
+    <div id="recordNotification" class="record-notification" aria-live="polite" role="status">
+        <span class="emoji">🎉</span>
+        <span>🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!</span>
+    </div>
+
+    <div id="newsTicker">
+        <span id="tickerEmoji" class="emoji"></span>
+        <span id="tickerMessage"></span>
     </div>
 
     <div class="container">
-        <header class="header">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="float">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <path d="M14 2v6h6"></path>
-                <path d="M10 15h4"></path>
-                <path d="M12 17v-4"></path>
-            </svg>
-            <h1 class="title">مصنع مشابك الورق</h1>
-        </header>
-        <p class="subtitle" style="text-align:center;">إدارة شركة مشابك الورق الخاصة بك</p>
+        <div class="header">
+            <h1 class="title"></h1> 
+        </div>
 
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon"><span class="emoji-icon-stat">📎</span></div>
-                <div class="stat-label">مشابك الورق</div>
-                <div class="stat-value" id="paperclips">0</div>
+            <div class="stat-card" id="card-clips">
+                <div class="stat-icon">
+                    <span class="emoji-icon-stat">📎</span>
+                </div>
+                <div class="stat-label">المشابك <span id="clipsLimit" style="display:none">(5,000)</span></div>
+                <div class="stat-value" id="clips">0</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon"><span class="emoji-icon-stat">💰</span></div>
-                <div class="stat-label">نقودك</div>
-                <div class="stat-value" id="money">0.00</div>
+
+            <div class="stat-card" id="card-money">
+                <div class="stat-icon">
+                    <span class="emoji-icon-stat">💵</span>
+                </div>
+                <div class="stat-label">المال</div>
+                <div class="stat-value">$<span id="money">0.00</span></div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon"><span class="emoji-icon-stat">📦</span></div>
-                <div class="stat-label">التكاليف</div>
-                <div class="stat-value" id="cost">0.01</div>
+
+            <div class="stat-card" id="card-wire">
+                <div class="stat-icon">
+                    <span class="emoji-icon-stat">🧵</span>
+                </div>
+                <div class="stat-label">السلك</div>
+                <div class="stat-value" id="wire">1000</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon"><span class="emoji-icon-stat">🔥</span></div>
-                <div class="stat-label">المبيعات/ث</div>
-                <div class="stat-value" id="salesPerSecond">0</div>
+
+            <div class="stat-card" id="card-demand">
+                <div class="stat-icon">
+                    <span class="emoji-icon-stat">📈</span>
+                </div>
+                <div class="stat-label">الطلب</div>
+                <div class="stat-value" id="demand">50</div>
             </div>
         </div>
 
-        <div class="main-grid" style="margin-top: 50px;">
+        <div class="main-grid">
             <div class="section">
-                <h2 class="section-title"><span class="emoji-icon-section">🏭</span> الإنتاج</h2>
-                <button class="icon-btn btn-make" id="makePaperclipBtn">
-                    <span class="emoji-icon">🔨</span>
-                    <span>اصنع مشبك ورق</span>
-                    <span class="cost-info" id="makeCost">مجاني</span>
-                </button>
-            </div>
+                <div class="section-title" style="color:#7dd3fc">
+                    <span class="emoji-icon-section">🏭</span>
+                    مصنع مشابك الورق
+                </div>
 
-            <div class="section">
-                <h2 class="section-title"><span class="emoji-icon-section">📈</span> التسعير والسوق</h2>
+                <button id="makeBtn" class="icon-btn btn-make" onclick="makeClip()">
+                    <span class="emoji-icon">📎</span>
+                    <span id="makeBtnText">صنع مشبك</span>
+                </button>
+
                 <div class="item-box">
                     <div class="item-header">
-                        <strong>سعر المشبك</strong>
-                        <span id="priceInfo"></span>
+                        <span>آلات صنع تلقائي</span>
+                        <span style="color:#60a5fa;font-weight:700" id="autoClippers">0</span>
                     </div>
-                    <div class="price-container">
-                        <button class="price-btn" id="decreasePriceBtn" onmousedown="startPriceAdjust('decrease')" ontouchstart="startPriceAdjust('decrease')">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        </button>
-                        <div class="price-display">
-                            <div class="price-label">السعر الحالي</div>
-                            <div class="price-value" id="currentPrice">0.01</div>
-                        </div>
-                        <button class="price-btn" id="increasePriceBtn" onmousedown="startPriceAdjust('increase')" ontouchstart="startPriceAdjust('increase')">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        </button>
-                    </div>
+                    <button id="autoClipperBtn" class="icon-btn btn-secondary" onclick="buyAutoClipper()">
+                        <span class="emoji-icon">🤖</span>
+                        <span>شراء آلة $<span id="autoClipperCost">5.00</span></span>
+                    </button>
                 </div>
-                
+
                 <div class="item-box">
-                    <div class="toggle-container">
-                        <span>البيع التلقائي (Auto-Sell)</span>
-                        <button class="toggle-btn toggle-off" id="autoSellToggle"></button>
+                    <div class="item-header">
+                        <span>شراء سلك</span>
+                        <span style="color:#f59e0b;font-weight:700">شراء سلك (1000 وحدة)</span>
                     </div>
-                    <div class="item-info" id="autoSellInfo">البيع التلقائي متوقف. يجب عليك البيع يدوياً.</div>
-                    <button class="icon-btn btn-sell" id="sellAllBtn">
-                        <span class="emoji-icon">💵</span>
-                        <span>بع كل مشابك الورق</span>
-                        <span class="cost-info" id="sellAllAmount">ربح: 0.00</span>
+                    <button id="wireBtn" class="icon-btn btn-buy" onclick="buyWire()">
+                        <span class="emoji-icon">📦</span>
+                        <span>$<span id="wireCost">20.00</span></span>
                     </button>
                 </div>
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji-icon-section">💡</span> ترقيات المصنع</h2>
-                <div id="upgradesList" style="display:flex; flex-direction:column; gap:6px;">
-                    <p style="text-align: center; color: #9aa4b2; font-size: 0.75rem;">لا توجد ترقيات متاحة حالياً.</p>
+                <div class="section-title" style="color:#86efac">
+                    <span class="emoji-icon-section">🛒</span>
+                    المبيعات
+                </div>
+                
+                <div class="price-container">
+                    <button id="decreasePriceBtn" class="price-btn" 
+                            onmousedown="startPriceAdjust(-0.01)" 
+                            ontouchstart="startPriceAdjust(-0.01)" 
+                            onmouseup="stopPriceAdjust()" 
+                            ontouchend="stopPriceAdjust()"
+                            ontouchcancel="stopPriceAdjust()">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
+                            <path d="M12 5v14M19 12l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="price-display">
+                        <div class="price-label">السعر</div>
+                        <div class="price-value">$<span id="price">0.25</span></div>
+                    </div>
+
+                    <button id="increasePriceBtn" class="price-btn" 
+                            onmousedown="startPriceAdjust(0.01)" 
+                            ontouchstart="startPriceAdjust(0.01)" 
+                            onmouseup="stopPriceAdjust()" 
+                            ontouchend="stopPriceAdjust()"
+                            ontouchcancel="stopPriceAdjust()">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
+                            <path d="M12 19V5M5 12l7-7 7 7"/>
+                        </svg>
+                    </button>
+                </div>
+                <button id="sellBtn" class="icon-btn btn-sell" onclick="sellClips()" style="margin-top:6px">
+                    <span class="emoji-icon">💰</span>
+                    <span>بيع المشابك (متوفر: <span id="availableClips">0</span>)</span>
+                </button>
+
+                <div class="toggle-container">
+                    <span>بيع تلقائي للمشابك</span>
+                    <button id="autoSellBtn" class="toggle-btn toggle-off" onclick="toggleAutoSell()"></button>
                 </div>
             </div>
-
-            <div class="section">
-                <h2 class="section-title"><span class="emoji-icon-section">📢</span> التسويق</h2>
-                <div id="marketingList" style="display:flex; flex-direction:column; gap:6px;">
-                    <p style="text-align: center; color: #9aa4b2; font-size: 0.75rem;">لا توجد حملات تسويقية متاحة حالياً.</p>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2 class="section-title"><span class="emoji-icon-section">📊</span> الإحصائيات</h2>
-                <div class="stats-section">
-                    <div class="stat-item">
-                        <div class="stat-item-label">إجمالي مشابك الورق المنتجة</div>
-                        <div class="stat-item-value" id="totalClipsMade">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-item-label">إجمالي مشابك الورق المباعة</div>
-                        <div class="stat-item-value" id="totalClipsSold">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-item-label">النقود المكتسبة من المبيعات</div>
-                        <div class="stat-item-value" id="totalRevenue">0.00</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-item-label">النقود المصروفة على الترقيات</div>
-                        <div class="stat-item-value" id="totalCost">0.00</div>
-                    </div>
-                </div>
-                <div class="dev-info" style="margin-top: 10px; font-size: 0.7rem;">
-                    مصنع مشابك الورق V 1.0.0
-                </div>
-            </div>
-
         </div>
-    </div>
 
-
-    <div id="guideModal" class="modal" onclick="toggleGuide()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 class="modal-title">دليل اللعبة 💡</h2>
-            
-            <div class="guide-section">
-                <h3>📎 الأساسيات</h3>
-                <p>ابدأ بصنع مشابك الورق يدوياً لجمع كمية كافية. ثم قم بتحديد سعر البيع واضغط "بع كل مشابك الورق".  </p>
-            </div>
-            
-            <div class="guide-section">
-                <h3>📈 السوق</h3>
-                <p>يحدد سعر مشبك الورق مدى سرعة بيعك. السعر الأقل = مبيعات أسرع. السعر الأعلى = أرباح أعلى لكل مشبك، لكن مبيعات أبطأ.</p>
-                <ul>
-                    <li>**البيع التلقائي:** قم بتمكين هذه الميزة لبيع المشابك تلقائياً كل ثانية، مما يوفر عليك النقرات.</li>
-                </ul>
+        <div class="section">
+            <div class="section-title" style="color:#fbbf24">
+                <span class="emoji-icon-section">✨</span>
+                الترقيات
             </div>
 
-            <div class="guide-section">
-                <h3>💡 الترقيات</h3>
-                <p>استخدم الأرباح لشراء ترقيات تزيد من كفاءة إنتاجك وقدرتك على البيع:</p>
-                <ul>
-                    <li>**مكابس صنع المشابك:** تزيد من عدد المشابك التي يتم صنعها في كل نقرة.  </li>
-                    <li>**ترقيات المبيعات:** تزيد من سرعة البيع التلقائي أو تزيل القيود عن سعر البيع.</li>
-                </ul>
-            </div>
-
-            <div class="guide-section">
-                <h3>📢 التسويق</h3>
-                <p>تزيد حملات التسويق من الطلب على مشابك الورق الخاصة بك، مما يزيد من سرعة البيع الإجمالية.</p>
-            </div>
-            
-            <div class="dev-info">
-                تم تطوير اللعبة بواسطة نموذج الذكاء الاصطناعي (Gemini).
-            </div>
-            
-            <div style="text-align: center; margin-top: 15px;">
-                <button class="icon-btn btn-secondary" onclick="toggleGuide()" style="width: auto; padding: 8px 15px; font-size: 0.7rem;">
-                    <span>إغلاق الدليل</span>
+            <div class="item-box">
+                <div class="item-header">
+                    <span>ترقية التسويق</span>
+                    <span style="color:#a78bfa;font-weight:700">المستوى <span id="marketingLevel">1</span></span>
+                </div>
+                <button id="marketingBtn" class="icon-btn btn-marketing" onclick="increaseMarketing()">
+                    <span class="emoji-icon">📣</span>
+                    <span> $<span id="marketingCost">100.00</span></span>
                 </button>
             </div>
+            
+            <div class="item-box">
+                <div class="item-header">
+                    <span>توسعة المستودع لـ 5,000 مشبك إضافية</span>
+                    <span style="color:#f59e0b;font-weight:700">الحد الأقصى: <span id="clipsLimitCurrent">5,000</span></span>
+                </div>
+                <button id="warehouseBtn" class="icon-btn btn-upgrade" onclick="upgradeWarehouse()">
+                    <span class="emoji-icon">📦</span>
+                    <span> $<span id="warehouseCost">50.00</span></span>
+                </button>
+            </div>
+            <div class="item-box">
+                <div class="item-header">
+                    <span>زيادة كفاءة السلك</span>
+                    <span style="color:#fbbf24;font-weight:700">×<span id="wireEfficiency">1.0</span></span>
+                </div>
+                <button id="efficiencyBtn" class="icon-btn btn-upgrade" onclick="buyWireEfficiency()">
+                    <span class="emoji-icon">⚙️</span>
+                    <span> $<span id="efficiencyCost">1000.00</span></span>
+                </button>
+            </div>
+
+            <div class="item-box">
+                <div class="item-header">
+                    <span>توسعة المصنع لـ 100 آلة جديدة</span>
+                    <span style="color:#7dd3fc;font-weight:700">الحد الأقصى: <span id="maxClippers">100</span></span>
+                </div>
+                <button id="expansionBtn" class="icon-btn btn-secondary" onclick="buyExpansion()">
+                    <span class="emoji-icon">🏗️</span>
+                    <span> $<span id="expansionCost">2000.00</span></span>
+                </button>
+            </div>
+
+            <div class="item-box">
+                <div class="item-header">
+                    <span>تأمين المصنع من الحوادث لمدة 5 دقائق</span>
+                    <span style="color:#8b5cf6;font-weight:700">المستوى <span id="insuranceLevel">0</span></span>
+                </div>
+                <div id="insuranceTimer"></div>
+                <button id="insuranceBtn" class="icon-btn btn-upgrade" onclick="buyInsurance()">
+                    <span class="emoji-icon">🛡️</span>
+                    <span> $<span id="insuranceCost">1000.00</span></span>
+                </button>
+            </div>
+
         </div>
+
+        <div class="section">
+            <div class="section-title" style="color:#cbd5e1">
+                <span class="emoji-icon-section">📊</span>
+                الإحصائيات
+            </div>
+            <div class="stats-section">
+                <div class="stat-item">
+                    <div class="stat-item-label">إجمالي الإنتاج</div>
+                    <div class="stat-item-value" id="totalClips">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-item-label">إجمالي المبيعات</div>
+                    <div class="stat-item-value" id="totalSold">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-item-label">الآلات</div>
+                    <div class="stat-item-value" id="totalMachines">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-item-label">معدل الإنتاج</div>
+                    <div class="stat-item-value"><span id="productionRate">0</span>/ث</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="localLeaderboardSection" style="margin-top:12px;">
+            <div class="section-title" style="color:#ffd166">
+                <span class="emoji-icon-section">🏅</span>
+                أفضل النتائج المحلية
+            </div>
+
+            <div class="item-box" style="text-align:center;">
+                <div style="font-weight:700; font-size:1rem; color:#fff; margin-bottom:6px;">🥇 أفضل نتيجة</div>
+                <div id="bestInfo" style="color:#cbd5e1; font-size:0.95rem;">
+                    <div>المبيعات: <span id="bestTotalSold">0</span> مشبك</div>
+                    <div style="margin-top:6px;">المال: $<span id="bestMoney">0.00</span></div>
+                    <div style="margin-top:6px; color:#9aa4b2; font-size:0.8rem;">التاريخ: <span id="bestDate">—</span></div>
+                </div>
+
+                <div style="display:flex; gap:8px; margin-top:12px;">
+                    <button class="icon-btn btn-secondary" onclick="resetBestScore()" style="flex:1; min-height:44px;">
+                        إعادة تعيين النتائج المحلية
+                    </button>
+                    <button class="icon-btn btn-make" onclick="exportBestScore()" style="flex:1; min-height:44px;">
+                        تصدير (نسخ)
+                    </button>
+                </div>
+
+                <div style="margin-top:10px; color:#9aa4b2; font-size:0.75rem;">
+                    تُبنى اللوحة على إجمالي المبيعات <strong>(totalSold)</strong>. يتم حفظ المال عند تحطيم رقم قياسي.
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div id="gameOverModal" class="modal">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 class="modal-title" style="color: #ef4444;">انتهت اللعبة! 💀</h2>
-            <p style="text-align: center; color: #cbd5e1; font-size: 0.85rem; margin-bottom: 12px;">لقد تعرضت لحادث كارثي! اضطررت إلى تصفية جميع أصول شركتك لدفع التعويضات.</p>
-            <p style="text-align: center; color: #fca5a5; font-size: 0.9rem; font-weight: bold;" id="gameOverDetails"></p>
-            <p style="text-align: center; color: #9aa4b2; font-size: 0.75rem; margin-top: 10px;">انقر "البدء من جديد" لإعادة المحاولة.</p>
-            <div style="text-align: center; margin-top: 20px;">
-                <button class="icon-btn btn-make" onclick="resetGame()" style="width: auto; padding: 10px 20px; font-size: 0.8rem;">
-                    <span>البدء من جديد</span>
+        <div class="modal-content">
+            <h2 class="modal-title" style="color: #ef4444;">انتهت اللعبة! 🛑</h2>
+            <p style="text-align:center;color:#cbd5e1;margin-bottom:15px;" id="gameOverMessage">
+                لقد نفد منك السلك ولا تملك المال الكافي لشراء المزيد، ولا يوجد لديك مشابك لبيعها.
+            </p>
+            <div class="dev-info" style="margin-top:0; border:none; background:none;">
+                <div style="font-weight:700;color:#e6eef8">النقاط النهائية: $<span id="finalMoney">0.00</span></div>
+                <div style="margin-top:3px; font-size:0.75rem; color:#9aa4b2">تم بيع: <span id="finalSold">0</span> مشبك</div>
+            </div>
+            <button class="icon-btn btn-make" onclick="location.reload()" style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8); margin-top:15px;">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="M12 4v16M5 11l7-7 7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>إعادة اللعب</span>
+            </button>
+        </div>
+    </div>
+    
+    <div id="challengeModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="challengeTitle">حادث!</h2>
+            <p style="text-align:center;color:#cbd5e1;margin-bottom:15px;" id="challengeMessage">
+                تمت سرقة 500 دولار من المصنع بسبب ثغرة أمنية!
+            </p>
+            <button class="icon-btn btn-make" onclick="closeChallengeModal()" style="width:100%;background:linear-gradient(135deg,#ef4444,#dc2626)">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="M6 18L18 6M6 6l12 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>حسناً</span>
+            </button>
+        </div>
+    </div>
+    
+    <div id="guideModal" class="modal">
+        <div class="modal-content">
+
+            <div class="guide-section">
+                <h3>🎮 كيفية اللعب</h3>
+                <ul>
+                    <li>• اضغط صنع مشبك لصنع مشبك واحد (يستهلك سلك).</li>
+                    <li>• بيع المشابك لتحصل على المال. السعر يؤثر على الطلب.</li>
+                    <li>• اشترِ سلك وآلات لترفع الإنتاجية، ووسع مصنعك.</li>
+                </ul>
+            </div>
+
+            <div class="guide-section">
+                <h3>⚡ الأتمتة</h3>
+                <ul>
+                    <li>• الآلة تنتج مشابك كل ثانية.</li>
+                    <li>• فعّل البيع التلقائي للبيع بدون ضغط منك.</li>
+                </ul>
+            </div>
+
+            <div class="guide-section">
+                <h3>🚀 الترقيات</h3>
+                <ul>
+                    <li>• زيادة كفاءة السلك تعطيك سلك أكثر عند الشراء.</li>
+                    <li>• التسويق يزيد الطلب على منتجاتك.</li>
+                    <li>• التأمين يقفل الحوادث السرقة والحريق مؤقتاً.</li>
+                    <li>• توسعة المصنع وترقية المستودع تتيح مساحة إضافية.</li>
+                </ul>
+            </div>
+
+            <div class="dev-info">
+                <div style="font-weight:700;color:#e6eef8">المطور — ABDULKARIM ALOBUD</div>
+                <div style="margin-top:6px"><a href="mailto:abo.saleh.g@gmail.com" style="color:#60a5fa;text-decoration:none">abo.saleh.g@gmail.com</a></div>
+            </div>
+
+            <div style="margin-top:16px">
+                <button class="icon-btn btn-make" onclick="toggleGuide()" style="width:100%">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>ابدأ اللعب</span>
                 </button>
             </div>
         </div>
     </div>
 
-
-    <div id="recordNotification" class="alert-bar" style="height: 50px; background-color: #f59e0b; z-index: 100;">
-        <span style="font-size: 1.2rem; margin-left: 10px;">🏆</span>
-        <span id="recordNotificationText">🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!</span>
-    </div>
-
     <script>
-        // Game State Variables
         let gameState = {
-            paperclips: 0,
-            money: 0.00,
-            clipPrice: 0.01, // The lowest possible price to start
+            clips: 0,
+            money: 0,
+            price: 0.25,
+            demand: 50,
+            wire: 1000,
+            wireCost: 20,
+            autoClippers: 0,
+            autoClipperCost: 5,
+            autoClipperRate: 0,
+            wireEfficiency: 1,
+            marketingLevel: 1,
+            autoSellEnabled: false,
+            totalClips: 0,
+            totalSold: 0,
+            // الإضافات الجديدة
+            insuranceLevel: 0,
+            insuranceCost: 1000,
+            insuranceEndTime: 0, // Timestamp of when insurance expires
+            maxClippersLimit: 100, // الحد الأقصى لآلات الصنع
+            expansionCost: 2000, // تكلفة التوسعة الأولية
             
-            // Production
-            clipsPerClick: 1,
+            // NEW: توسعة المستودع
+            maxClipsLimit: 5000, // الحد الأقصى المبدئي للمشابك
+            warehouseCost: 100, // تكلفة ترقية المستودع المبدئية
             
-            // Selling
-            autoSell: false,
-            salesPerSecond: 0, // Base sales rate (increases with marketing/upgrades)
-            
-            // Stats
-            totalClipsMade: 0,
-            totalClipsSold: 0,
-            totalRevenue: 0,
-            totalCost: 0,
-            
-            // Upgrades
-            upgrades: {
-                pressBoost: {
-                    name: "ترقية مكبس الإنتاج",
-                    level: 0,
-                    cost: 5,
-                    multiplier: 2,
-                    purchased: false,
-                    onPurchase: () => {
-                        gameState.clipsPerClick *= gameState.upgrades.pressBoost.multiplier;
-                    },
-                    canAfford: () => gameState.money >= gameState.upgrades.pressBoost.cost,
-                    updateCost: () => {
-                        gameState.upgrades.pressBoost.cost = Math.ceil(gameState.upgrades.pressBoost.cost * 1.5);
-                    }
-                },
-                marketing: {
-                    name: "حملة تسويقية",
-                    level: 0,
-                    cost: 10,
-                    salesBoost: 0.1, // 10% boost to base sales
-                    purchased: false,
-                    onPurchase: () => {
-                        gameState.salesPerSecond += gameState.upgrades.marketing.salesBoost;
-                    },
-                    canAfford: () => gameState.money >= gameState.upgrades.marketing.cost,
-                    updateCost: () => {
-                        gameState.upgrades.marketing.cost = Math.ceil(gameState.upgrades.marketing.cost * 1.8);
-                    }
-                },
-                autoClipper: {
-                    name: "آلة قص تلقائية",
-                    level: 0,
-                    cost: 100,
-                    autoClipsPerSecond: 1,
-                    purchased: false,
-                    onPurchase: () => {
-                        gameState.upgrades.autoClipper.level++;
-                        gameState.upgrades.autoClipper.cost *= 2; // Price increases with each level
-                    },
-                    canAfford: () => gameState.money >= gameState.upgrades.autoClipper.cost,
-                    updateCost: () => {
-                        // The cost updates automatically in onPurchase for this one
-                    }
-                }
-            },
-
-            // Events/Challenges
-            insurance: false,
-            insuranceCost: 500,
-            insuranceDuration: 0, // Time left on insurance in seconds
+            // حالة الإنجازات
+            trophyBronze: false,
+            trophySilver: false,
+            trophyGold: false
         };
 
-        const elements = {
-            paperclips: document.getElementById('paperclips'),
-            money: document.getElementById('money'),
-            currentPrice: document.getElementById('currentPrice'),
-            priceInfo: document.getElementById('priceInfo'),
-            makePaperclipBtn: document.getElementById('makePaperclipBtn'),
-            sellAllBtn: document.getElementById('sellAllBtn'),
-            sellAllAmount: document.getElementById('sellAllAmount'),
-            autoSellToggle: document.getElementById('autoSellToggle'),
-            autoSellInfo: document.getElementById('autoSellInfo'),
-            upgradesList: document.getElementById('upgradesList'),
-            marketingList: document.getElementById('marketingList'),
-            totalClipsMade: document.getElementById('totalClipsMade'),
-            totalClipsSold: document.getElementById('totalClipsSold'),
-            totalRevenue: document.getElementById('totalRevenue'),
-            totalCost: document.getElementById('totalCost'),
-            salesPerSecond: document.getElementById('salesPerSecond'),
-            makeCost: document.getElementById('makeCost'),
-            guideModal: document.getElementById('guideModal'),
-            gameOverModal: document.getElementById('gameOverModal'),
-            gameOverDetails: document.getElementById('gameOverDetails'),
-            insuranceTimer: document.getElementById('insuranceTimer'),
-            recordNotification: document.getElementById('recordNotification'),
-        };
-
-        const sounds = {
-            clickSound: new Audio('click.mp3'),
-            buySound: new Audio('buy.mp3'),
-            sellSound: new Audio('sell.mp3'),
-            errorSound: new Audio('error.mp3'),
-            completionSound: new Audio('completion.mp3'),
-            trophySound: new Audio('trophy.mp3'),
-        };
-        
-        // Caching the new Alert Bar elements
-        const challengeAlertBar = document.getElementById('challengeAlertBar');
-        const challengeAlertText = document.getElementById('challengeAlertText');
-        
-        // أفضل نتيجة محلية (Local Best Score)
+        // Best local score object (loaded from localStorage)
         let bestLocalScore = {
-            sold: 0,
-            date: null,
+            totalSold: 0,
+            money: 0,
+            date: null
         };
 
-        // ----------------------------------------------------------------------
-        // NEW: Challenge Alert Function
-        // ----------------------------------------------------------------------
-        /**
-         * يعرض شريط التنبيه المتحرك الخاص بالتحديات/الأحداث.
-         * @param {string} text - النص الذي سيتم عرضه في الشريط.
-         */
-        function showChallengeAlert(text) {
-            // تحديث النص
-            challengeAlertText.textContent = text;
-            
-            // جعل الشريط مرئياً وإعادة تشغيل الحركة
-            challengeAlertBar.classList.remove('animate');
-            // إعادة تعيين الـ animation (مهم لضمان التشغيل في كل مرة)
-            void challengeAlertBar.offsetWidth; 
-            
-            // تشغيل الحركة
-            challengeAlertBar.classList.add('animate');
-            playSound(sounds.errorSound); // عادةً يتم تشغيل صوت تنبيه للتحديات
+        const clickSound = document.getElementById('clickSound');
+        const cashSound = document.getElementById('cashSound');
+        const buySound = document.getElementById('buySound');
+        const trophySound = document.getElementById('trophySound');
+        const warningSound = document.getElementById('warningSound');
+        const fireSound = document.getElementById('fireSound');
+        const failSound = document.getElementById('failSound'); // NEW: Fail Sound
+        const completionSound = document.getElementById('completionSound'); // NEW: completion.mp3
 
-            // إخفاء الشريط بعد انتهاء الحركة (4 ثواني حسب الـ keyframes)
-            setTimeout(() => {
-                challengeAlertBar.classList.remove('animate');
-            }, 4000); 
-            
-            // ملاحظة: استبدل أي استدعاء لـ showChallengeModal() في كود اللعبة بـ showChallengeAlert(النص_المطلوب)
-        }
-        // ----------------------------------------------------------------------
+        // عناصر الكؤوس
+        const trophyBronzeIcon = document.getElementById('trophyBronzeIcon');
+        const trophySilverIcon = document.getElementById('trophySilverIcon');
+        const trophyGoldIcon = document.getElementById('trophyGoldIcon');
+        
+        // عناصر الحوادث (المودال أصبحت غير مستخدمة)
+        // const challengeModal = document.getElementById('challengeModal');
+        // const challengeTitle = document.getElementById('challengeTitle');
+        // const challengeMessage = document.getElementById('challengeMessage');
+        const insuranceTimerEl = document.getElementById('insuranceTimer');
+        
+        // عناصر الخسارة (المودال أصبحت غير مستخدمة)
+        // const gameOverModal = document.getElementById('gameOverModal');
+        // const finalMoneyEl = document.getElementById('finalMoney');
+        // const finalSoldEl = document.getElementById('finalSold');
 
-        // Game Logic
-        function makePaperclip() {
-            if (gameState.paperclips >= 1000000000000) {
-                 // The game has an effective limit for the current version
-                alert('لقد وصلت للحد الأقصى من مشابك الورق في هذه النسخة!');
-                return;
-            }
-            gameState.paperclips += gameState.clipsPerClick;
-            gameState.totalClipsMade += gameState.clipsPerClick;
-            updateUI();
-            playSound(sounds.clickSound);
-            showFloatingEmoji('📎', elements.makePaperclipBtn);
-        }
+        // عناصر اللوحة المحلية (تم إخفاء إشعار recordNotification)
+        // const recordNotificationEl = document.getElementById('recordNotification');
+        const bestTotalSoldEl = document.getElementById('bestTotalSold');
+        const bestMoneyEl = document.getElementById('bestMoney');
+        const bestDateEl = document.getElementById('bestDate');
+        
+        const makeBtn = document.getElementById('makeBtn'); // تم جلب زر الصنع
+        const sellBtn = document.getElementById('sellBtn'); // تم جلب زر البيع
 
-        function sellAll() {
-            if (gameState.paperclips === 0) return;
+        // NEW: Price Control Variables for Hold-down
+        let priceAdjustInterval = null;
+        
+        // NEW: عناصر شريط الأخبار
+        const newsTickerEl = document.getElementById('newsTicker');
+        const tickerEmojiEl = document.getElementById('tickerEmoji');
+        const tickerMessageEl = document.getElementById('tickerMessage');
+        let tickerTimeout = null; // مؤقت لإخفاء الشريط
 
-            const revenue = gameState.paperclips * gameState.clipPrice;
-            gameState.money += revenue;
-            gameState.totalRevenue += revenue;
-            gameState.totalClipsSold += gameState.paperclips;
-            
-            // Check for best score
-            if (gameState.totalClipsSold > bestLocalScore.sold) {
-                bestLocalScore.sold = gameState.totalClipsSold;
-                bestLocalScore.date = Date.now();
-                saveBestScore();
-                showRecordNotification();
-            }
-
-            gameState.paperclips = 0;
-            updateUI();
-            playSound(sounds.sellSound);
+        function playSound(audioElement) {
+            if(!audioElement) return;
+            try{
+                audioElement.currentTime = 0;
+                audioElement.play().catch(e => {/*ignore autoplay issues*/});
+            }catch(e){}
         }
 
-        function handleAutoSell() {
-            if (gameState.autoSell && gameState.paperclips > 0) {
-                const effectiveSalesRate = gameState.salesPerSecond;
-                const clipsToSell = Math.min(gameState.paperclips, Math.ceil(effectiveSalesRate * 1)); // Sell based on rate * 1 second
+        function flash(id){
+            const el = document.getElementById(id);
+            if(!el) return;
+            el.classList.add('glow-update');
+            setTimeout(()=>el.classList.remove('glow-update'),900);
+        }
+        
+        // **وظيفة جديدة: إنشاء وتطاير الإيموجي**
+        function createFloatingEmoji(buttonElement, emoji, count = 5) {
+            const rect = buttonElement.getBoundingClientRect();
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('span');
+                particle.textContent = emoji;
+                particle.classList.add('floating-emoji');
                 
-                if (clipsToSell > 0) {
-                    const revenue = clipsToSell * gameState.clipPrice;
-                    gameState.money += revenue;
-                    gameState.totalRevenue += revenue;
-                    gameState.totalClipsSold += clipsToSell;
-                    gameState.paperclips -= clipsToSell;
-
-                    // Check for best score
-                    if (gameState.totalClipsSold > bestLocalScore.sold) {
-                        bestLocalScore.sold = gameState.totalClipsSold;
-                        bestLocalScore.date = Date.now();
-                        saveBestScore();
-                        showRecordNotification();
-                    }
-                }
+                // تحديد موضع البدء بشكل عشوائي داخل حدود الزر
+                const x = rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width * 0.4;
+                const y = rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height * 0.4;
                 
-                updateUI();
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                document.body.appendChild(particle);
+
+                // إزالة الإيموجي بعد انتهاء الحركة
+                setTimeout(() => {
+                    particle.remove();
+                }, 1200); 
             }
         }
         
-        function handleAutoClipper() {
-             // Logic for the autoClipper
-            if (gameState.upgrades.autoClipper.level > 0) {
-                const clipsToMake = gameState.upgrades.autoClipper.level * gameState.upgrades.autoClipper.autoClipsPerSecond;
-                if (gameState.paperclips < 1000000000000) { // check limit again
-                    gameState.paperclips += clipsToMake;
-                    gameState.totalClipsMade += clipsToMake;
-                    updateUI();
-                }
+        // NEW: وظيفة إظهار شريط الأخبار
+        function showNewsTicker(message, emoji, duration = 3000) {
+            // مسح أي مؤقت سابق
+            if (tickerTimeout) {
+                clearTimeout(tickerTimeout);
+                tickerTimeout = null;
+            }
+
+            tickerEmojiEl.textContent = emoji;
+            tickerMessageEl.textContent = message;
+            newsTickerEl.classList.add('show');
+            
+            // تعيين مؤقت لإخفاء الشريط
+            tickerTimeout = setTimeout(() => {
+                newsTickerEl.classList.remove('show');
+            }, duration);
+        }
+
+        // NEW: Game Over Check (معدّل ليستخدم شريط الأخبار)
+        function checkGameOver() {
+            // شرط الخسارة: لا يوجد سلك AND المال < تكلفة السلك AND لا يوجد مشابك لبيعها
+            if (gameState.wire === 0 && gameState.money < gameState.wireCost && gameState.clips === 0) {
+                
+                // finalMoneyEl.textContent = gameState.money.toFixed(2);
+                // finalSoldEl.textContent = gameState.totalSold.toLocaleString();
+                
+                // gameOverModal.classList.add('active'); // تم إلغاء استخدام المودال
+                
+                // إظهار رسالة الخسارة في شريط الأخبار
+                const finalMessage = `انتهت اللعبة! 🛑 النقاط النهائية: $${gameState.money.toFixed(2)} (تم بيع: ${gameState.totalSold.toLocaleString()})`;
+                showNewsTicker(finalMessage, '🔴', 60000); // إبقاء الشريط مرئياً لوقت طويل (60 ثانية)
+
+                playSound(failSound); // تشغيل صوت الخسارة
+                
+                // إيقاف جميع الأزرار لمنع أي تفاعل آخر عدا "إعادة اللعب"
+                document.querySelectorAll('button:not(.guide-btn)').forEach(btn => btn.disabled = true);
+                document.getElementById('autoSellBtn').disabled = true;
+                // إبقاء زر الدليل نشطًا
+                // document.querySelector('.guide-btn').style.display = 'none'; // لا نخفي زر الدليل
+
+                console.log("Game Over: Stuck without clips or wire!");
+                return true;
+            }
+            return false;
+        }
+
+        function checkTrophy(newTotalSold) {
+            const body = document.body;
+
+            // إخفاء جميع الكؤوس أولاً
+            trophyBronzeIcon.style.display = 'none';
+            trophySilverIcon.style.display = 'none';
+            trophyGoldIcon.style.display = 'none';
+
+            // إزالة جميع تأثيرات الجسم أولاً
+            body.classList.remove('trophy-bronze', 'trophy-silver', 'trophy-gold');
+
+
+            // إنجاز برونزي (1000 مبيعة)
+            if (!gameState.trophyBronze && newTotalSold >= 1000) {
+                gameState.trophyBronze = true;
+                body.classList.add('trophy-bronze');
+                trophyBronzeIcon.style.display = 'flex';
+                playSound(trophySound);
+                showNewsTicker("🏆 إنجاز جديد: البرونزي (1,000 مشبك مُباع)!", '🌟');
+                console.log("Trophy Unlocked: Bronze (1,000 Clips Sold)");
+            }
+            // إذا كان الإنجاز البرونزي محققًا بالفعل ولم يتم تحقيق الفضي أو الذهبي بعد
+            else if (gameState.trophyBronze && newTotalSold < 10000) {
+                body.classList.add('trophy-bronze');
+                trophyBronzeIcon.style.display = 'flex';
+            }
+
+
+            // إنجاز فضي (10000 مبيعة)
+            if (!gameState.trophySilver && newTotalSold >= 10000) {
+                gameState.trophySilver = true;
+                body.classList.remove('trophy-bronze');
+                trophyBronzeIcon.style.display = 'none';
+                body.classList.add('trophy-silver');
+                trophySilverIcon.style.display = 'flex';
+                playSound(trophySound);
+                showNewsTicker("🏆 إنجاز جديد: الفضي (10,000 مشبك مُباع)!", '✨');
+                console.log("Trophy Unlocked: Silver (10,000 Clips Sold)");
+            }
+            // إذا كان الإنجاز الفضي محققًا بالفعل ولم يتم تحقيق الذهبي بعد
+            else if (gameState.trophySilver && newTotalSold < 100000) {
+                body.classList.add('trophy-silver');
+                trophySilverIcon.style.display = 'flex';
+            }
+
+
+            // إنجاز ذهبي (100000 مبيعة)
+            if (!gameState.trophyGold && newTotalSold >= 100000) {
+                gameState.trophyGold = true;
+                body.classList.remove('trophy-silver');
+                trophySilverIcon.style.display = 'none';
+                body.classList.add('trophy-gold');
+                trophyGoldIcon.style.display = 'flex';
+                playSound(trophySound);
+                showNewsTicker("🏆 إنجاز جديد: الذهبي (100,000 مشبك مُباع)! تهانينا!", '🌟');
+                console.log("Trophy Unlocked: Gold (100,000 Clips Sold)");
+            }
+            // إذا كان الإنجاز الذهبي محققًا بالفعل
+            else if (gameState.trophyGold) {
+                body.classList.add('trophy-gold');
+                trophyGoldIcon.style.display = 'flex';
             }
         }
 
-        // Price Adjustment Logic
-        let priceAdjustInterval = null;
-        let adjustAmount = 0.01;
+        // تحديث عرض مؤقت التأمين
+        function updateInsuranceTimer() {
+            const remainingTime = gameState.insuranceEndTime - Date.now();
+            const insuranceBtn = document.getElementById('insuranceBtn');
+            const insuranceCostSpan = document.getElementById('insuranceCost');
 
-        function startPriceAdjust(direction) {
-            adjustAmount = 0.01;
-            clearInterval(priceAdjustInterval);
-            
-            function adjust() {
-                if (direction === 'increase') {
-                    gameState.clipPrice = Math.min(10000, gameState.clipPrice + adjustAmount);
-                } else {
-                    gameState.clipPrice = Math.max(0.01, gameState.clipPrice - adjustAmount);
-                }
-                gameState.clipPrice = Math.round(gameState.clipPrice * 100) / 100;
-                updateUI();
-                
-                // Increase speed over time
-                if (adjustAmount < 1.00) {
-                    adjustAmount += 0.01;
-                }
+            if (remainingTime > 0) {
+                const minutes = Math.floor(remainingTime / 60000);
+                const seconds = Math.floor((remainingTime % 60000) / 1000);
+                insuranceTimerEl.textContent = `التأمين نشط: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                insuranceTimerEl.style.display = 'block';
+                // أثناء نشاط التأمين، لا يمكن الشراء ولكنه لا يزال يظهر التكلفة التالية
+                insuranceBtn.disabled = true;
+            } else {
+                gameState.insuranceEndTime = 0; // تأكد من أن الوقت ينتهي
+                insuranceTimerEl.textContent = '';
+                insuranceTimerEl.style.display = 'none';
+                insuranceBtn.disabled = gameState.money < gameState.insuranceCost; // أعد تفعيل الزر إذا كان لديه مال
             }
             
-            adjust(); // Apply immediately
-            priceAdjustInterval = setInterval(adjust, 100); // Apply repeatedly
+            insuranceCostSpan.textContent = gameState.insuranceCost.toFixed(2);
+        }
+        
+        // مؤقت تحديث التأمين
+        setInterval(updateInsuranceTimer, 1000);
+
+
+        function updateUI(){
+            document.getElementById('clips').textContent = gameState.clips.toLocaleString();
+            document.getElementById('money').textContent = gameState.money.toFixed(2);
+            document.getElementById('wire').textContent = gameState.wire.toLocaleString();
+            document.getElementById('demand').textContent = gameState.demand;
+            document.getElementById('price').textContent = gameState.price.toFixed(2);
+            document.getElementById('autoClippers').textContent = gameState.autoClippers;
+            // تم حذف تحديث 'autoRate' من هنا أيضاً لأنه تم حذف العنصر من HTML
+            // document.getElementById('autoRate').textContent = gameState.autoClipperRate; 
+            document.getElementById('autoClipperCost').textContent = gameState.autoClipperCost.toFixed(2);
+            document.getElementById('wireCost').textContent = gameState.wireCost.toFixed(2);
+            document.getElementById('wireEfficiency').textContent = gameState.wireEfficiency.toFixed(1);
+            document.getElementById('efficiencyCost').textContent = (gameState.wireEfficiency * 1000).toFixed(2);
+            document.getElementById('marketingLevel').textContent = gameState.marketingLevel;
+            document.getElementById('marketingCost').textContent = (gameState.marketingLevel * 100).toFixed(2);
+            document.getElementById('availableClips').textContent = gameState.clips;
+            document.getElementById('totalClips').textContent = gameState.totalClips.toLocaleString();
+            document.getElementById('totalSold').textContent = gameState.totalSold.toLocaleString();
+            document.getElementById('totalMachines').textContent = gameState.autoClippers;
+            document.getElementById('productionRate').textContent = gameState.autoClipperRate;
+            
+            // تحديث عناصر التأمين الجديدة
+            document.getElementById('insuranceLevel').textContent = gameState.insuranceLevel;
+            document.getElementById('insuranceCost').textContent = gameState.insuranceCost.toFixed(2);
+            
+            // NEW: تحديث عناصر التوسعة
+            document.getElementById('maxClippers').textContent = gameState.maxClippersLimit.toLocaleString();
+            document.getElementById('expansionCost').textContent = gameState.expansionCost.toFixed(2);
+            
+            // NEW: تحديث عناصر المستودع
+            document.getElementById('clipsLimit').textContent = gameState.maxClipsLimit.toLocaleString();
+            document.getElementById('clipsLimitCurrent').textContent = gameState.maxClipsLimit.toLocaleString();
+            document.getElementById('warehouseCost').textContent = gameState.warehouseCost.toFixed(2);
+            
+            updateInsuranceTimer(); // تحديث خاص بحالة التأمين والزر
+            
+            // const makeBtn = document.getElementById('makeBtn'); // تم نقلها إلى نطاق أوسع
+            // NEW: يجب أن يتعطل زر الصنع إذا نفد السلك أو إذا امتلأ المستودع
+            makeBtn.disabled = gameState.wire < 1 || gameState.clips >= gameState.maxClipsLimit;
+            document.getElementById('makeBtnText').textContent = gameState.wire < 1 ? 'لا يوجد سلك' : 
+                                                               gameState.clips >= gameState.maxClipsLimit ? 'المستودع ممتلئ' : 'صنع مشبك';
+
+            // const sellBtn = document.getElementById('sellBtn'); // تم نقلها إلى نطاق أوسع
+            sellBtn.disabled = gameState.clips === 0;
+            // NEW: الحد الأقصى للآلات
+            document.getElementById('autoClipperBtn').disabled = gameState.money < gameState.autoClipperCost || gameState.autoClippers >= gameState.maxClippersLimit;
+            document.getElementById('wireBtn').disabled = gameState.money < gameState.wireCost;
+            document.getElementById('efficiencyBtn').disabled = gameState.money < gameState.wireEfficiency * 1000;
+            document.getElementById('marketingBtn').disabled = gameState.money < gameState.marketingLevel * 100;
+            document.getElementById('expansionBtn').disabled = gameState.money < gameState.expansionCost; // NEW: زر التوسعة
+            document.getElementById('warehouseBtn').disabled = gameState.money < gameState.warehouseCost; // NEW: زر المستودع
+            
+            // تحديث واجهة أفضل نتيجة محلية
+            bestTotalSoldEl.textContent = bestLocalScore.totalSold.toLocaleString();
+            bestMoneyEl.textContent = parseFloat(bestLocalScore.money || 0).toFixed(2);
+            bestDateEl.textContent = bestLocalScore.date ? new Date(bestLocalScore.date).toLocaleString() : '—';
+            
+            checkGameOver(); // NEW: فحص الخسارة
+        }
+
+        function makeClip(){
+            // NEW: فحص الحد الأقصى للمشابك
+            if(gameState.wire >= 1 && gameState.clips < gameState.maxClipsLimit){
+                gameState.clips++;
+                gameState.totalClips++;
+                gameState.wire--;
+                
+                // **إضافة تأثير تطاير المشابك**
+                createFloatingEmoji(makeBtn, '📎', 1);
+
+                playSound(clickSound); // صوت صنع مشبك
+                flash('card-clips');
+                flash('card-wire');
+                updateUI();
+            }
+        }
+
+        function sellClips(){
+            if(gameState.clips > 0){
+                const sellAmount = Math.min(gameState.clips, gameState.demand);
+                gameState.clips -= sellAmount;
+                const revenue = sellAmount * gameState.price;
+                gameState.money += revenue;
+                gameState.totalSold += sellAmount;
+                gameState.demand = Math.max(10, gameState.demand - Math.floor(sellAmount * 0.1));
+                
+                if (sellAmount > 0) {
+                    // **إضافة تأثير تطاير الأوراق النقدية**
+                    createFloatingEmoji(sellBtn, '💵', Math.min(sellAmount, 8)); // يتطاير 8 كحد أقصى
+
+                    playSound(cashSound); // صوت بيع المشابك
+                    checkTrophy(gameState.totalSold);
+                    checkLocalRecord(); // NEW: فحص وتحديث لوحة المتصدرين المحلية
+                }
+                
+                flash('card-money');
+                flash('card-clips');
+                updateUI();
+            }
+        }
+
+        function buyWire(){
+            if(gameState.money >= gameState.wireCost){
+                gameState.money -= gameState.wireCost;
+                gameState.wire += 1000 * gameState.wireEfficiency;
+                playSound(buySound); // صوت شراء سلك
+                flash('card-wire');
+                flash('card-money');
+                updateUI();
+            }
+        }
+
+        function buyAutoClipper(){
+            // NEW: إضافة شرط الحد الأقصى للآلات
+            if(gameState.money >= gameState.autoClipperCost && gameState.autoClippers < gameState.maxClippersLimit){
+                gameState.money -= gameState.autoClipperCost;
+                gameState.autoClippers++;
+                // يتم زيادة التكلفة بشكل طبيعي إذا لم نصل للحد الأقصى الحالي
+                if (gameState.autoClippers % 100 !== 0) {
+                    gameState.autoClipperCost = Math.floor(gameState.autoClipperCost * 1.15);
+                } else {
+                    // إذا وصلنا للحد الأقصى، تثبيت التكلفة مؤقتاً
+                    // عند التوسعة، سيعاد تعيين التكلفة وفقاً لمنطق اللعبة
+                }
+                
+                playSound(buySound); // صوت شراء آلة
+                flash('card-clips');
+                flash('card-money');
+                updateUI();
+            }
+        }
+
+        function adjustPrice(delta){
+            gameState.price = Math.max(0.01, Math.round((gameState.price + delta)*100)/100);
+            if(delta > 0) gameState.demand = Math.max(5, gameState.demand - 5);
+            else gameState.demand = Math.min(100 * gameState.marketingLevel, gameState.demand + 5); // ضمان عدم تجاوز الحد الأقصى
+            flash('card-demand');
+            updateUI();
+        }
+        
+        // NEW: Price Adjust with Hold-down logic
+        function startPriceAdjust(delta) {
+            adjustPrice(delta); // Run once immediately
+            // Clear any existing interval to prevent overlapping
+            if (priceAdjustInterval) clearInterval(priceAdjustInterval);
+            // Set a new interval for continuous adjustment
+            priceAdjustInterval = setInterval(() => {
+                adjustPrice(delta);
+            }, 180); // تم تخفيف الحساسية إلى 180ms
         }
 
         function stopPriceAdjust() {
-            clearInterval(priceAdjustInterval);
-            priceAdjustInterval = null;
+            if (priceAdjustInterval) {
+                clearInterval(priceAdjustInterval);
+                priceAdjustInterval = null;
+            }
         }
 
-        // UI Update Functions
-        function updateUI() {
-            elements.paperclips.textContent = formatNumber(gameState.paperclips);
-            elements.money.textContent = formatNumber(gameState.money, 2);
-            elements.currentPrice.textContent = formatNumber(gameState.clipPrice, 2);
-            elements.salesPerSecond.textContent = formatNumber(getActualSalesRate(), 1);
-            elements.sellAllAmount.textContent = `ربح: ${formatNumber(gameState.paperclips * gameState.clipPrice, 2)}`;
-
-            elements.totalClipsMade.textContent = formatNumber(gameState.totalClipsMade);
-            elements.totalClipsSold.textContent = formatNumber(gameState.totalClipsSold);
-            elements.totalRevenue.textContent = formatNumber(gameState.totalRevenue, 2);
-            elements.totalCost.textContent = formatNumber(gameState.totalCost, 2);
-            
-            // Check affordability
-            elements.makePaperclipBtn.disabled = gameState.clipsPerClick === 0;
-            elements.sellAllBtn.disabled = gameState.paperclips === 0;
-
-            // Price Info
-            if (gameState.clipPrice > 0.10) {
-                elements.priceInfo.textContent = 'سعر مرتفع جداً! البيع بطيء.';
-                elements.priceInfo.style.color = '#f87171';
-            } else if (gameState.clipPrice > 0.01) {
-                elements.priceInfo.textContent = 'سعر معقول. البيع متوسط.';
-                elements.priceInfo.style.color = '#facc15';
-            } else {
-                elements.priceInfo.textContent = 'سعر منافس! البيع سريع جداً.';
-                elements.priceInfo.style.color = '#34d399';
-            }
-
-            // Auto-Sell Toggle
-            if (gameState.autoSell) {
-                elements.autoSellToggle.classList.remove('toggle-off');
-                elements.autoSellToggle.classList.add('toggle-on');
-                elements.autoSellInfo.textContent = `البيع التلقائي نشط. معدل المبيعات الحالي: ${formatNumber(getActualSalesRate(), 1)} مشبك/ث.`;
-                elements.autoSellInfo.style.color = '#34d399';
-            } else {
-                elements.autoSellToggle.classList.remove('toggle-on');
-                elements.autoSellToggle.classList.add('toggle-off');
-                elements.autoSellInfo.textContent = 'البيع التلقائي متوقف. يجب عليك البيع يدوياً.';
-                elements.autoSellInfo.style.color = '#9aa4b2';
-            }
-            
-            // Insurance Timer
-            if (gameState.insurance && elements.insuranceTimer) {
-                elements.insuranceTimer.style.display = 'block';
-                elements.insuranceTimer.textContent = `التأمين نشط: ${gameState.insuranceDuration} ثواني متبقية.`;
-            } else if (elements.insuranceTimer) {
-                elements.insuranceTimer.style.display = 'none';
-            }
-
-            renderUpgrades();
-        }
-
-        function getActualSalesRate() {
-            // Placeholder logic: Sales rate decreases exponentially with price
-            let baseRate = gameState.salesPerSecond * 10;
-            let pricePenalty = Math.pow(gameState.clipPrice / 0.01, 2.5);
-            
-            if (gameState.clipPrice > 0.01) {
-                baseRate = baseRate / pricePenalty;
-            }
-            
-            return Math.max(0, baseRate);
-        }
-
-        // Upgrade Rendering and Logic
-        function buyUpgrade(upgradeKey) {
-            const upgrade = gameState.upgrades[upgradeKey];
-            if (upgrade && upgrade.canAfford()) {
-                gameState.money -= upgrade.cost;
-                gameState.totalCost += upgrade.cost;
-                upgrade.purchased = true;
-                
-                // If the upgrade is levelable (like autoClipper), keep it in the list
-                if(upgradeKey !== 'autoClipper') {
-                    upgrade.onPurchase();
-                }
-                
-                // If it's autoClipper, we call onPurchase to handle the level increase
-                if(upgradeKey === 'autoClipper') {
-                    upgrade.onPurchase();
-                }
-
-                // If it's pressBoost or marketing, update the next level cost
-                if(upgradeKey === 'pressBoost' || upgradeKey === 'marketing') {
-                    upgrade.updateCost();
-                    upgrade.level++;
-                }
-                
+        function increaseMarketing(){
+            const cost = gameState.marketingLevel * 100;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.marketingLevel++;
+                gameState.demand = Math.min(100 * gameState.marketingLevel, gameState.demand + 20); // ضمان عدم تجاوز الحد الأقصى للمستوى الجديد
+                playSound(buySound); 
+                flash('card-demand');
+                flash('card-money');
                 updateUI();
-                playSound(sounds.buySound);
-            } else {
-                playSound(sounds.errorSound);
             }
         }
 
-        function renderUpgrades() {
-            elements.upgradesList.innerHTML = '';
-            elements.marketingList.innerHTML = '';
-            
-            const upgradeKeys = Object.keys(gameState.upgrades);
-            
-            let upgradesAvailable = false;
-            let marketingAvailable = false;
-
-            for (const key of upgradeKeys) {
-                const upgrade = gameState.upgrades[key];
+        // NEW: دالة ترقية المستودع
+        function upgradeWarehouse(){
+            const cost = gameState.warehouseCost;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.maxClipsLimit += 5000; // إضافة 5000 مشبك للحد الأقصى
+                gameState.warehouseCost = Math.floor(gameState.warehouseCost * 1.5); // زيادة التكلفة بنسبة 50%
                 
-                // Special case for simple one-time upgrades
-                if(key === 'pressBoost' && upgrade.level >= 3) continue;
-                if(key === 'marketing' && upgrade.level >= 5) continue;
+                playSound(buySound); 
+                flash('card-clips');
+                flash('card-money');
+                updateUI();
+            }
+        }
 
-                // Simple Check: Only show if not a one-time purchase AND the first level hasn't been bought
-                // Or if it's a multi-level upgrade like autoClipper
-                if(key !== 'autoClipper' && upgrade.purchased) continue;
-                if(key === 'autoClipper' && gameState.upgrades.autoClipper.level > 0 && gameState.upgrades.autoClipper.level >= 10) continue;
+        function buyWireEfficiency(){
+            const cost = gameState.wireEfficiency * 1000;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.wireEfficiency += 0.5;
+                playSound(buySound); 
+                flash('card-wire');
+                flash('card-money');
+                updateUI();
+            }
+        }
+        
+        // NEW: وظيفة توسعة المصنع
+        function buyExpansion(){
+            const cost = gameState.expansionCost;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.maxClippersLimit += 100; // زيادة الحد الأقصى بمقدار 100
+                gameState.expansionCost = Math.floor(gameState.expansionCost * 2); // مضاعفة تكلفة التوسعة
+                
+                playSound(buySound); 
+                flash('card-money');
+                updateUI();
+            }
+        }
+        
+        // وظيفة شراء التأمين الجديدة
+        function buyInsurance(){
+            const cost = gameState.insuranceCost;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.insuranceLevel++;
+                gameState.insuranceCost = gameState.insuranceLevel * 1000;
+                
+                // إضافة 5 دقائق (300,000 مللي ثانية)
+                const now = Date.now();
+                // إذا كان التأمين نشطاً، يتم تمديد الوقت. إذا لم يكن نشطاً، يبدأ الآن.
+                gameState.insuranceEndTime = Math.max(gameState.insuranceEndTime, now) + 300000; 
+                
+                playSound(buySound); 
+                flash('card-money');
+                showNewsTicker("🛡️ تم تفعيل تأمين المصنع لمدة 5 دقائق!", '👍', 4000);
+                updateUI();
+            }
+        }
 
+        function toggleAutoSell(){
+            gameState.autoSellEnabled = !gameState.autoSellEnabled;
+            const btn = document.getElementById('autoSellBtn');
+            btn.className = gameState.autoSellEnabled ? 'toggle-btn toggle-on' : 'toggle-btn toggle-off';
+        }
 
-                let targetList = elements.upgradesList;
-                if (key === 'marketing' || key === 'autoClipper') {
-                    targetList = elements.marketingList;
-                    marketingAvailable = true;
-                } else {
-                    upgradesAvailable = true;
+        function toggleGuide(){
+            const modal = document.getElementById('guideModal');
+            modal.classList.toggle('active');
+        }
+        
+        // تم إلغاء استخدام هذه الوظيفة
+        // function closeChallengeModal(){
+        //      challengeModal.classList.remove('active');
+        //      updateUI();
+        // }
+        
+        // منطق الحوادث العشوائية (معدّل ليستخدم شريط الأخبار)
+        function triggerRandomChallenge() {
+            // تحقق ما إذا كان التأمين نشطًا
+            if (gameState.insuranceEndTime > Date.now()) {
+                console.log("Challenge blocked by insurance!");
+                return; 
+            }
+            
+            // فرصة 10% لوقوع حادث عشوائي
+            if (Math.random() < 0.10) { 
+                
+                let challengeType = null;
+
+                // تحدي 1: سرقة المال (إذا كان المال > 4500)
+                if (gameState.money >= 4500 && Math.random() < 0.25) { 
+                    challengeType = 'money';
+                } 
+                
+                // تحدي 2: حريق المشابك (إذا كانت المشابك > 7500)
+                else if (gameState.clips >= 7500 && Math.random() < 0.25) {
+                    challengeType = 'clips';
                 }
                 
-                const levelDisplay = upgrade.level > 0 ? ` (المستوى ${upgrade.level})` : '';
-                const costDisplay = formatNumber(upgrade.cost, 2);
+                // تحدي 3: تلف الآلات (إذا كان لديك 100 آلة أو أكثر) - NEW REQUIREMENT 1
+                else if (gameState.autoClippers >= 100 && Math.random() < 0.25) {
+                    challengeType = 'clippers';
+                }
                 
-                const buttonHTML = `
-                    <button class="icon-btn btn-upgrade" ${upgrade.canAfford() ? '' : 'disabled'} onclick="buyUpgrade('${key}')">
-                        <span class="emoji-icon">✨</span>
-                        <span>${upgrade.name} ${levelDisplay}</span>
-                        <span class="cost-info">التكلفة: ${costDisplay} 💰</span>
-                    </button>
-                `;
+                // تحدي 4: دعاية سلبية (إذا كان الطلب 100 أو أكثر) - NEW REQUIREMENT 2
+                else if (gameState.demand >= 100 && Math.random() < 0.25) {
+                    challengeType = 'demand';
+                }
                 
-                targetList.insertAdjacentHTML('beforeend', buttonHTML);
-            }
-            
-            if (!upgradesAvailable && elements.upgradesList.innerHTML === '') {
-                elements.upgradesList.innerHTML = '<p style="text-align: center; color: #9aa4b2; font-size: 0.75rem;">لا توجد ترقيات متاحة حالياً.</p>';
-            }
-            if (!marketingAvailable && elements.marketingList.innerHTML === '') {
-                elements.marketingList.innerHTML = '<p style="text-align: center; color: #9aa4b2; font-size: 0.75rem;">لا توجد حملات تسويقية متاحة حالياً.</p>';
+                // إذا لم يتحقق أي شرط، لا يتم تشغيل التحدي
+                if (!challengeType) return;
+
+
+                if (challengeType === 'money') {
+                    const lossAmount = 500;
+                    gameState.money = Math.max(0, gameState.money - lossAmount);
+                    
+                    showNewsTicker(`⚠️ حادث: سرقة! سُرق $${lossAmount.toFixed(2)} من أموالك.`, '🚨', 4500);
+                    playSound(warningSound); // تشغيل نغمة التحذير
+                    flash('card-money');
+
+                } else if (challengeType === 'clips') {
+                    const lossAmount = 500;
+                    gameState.clips = Math.max(0, gameState.clips - lossAmount);
+                    
+                    showNewsTicker(`🔥 حادث: حريق! تلف ${lossAmount.toLocaleString()} مشبك ورقي.`, '🚒', 4500);
+                    playSound(fireSound); // تشغيل نغمة الحريق
+                    flash('card-clips');
+
+                } else if (challengeType === 'clippers') { // NEW: Clipper Loss Challenge
+                    const lossAmount = 20;
+                    gameState.autoClippers = Math.max(0, gameState.autoClippers - lossAmount);
+                    
+                    showNewsTicker(`⚙️ حادث: تلف آلات! تعطلت ${lossAmount} آلة صنع تلقائي.`, '💥', 4500);
+                    playSound(fireSound); // استخدام صوت الحريق/خسارة (يمكن تغيير الصوت)
+                    flash('autoClippers');
+
+                } else if (challengeType === 'demand') { // NEW: Negative Publicity Challenge
+                    const oldDemand = gameState.demand;
+                    gameState.demand = 1; // تخفيض الطلب إلى 1
+                    
+                    showNewsTicker(`📉 تحدي: دعاية سلبية! انخفض الطلب من ${oldDemand} إلى ${gameState.demand}.`, '📢', 4500);
+                    playSound(warningSound); // استخدام صوت التحذير
+                    flash('card-demand');
+                }
+                
+                // challengeModal.classList.add('active'); // تم إلغاء استخدام المودال
+                updateUI();
             }
         }
-        
-        // Game Loop
-        setInterval(gameLoop, 1000); // The main game tick is once per second
 
-        function gameLoop() {
-            handleAutoSell();
-            handleAutoClipper();
-            handleEvents();
+        // Auto production
+        setInterval(()=>{
+            // NEW: إذا كانت اللعبة قد انتهت، لا تكمل الإنتاج
+            if (checkGameOver()) return;
             
-            // Insurance timer tick
-            if (gameState.insuranceDuration > 0) {
-                gameState.insuranceDuration--;
-            } else {
-                gameState.insurance = false;
-            }
-
-            updateUI();
-        }
-
-        // Event Handling (Challenges)
-        function handleEvents() {
-            if (Math.random() < 0.05) { // 5% chance every second for an event
-                const eventType = Math.floor(Math.random() * 3);
+            if(gameState.autoClippers > 0 && gameState.wire >= gameState.autoClippers){
                 
-                if (eventType === 0) { // Sales Rush
-                    showChallengeAlert('📈 تحدٍ! موجة طلب غير متوقعة رفعت مبيعاتك 3 أضعاف لمدة 5 ثواني!');
-                    const originalRate = gameState.salesPerSecond;
-                    gameState.salesPerSecond *= 3;
-                    setTimeout(() => {
-                        gameState.salesPerSecond = originalRate;
-                        updateUI();
-                    }, 5000);
-                    
-                } else if (eventType === 1) { // Cost Increase
-                    showChallengeAlert('📉 تحدٍ! ارتفاع مفاجئ في تكلفة المواد الخام!');
-                    gameState.clipPrice = Math.max(0.01, gameState.clipPrice + 0.05); // Price must increase
-                    
-                } else if (eventType === 2 && gameState.money > 100) { // Major Accident
-                    if (gameState.insurance) {
-                        showChallengeAlert('🛡️ حادث! لكن التأمين حمى شركتك من خسارة 50% من أموالك.');
-                    } else {
-                        const loss = gameState.money * 0.5;
-                        gameState.money -= loss;
-                        showChallengeAlert(`💀 كارثة! حادث كبير كلفك ${formatNumber(loss, 2)} نقداً!`);
-                        
-                        // Check for Game Over only if the player loses too much
-                        if (gameState.money < 10) {
-                             // This is a placeholder for a real game over scenario
-                            showGameOver(`خسارة فادحة في حادث، ولم يكن لديك تأمين لحمايتك.`);
-                        }
-                    }
+                // NEW: حساب المشابك التي سيتم صنعها مع الأخذ في الاعتبار الحد الأقصى للمستودع
+                let potentialClips = gameState.autoClippers;
+                let availableSpace = gameState.maxClipsLimit - gameState.clips;
+                let clipsMade = Math.min(potentialClips, availableSpace);
+
+                if (clipsMade > 0) {
+                    gameState.clips += clipsMade;
+                    gameState.totalClips += clipsMade;
+                    gameState.wire -= clipsMade;
+                    gameState.autoClipperRate = gameState.autoClippers;
+                    flash('card-clips');
+                    flash('card-wire');
+                    updateUI();
+                } else if (gameState.clips >= gameState.maxClipsLimit) {
+                    gameState.autoClipperRate = 0; // معدل إنتاج صفر إذا كان ممتلئاً
+                    updateUI();
                 }
             }
-        }
-        
-        // Game Over function
-        function showGameOver(reason) {
-            elements.gameOverDetails.textContent = reason;
-            elements.gameOverModal.classList.add('active');
-            // Stop game loop visually (optional: set a flag to stop the loop)
-        }
+        },1000);
 
-        // Reset game
-        function resetGame() {
-            // Reload the page to reset the game state
-            location.reload();
-        }
-
-        // Utility Functions
-        function formatNumber(num, decimalPlaces = 0) {
-            if (num >= 1e12) return (num / 1e12).toFixed(1) + ' تريليون';
-            if (num >= 1e9) return (num / 1e9).toFixed(1) + ' مليار';
-            if (num >= 1e6) return (num / 1e6).toFixed(1) + ' مليون';
-            if (num >= 1e3) return (num / 1e3).toFixed(1) + ' ألف';
-
-            if (decimalPlaces === 0) return Math.floor(num).toLocaleString('ar-EG');
+        // Auto sell
+        setInterval(()=>{
+            // NEW: إذا كانت اللعبة قد انتهت، لا تكمل البيع
+            if (checkGameOver()) return;
             
-            return num.toLocaleString('ar-EG', {
-                minimumFractionDigits: decimalPlaces,
-                maximumFractionDigits: decimalPlaces,
-            });
-        }
-        
-        function playSound(audioElement) {
-            audioElement.currentTime = 0;
-            audioElement.play().catch(e => console.log('Audio play failed:', e));
-        }
+            if(gameState.autoSellEnabled && gameState.clips > 0){
+                const sellAmount = Math.min(gameState.clips, Math.max(1, Math.floor(gameState.demand * 0.1)), 10);
+                gameState.clips -= sellAmount;
+                gameState.money += sellAmount * gameState.price;
+                gameState.totalSold += sellAmount;
+                
+                if (sellAmount > 0) {
+                    // ملاحظة: البيع التلقائي لا يضيف تأثير التطاير لأنه يحدث في الخلفية
+                    playSound(cashSound); // صوت بيع المشابك للبيع التلقائي
+                    checkTrophy(gameState.totalSold);
+                    checkLocalRecord(); // NEW: فحص وتحديث لوحة المتصدرين المحلية
+                }
 
-        function showFloatingEmoji(emoji, targetElement) {
-            const rect = targetElement.getBoundingClientRect();
-            const emojiEl = document.createElement('div');
-            emojiEl.className = 'floating-emoji';
-            emojiEl.textContent = emoji;
-            // Position near the center of the button, absolutely
-            emojiEl.style.left = `${rect.left + rect.width / 2}px`;
-            emojiEl.style.top = `${rect.top + rect.height / 2}px`;
+                flash('card-money');
+                flash('card-clips');
+                updateUI();
+            }
+        },2000);
+
+        // Restore demand and check random challenges
+        setInterval(()=>{
+            // NEW: إذا كانت اللعبة قد انتهت، لا تكمل التحديثات
+            if (checkGameOver()) return;
             
-            document.body.appendChild(emojiEl);
-
-            // Remove after animation finishes
-            setTimeout(() => {
-                emojiEl.remove();
-            }, 1200); 
-        }
-        
-        function showRecordNotification() {
-            elements.recordNotification.classList.add('animate');
-            playSound(sounds.completionSound);
-            setTimeout(() => {
-                elements.recordNotification.classList.remove('animate');
-            }, 4000); 
-        }
-
-        // Event Listeners
-        elements.makePaperclipBtn.addEventListener('click', makePaperclip);
-        elements.sellAllBtn.addEventListener('click', sellAll);
-        
-        elements.autoSellToggle.addEventListener('click', () => {
-            gameState.autoSell = !gameState.autoSell;
+            // تحديث الطلب
+            gameState.demand = Math.min(100 * gameState.marketingLevel, gameState.demand + gameState.marketingLevel);
+            
+            // تحقق من الحوادث العشوائية كل 3 ثوان (بالتزامن مع تحديث الطلب)
+            triggerRandomChallenge();
+            
             updateUI();
-        });
+        },3000);
 
-        // Guide Modal Toggle
-        function toggleGuide() {
-            elements.guideModal.classList.toggle('active');
-        }
-
-        // Load/Save functions
-        function saveBestScore() {
-            localStorage.setItem('paperclip_factory_best_score', JSON.stringify(bestLocalScore));
-        }
+        // ========== Local Leaderboard: load / save / notify ==========
+        const STORAGE_KEY = 'bestLocalScore';
 
         function loadBestScore() {
-            const savedScore = localStorage.getItem('paperclip_factory_best_score');
-            if (savedScore) {
-                bestLocalScore = JSON.parse(savedScore);
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed.totalSold !== 'undefined') {
+                        bestLocalScore.totalSold = parsed.totalSold || 0;
+                        bestLocalScore.money = parsed.money || 0;
+                        bestLocalScore.date = parsed.date || null;
+                    }
+                }
+            } catch(e){
+                console.error("Error loading bestLocalScore:", e);
             }
         }
-        
+
+        function saveBestScore() {
+            try {
+                const payload = {
+                    totalSold: bestLocalScore.totalSold,
+                    money: bestLocalScore.money,
+                    date: bestLocalScore.date
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+            } catch(e){
+                console.error("Error saving bestLocalScore:", e);
+            }
+        }
+
+       function checkLocalRecord() {
+           const previousBest = bestLocalScore.totalSold || 0;
+
+            if (gameState.totalSold > previousBest + 1000) {
+                bestLocalScore.totalSold = gameState.totalSold;
+                bestLocalScore.money = parseFloat(gameState.money.toFixed(2));
+                bestLocalScore.date = new Date().toISOString();
+                saveBestScore();
+
+                showNewsTicker(`🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!`, '🏅', 3500);
+                playSound(completionSound);
+                flash('card-clips');
+                flash('card-money');
+                console.log("New local record saved:", bestLocalScore);
+                updateUI();
+            }
+        }
+
+        // وظيفة إظهار إشعار الرقم القياسي (لم تعد مستخدمة ولكن تم الإبقاء عليها في الكود القديم)
+        // let recordTimeouts = [];
+        // function showRecordNotification() {
+        //     // إظهار الإشعار، ثم تلاشيه تدريجيًا بعد 4 ثوانٍ
+        //     try {
+        //         // إيقاف أي مؤقتات سابقة لإعادة الضبط
+        //         recordTimeouts.forEach(t => clearTimeout(t));
+        //         recordTimeouts = [];
+
+        //         recordNotificationEl.classList.remove('fade-out');
+        //         // Force reflow for reliable animation restart
+        //         void recordNotificationEl.offsetWidth;
+        //         recordNotificationEl.classList.add('show');
+
+        //         // بعد 4 ثوانٍ نضيف فئة fade-out لبدء التلاشي
+        //         const t1 = setTimeout(()=>{
+        //             recordNotificationEl.classList.add('fade-out');
+        //             recordNotificationEl.classList.remove('show');
+        //         }, 2000);
+
+        //         // بعد مدة إضافية نزيل كل الفئات لضمان الحالة الافتراضية
+        //         const t2 = setTimeout(()=>{
+        //             recordNotificationEl.classList.remove('fade-out');
+        //             recordNotificationEl.classList.remove('show');
+        //         }, 4800);
+
+        //         recordTimeouts.push(t1, t2);
+        //     } catch(e){ console.error(e); }
+        // }
+
+        function resetBestScore() {
+            bestLocalScore = { totalSold: 0, money: 0, date: null };
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch(e){ console.error(e); }
+            updateUI();
+            
+            // استخدام شريط الأخبار للإشعار
+            showNewsTicker('تمت إعادة تعيين النتائج المحلية.', '🔄', 3500);
+            playSound(completionSound);
+        }
+
+        // تصدير سريع للنتيجة (نسخ للنص)
+        function exportBestScore() {
+            const text = `أفضل مبيعات محلية: ${bestLocalScore.totalSold.toLocaleString()} مشبك — المال: $${parseFloat(bestLocalScore.money || 0).toFixed(2)} — التاريخ: ${bestLocalScore.date ? new Date(bestLocalScore.date).toLocaleString() : '—'}`;
+            try {
+                navigator.clipboard.writeText(text).then(()=> {
+                    // استخدام شريط الأخبار للإشعار
+                    showNewsTicker('تم نسخ أفضل نتيجة إلى الحافظة!', '📋', 3500);
+                    playSound(completionSound);
+                }).catch(()=> {
+                    // fallback: alert
+                    alert(text);
+                });
+            } catch(e){
+                alert(text);
+            }
+        }
+
         // قم بفتح نافذة الدليل عند أول تحميل
         window.onload = function() {
             toggleGuide();
             // حمل أفضل نتيجة محلية
             loadBestScore();
             // لضمان عرض أي كأس تم تحقيقه بعد تحميل الصفحة (إذا كانت البيانات محفوظة)
-            // checkTrophy(gameState.totalSold); // This function is not defined in the snippet, keeping the check
+            checkTrophy(gameState.totalSold); 
             updateUI();
         }
         
