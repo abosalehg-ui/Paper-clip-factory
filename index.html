@@ -478,7 +478,7 @@
         /* --- شريط الأخبار الجديد (للتحديات والأرقام القياسية) --- */
         #newsTicker {
             position: fixed;
-            bottom: -50px; /* يبدأ من تحت الشاشة */
+            bottom: 0; /* تثبيت في أسفل الشاشة */
             left: 0;
             width: 100%;
             background: linear-gradient(90deg, #ef4444, #dc2626); /* خلفية حمراء */
@@ -492,12 +492,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.4s ease-out; /* حركة ظهور الشريط */
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
+            
+            /* **التعديل لجعل الشريط يبدأ خارج الشاشة من اليسار** */
+            transform: translateX(-100%); 
+            
+            transition: transform 0.5s ease-out; /* حركة ظهور الشريط */
+            
+            /* إزالة الزوايا العلوية لجعل الشريط يغطي العرض بالكامل من الأسفل */
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
         }
         #newsTicker.show {
-            transform: translateY(-100%); /* الانتقال إلى داخل الشاشة بمقدار ارتفاعه */
+            /* **التعديل لجعل الشريط ينتقل إلى موضعه الطبيعي داخل الشاشة** */
+            transform: translateX(0);
         }
         #newsTicker .emoji {
             font-size: 1.1rem;
@@ -1587,36 +1594,6 @@
                 updateUI();
             }
         }
-
-        // وظيفة إظهار إشعار الرقم القياسي (لم تعد مستخدمة ولكن تم الإبقاء عليها في الكود القديم)
-        // let recordTimeouts = [];
-        // function showRecordNotification() {
-        //     // إظهار الإشعار، ثم تلاشيه تدريجيًا بعد 4 ثوانٍ
-        //     try {
-        //         // إيقاف أي مؤقتات سابقة لإعادة الضبط
-        //         recordTimeouts.forEach(t => clearTimeout(t));
-        //         recordTimeouts = [];
-
-        //         recordNotificationEl.classList.remove('fade-out');
-        //         // Force reflow for reliable animation restart
-        //         void recordNotificationEl.offsetWidth;
-        //         recordNotificationEl.classList.add('show');
-
-        //         // بعد 4 ثوانٍ نضيف فئة fade-out لبدء التلاشي
-        //         const t1 = setTimeout(()=>{
-        //             recordNotificationEl.classList.add('fade-out');
-        //             recordNotificationEl.classList.remove('show');
-        //         }, 2000);
-
-        //         // بعد مدة إضافية نزيل كل الفئات لضمان الحالة الافتراضية
-        //         const t2 = setTimeout(()=>{
-        //             recordNotificationEl.classList.remove('fade-out');
-        //             recordNotificationEl.classList.remove('show');
-        //         }, 4800);
-
-        //         recordTimeouts.push(t1, t2);
-        //     } catch(e){ console.error(e); }
-        // }
 
         function resetBestScore() {
             bestLocalScore = { totalSold: 0, money: 0, date: null };
