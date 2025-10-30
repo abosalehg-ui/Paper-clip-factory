@@ -218,7 +218,27 @@
             border:1px solid rgba(16,185,129,0.2);
         }
         .price-label{color:#9aa4b2;font-size:0.65rem;margin-bottom:2px}
-        .price-value{font-size:1.2rem;font-weight:700;color:#10b981}
+        /* NEW: Price Value Container for Editable Text */
+        .price-value{
+            font-size:1.2rem;
+            font-weight:700;
+            color:#10b981;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* NEW: Styling for Editable Price Span */
+        #price {
+            min-width: 40px; /* ضمان عرض كافٍ للتحرير */
+            padding: 0 4px;
+            outline: none; /* إزالة الخط الأزرق الافتراضي للتركيز */
+            border-bottom: 1px solid transparent; /* خط التحرير المخفي */
+            transition: border-bottom-color 0.2s;
+        }
+        #price:focus {
+            border-bottom-color: #10b981; /* إظهار خط التحرير عند التركيز */
+        }
+        /* End NEW Price Styles */
 
         /* Price control buttons - now single buttons */
         .price-btn{
@@ -672,7 +692,10 @@
                     
                     <div class="price-display">
                         <div class="price-label">السعر</div>
-                        <div class="price-value">$<span id="price">0.25</span></div>
+                        <div class="price-value">
+                            $
+                            <span id="price" contenteditable="true" onblur="handlePriceEdit()">0.25</span>
+                        </div>
                     </div>
 
                     <button id="increasePriceBtn" class="price-btn" 
@@ -970,6 +993,7 @@
         
         const makeBtn = document.getElementById('makeBtn'); // تم جلب زر الصنع
         const sellBtn = document.getElementById('sellBtn'); // تم جلب زر البيع
+        const insuranceBtn = document.getElementById('insuranceBtn'); // تم جلب زر التأمين
 
         // NEW: Price Control Variables for Hold-down
         let priceAdjustInterval = null;
@@ -979,6 +1003,8 @@
         const tickerEmojiEl = document.getElementById('tickerEmoji');
         const tickerMessageEl = document.getElementById('tickerMessage');
         let tickerTimeout = null; // مؤقت لإخفاء الشريط
+        
+        const priceEl = document.getElementById('price'); // عنصر السعر القابل للتحرير
 
         function playSound(audioElement) {
             if(!audioElement) return;
@@ -1132,7 +1158,7 @@
         // تحديث عرض مؤقت التأمين
         function updateInsuranceTimer() {
             const remainingTime = gameState.insuranceEndTime - Date.now();
-            const insuranceBtn = document.getElementById('insuranceBtn');
+            // const insuranceBtn = document.getElementById('insuranceBtn'); // تم جلبه مسبقًا
             const insuranceCostSpan = document.getElementById('insuranceCost');
 
             if (remainingTime > 0) {
@@ -1140,13 +1166,14 @@
                 const seconds = Math.floor((remainingTime % 60000) / 1000);
                 insuranceTimerEl.textContent = `التأمين نشط: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 insuranceTimerEl.style.display = 'block';
-                // أثناء نشاط التأمين، لا يمكن الشراء ولكنه لا يزال يظهر التكلفة التالية
-                insuranceBtn.disabled = true;
+                // التعديل المطلوب: لا يتم تعطيل الزر إلا إذا كان المال أقل من التكلفة
+                insuranceBtn.disabled = gameState.money < gameState.insuranceCost;
             } else {
                 gameState.insuranceEndTime = 0; // تأكد من أن الوقت ينتهي
                 insuranceTimerEl.textContent = '';
                 insuranceTimerEl.style.display = 'none';
-                insuranceBtn.disabled = gameState.money < gameState.insuranceCost; // أعد تفعيل الزر إذا كان لديه مال
+                // تفعيل/تعطيل الزر بناءً على المال
+                insuranceBtn.disabled = gameState.money < gameState.insuranceCost;
             }
             
             insuranceCostSpan.textContent = gameState.insuranceCost.toFixed(2);
@@ -1161,7 +1188,12 @@
             document.getElementById('money').textContent = gameState.money.toFixed(2);
             document.getElementById('wire').textContent = gameState.wire.toLocaleString();
             document.getElementById('demand').textContent = gameState.demand;
-            document.getElementById('price').textContent = gameState.price.toFixed(2);
+            
+            // التعديل هنا: تحديث قيمة عنصر السعر القابل للتحرير
+            if (document.activeElement !== priceEl) {
+                 priceEl.textContent = gameState.price.toFixed(2);
+            }
+            
             document.getElementById('autoClippers').textContent = gameState.autoClippers;
             // تم حذف تحديث 'autoRate' من هنا أيضاً لأنه تم حذف العنصر من HTML
             // document.getElementById('autoRate').textContent = gameState.autoClipperRate; 
@@ -1215,6 +1247,36 @@
             
             checkGameOver(); // NEW: فحص الخسارة
         }
+        
+        // دالة جديدة لمعالجة تحرير السعر
+        function handlePriceEdit() {
+            let newPriceStr = priceEl.textContent.trim();
+            // إزالة أي رموز غير ضرورية (مثل $)
+            newPriceStr = newPriceStr.replace(/[^\d.]/g, ''); 
+            
+            // تحويل إلى رقم، والتأكد من أنه رقم موجب
+            let newPrice = parseFloat(newPriceStr);
+            
+            if (isNaN(newPrice) || newPrice <= 0) {
+                // إذا كان الإدخال غير صالح، أعد تعيين القيمة القديمة
+                priceEl.textContent = gameState.price.toFixed(2);
+            } else {
+                // قص القيمة إلى منزلتين عشريتين والتأكد من الحد الأدنى
+                newPrice = Math.max(0.01, Math.round(newPrice * 100) / 100); 
+                
+                // تحديث حالة اللعبة
+                gameState.price = newPrice;
+                
+                // تحديث العرض بالقيمة الجديدة الصحيحة
+                priceEl.textContent = gameState.price.toFixed(2);
+            }
+            
+            // بعد التحرير، يتم تحديث الطلب أيضًا
+            // (افتراضياً: الطلب ينخفض قليلاً عند تعديل السعر يدوياً لأعلى/لأسفل)
+            gameState.demand = Math.max(10, gameState.demand - 5); 
+            flash('card-demand');
+            updateUI(); // تأكد من مزامنة الواجهة
+        }
 
         function makeClip(){
             // NEW: فحص الحد الأقصى للمشابك
@@ -1244,7 +1306,7 @@
                 
                 if (sellAmount > 0) {
                     // **إضافة تأثير تطاير الأوراق النقدية**
-                    createFloatingEmoji(sellBtn, '💵', Math.min(sellAmount, 8)); // يتطاير 8 كحد أقصى
+                    createFloatingEmoji(sellBtn, '💵', Math.min(sellAmount, 8)); // يتطاير 8 كحد أقص
 
                     playSound(cashSound); // صوت بيع المشابك
                     checkTrophy(gameState.totalSold);
@@ -1368,23 +1430,30 @@
             }
         }
         
-        // وظيفة شراء التأمين الجديدة
+        // وظيفة شراء التأمين الجديدة والمعدلة
         function buyInsurance(){
             const cost = gameState.insuranceCost;
             if(gameState.money >= cost){
                 gameState.money -= cost;
                 gameState.insuranceLevel++;
-                gameState.insuranceCost = gameState.insuranceLevel * 1000;
+                
+                // يتم إعادة حساب التكلفة عند الشراء فقط
+                gameState.insuranceCost = gameState.insuranceLevel * 1000; 
                 
                 // إضافة 5 دقائق (300,000 مللي ثانية)
                 const now = Date.now();
-                // إذا كان التأمين نشطاً، يتم تمديد الوقت. إذا لم يكن نشطاً، يبدأ الآن.
+                // يتم تمديد الوقت إذا كان نشطاً، أو يبدأ الآن.
                 gameState.insuranceEndTime = Math.max(gameState.insuranceEndTime, now) + 300000; 
                 
                 playSound(buySound); 
                 flash('card-money');
-                showNewsTicker("🛡️ تم تفعيل تأمين المصنع لمدة 5 دقائق!", '👍', 4000);
+                showNewsTicker("🛡️ تم تمديد/تفعيل تأمين المصنع لمدة 5 دقائق!", '👍', 4000);
                 updateUI();
+            } else {
+                // صوت تحذير إذا لم يكن هناك ما يكفي من المال
+                playSound(warningSound);
+                // إظهار رسالة تحذير في شريط الأخبار
+                showNewsTicker("❌ لا يوجد مال كافٍ لشراء التأمين!", '💰', 3000);
             }
         }
 
