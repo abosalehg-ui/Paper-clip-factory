@@ -1,1834 +1,1713 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍋 Lemonade Tycoon</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>مصنع مشابك الورق</title>
     <style>
-        /* أنماط CSS الأساسية (لم تتغير) */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *{box-sizing:border-box;margin:0;padding:0}
+        html,body{height:100%;touch-action:manipulation}
+        body{
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: url('background.webp');
+            background-size: cover;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-color: #0b1736;
+            background-blend-mode: overlay;
+            color:#e6eef8;
+            padding:8px;
+            min-height:100vh;
+            -webkit-font-smoothing:antialiased;
+            overflow-x:hidden;
+            transition: box-shadow 1s ease-in-out; /* خاصية الانتقال لتأثيرات الإنجاز */
+            position: relative; /* لتمكين وضع الكؤوس بشكل مطلق */
         }
-
-        body {
-            font-family: 'Cairo', sans-serif;
-            background: linear-gradient(180deg, #6fba52 0%, #8BC34A 100%);
-            min-height: 10vh;
-            padding-top: 60px;
+        .container{
+            max-width:1200px;
+            margin:0 auto;
+            /* لتعويض المساحة المأخوذة من الـ fixed stats */
+            padding-top: 30px;
         }
+        .header{
+            display: flex; /* يجعل العناصر (الأيقونة والنص) على سطر واحد */
+            justify-content: center; /* لتوسيط الأيقونة والنص معاً أفقياً */
+            align-items: center; /* لتوسيط الأيقونة والنص عمودياً (للتساوي في الارتفاع) */
+            margin:6px 0 10px;
+        }
+        .title{
+            font-size:1.3rem;
+            color:#7dd3fc;
+            font-weight:700;
+            margin-top:0; /* إلغاء الهامش العلوي لضمان التوسيط الأفقي */
+            margin-right: 8px; /* إضافة مسافة فاصلة بين الأيقونة والنص */
+        }
+        .subtitle{color:#9aa4b2;margin-top:3px;font-size:0.75rem}
 
-        .resources-bar {
+        /* Guide button */
+        .guide-btn{
+            position: fixed; /* لتثبيته على الشاشة */
+            top: 8px; /* مسافة من الأعلى */
+            right: auto; /* إزالة أي تأثير سابق للزاوية اليمنى */
+            left: 8px; /* مسافة من اليسار */
+            z-index: 55; /* لضمان ظهوره فوق باقي المحتوى */
+            
+            background:linear-gradient(135deg,#1e40af,#3b82f6);
+            border:none;
+            width:30px; /* زيادة بسيطة في الحجم لتحسين اللمس */
+            height:30px;
+            border-radius:50%;
+            cursor:pointer;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 3px 8px rgba(59,130,246,0.4);
+            transition:transform .2s ease;
+        }
+        .guide-btn:active{transform:scale(0.95)}
+        .guide-btn svg{width:18px;height:18px} /* زيادة حجم الأيقونة */
+        
+        /* Emoji Icon Styling */
+        .emoji-icon{
+            font-size: 20px; /* حجم الإيموجي في الأزرار */
+            line-height: 1; /* لضمان التوسيط العمودي */
+            transition: transform .2s;
+        }
+        .icon-btn:active:not(:disabled) .emoji-icon{transform:scale(1.1)}
+
+
+        /* Stats grid - FIXED Position */
+        .stats-grid{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:5px;
+            /* تم تعديل Margin-bottom لتسهيل الـ Fixed */
+            /* margin-bottom:10px; */
+
+            /* NEW: Fixed Position Styles */
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(74, 124, 44, 0.9);
-            border-bottom: 3px solid #000;
-            padding: 5px 8px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
-            z-index: 1000;
-        }
-
-        .resource-item {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-
-        .resource-icon {
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1em;
-            border: 1px solid #666;
-        }
-
-        .resource-value {
-            color: white;
-            font-weight: bold;
-            font-size: 0.85em;
-            text-shadow: 1px 1px 2px #000;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 10px;
-        }
-
-        .menu-buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-
-        .menu-btn {
-            background: linear-gradient(180deg, #7ab84a 0%, #5a8f3a 100%);
-            border: 2px solid #3d5e27;
-            border-radius: 8px;
-            padding: 8px 6px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 2px 0 #2d4a1d, 0 2px 6px rgba(0,0,0,0.3);
-        }
-
-        .menu-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 0px 0 #2d4a1d, 0 1px 4px rgba(0,0,0,0.3);
-        }
-
-        .menu-btn-icon {
-            font-size: 1.5em;
-            margin-bottom: 2px;
-        }
-
-        .menu-btn-text {
-            color: white;
-            font-weight: bold;
-            font-size: 0.7em;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            text-transform: lowercase;
-        }
-
-        /* حجب قسم الأداء القديم */
-        .performance-section, .feedback-icons {
-            display: none !important; 
-        }
-
-        /* تنسيقات الصورة وحاوياتها الجديدة والمصححة */
-        .image-container {
-            position: relative;
-            max-width: 900px;
-            margin: 0 auto;
-            /* **التصحيح: إخفاء أي محتوى يخرج عن حدود الحاوية (القائمة المخفية)** */
-            overflow: hidden; 
-        }
-
-        .lemonade-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            border: 5px solid #FFD700;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-
-        /* أنماط الأيقونات الجديدة (العلوية والسفلية) */
-        .icon-bar {
-            position: absolute;
+            top: 8px; /* نفس مستوى زر الدليل والكأس */
             left: 50%;
             transform: translateX(-50%);
+            width: calc(100% - 16px); /* 100% minus 8px padding on each side of body */
+            max-width: 1200px;
+            z-index: 50; /* Above regular content */
+            /* الشفافية المطلوبة */
+            background: #071033e6; /* Semi-transparent background to blend with body but be visible */
+            padding: 5px 8px; /* Top/Bottom padding for the fixed container */
+            border-radius: 8px; /* تم تعديل الزوايا لتكون مربعة من جميع الجهات */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            /* End NEW: Fixed Position Styles */
+        }
+        .stat-card{
+            background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            padding:2px;
+            border-radius:8px;
+            border:1px solid rgba(255,255,255,0.06);
+            backdrop-filter:blur(4px);
+            box-shadow:0 3px 12px rgba(2,6,23,0.5);
+            text-align:center;
+        }
+        .stat-icon{
+            width:12px;
+            height:12px;
+            margin:0 auto 2px;
+            display:grid;
+            place-items:center;
+            border-radius:6px;
+            background:rgba(255,255,255,0.03);
+        }
+        .stat-icon .emoji-icon-stat{
+            font-size: 10px; /* حجم الإيموجي في إحصائيات الأيقونة */
+        }
+        .stat-label{color:#9aa4b2;font-size:0.50rem;margin-bottom:1px}
+        .stat-value{font-size:0.70rem;font-weight:700}
+
+        /* Main sections */
+        .main-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+        .section{
+            background:linear-gradient(145deg,#0f1724,#1a1f2e);
+            padding:8px;
+            border-radius:10px;
+            border:1px solid rgba(125,211,252,0.08);
+            box-shadow:0 6px 20px rgba(0,0,0,0.4);
+        }
+        .section-title{
+            font-size:0.85rem;
+            font-weight:700;
+            margin-bottom:6px;
+            display:flex;
+            align-items:center;
+            gap:5px;
+            justify-content:center;
+        }
+        .section-title .emoji-icon-section{
+            font-size: 14px;
+        }
+
+        /* Buttons */
+        .icon-btn{
+            width:100%;
+            min-height:45px;
+            border:none;
+            border-radius:10px;
+            cursor:pointer;
+            transition:all .2s ease;
+            position:relative;
+            overflow:hidden;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:3px;
+            padding:6px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.3);
+            font-weight:700;
+            font-size:0.75rem;
+        }
+        .icon-btn:active:not(:disabled){transform:scale(0.97)}
+        .icon-btn:disabled{opacity:.4;cursor:not-allowed}
+        .icon-btn svg{width:22px;height:22px;transition:transform .2s} /* الإبقاء على الأنماط الخاصة بـ SVG لأزرار المودال والدليل فقط */
+        .icon-btn:active:not(:disabled) svg{transform:scale(1.1)}
+
+        .btn-make{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff}
+        .btn-make:before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);opacity:0;transition:opacity .2s}
+        .btn-make:active:not(:disabled):before{opacity:1}
+        .btn-sell{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff}
+        .btn-buy{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+        .btn-upgrade{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff}
+        .btn-marketing{background:linear-gradient(135deg,#a855f7,#9333ea);color:#fff}
+        .btn-secondary{background:linear-gradient(135deg,#1e3a8a,#1e40af);color:#fff}
+
+        /* Item boxes */
+        .item-box{
+            background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
+            padding:6px;
+            border-radius:8px;
+            margin-bottom:6px;
+            border:1px solid rgba(255,255,255,0.04);
+        }
+        .item-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:5px;
+            font-size:0.7rem;
+        }
+        .item-info{
+            color:#9aa4b2;
+            font-size:0.65rem;
+            margin-bottom:5px;
+            text-align:center;
+        }
+
+        /* Price controls */
+        .price-container{
             display: flex;
-            gap: 15px;
-            padding: 5px;
-            z-index: 500;
-        }
-
-        .icon-bar.top-bar {
-            top: 10px;
-        }
-
-        .icon-bar.bottom-bar {
-            bottom: 10px;
-        }
-
-        .icon-display-item {
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            text-align: center;
-            position: relative;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 3px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            min-width: 45px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            justify-content: space-between;
+            gap: 5px; /* Spacing between button and display */
         }
-
-        .icon-display-icon {
-            font-size: 1.2em; /* حجم الأيقونة */
-            line-height: 1;
+        .price-display{
+            flex-grow: 1; /* Allow price display to take up available space */
+            text-align:center;
+            padding:4px;
+            background:rgba(16,185,129,0.1);
+            border-radius:8px;
+            border:1px solid rgba(16,185,129,0.2);
         }
-
-        .icon-display-value {
-            color: white;
-            font-weight: 900;
-            font-size: 0.7em;
-            text-shadow: 1px 1px 2px #000;
-            margin-top: 2px;
+        .price-label{color:#9aa4b2;font-size:0.65rem;margin-bottom:2px}
+        /* NEW: Price Value Container for Editable Text */
+        .price-value{
+            font-size:1.2rem;
+            font-weight:700;
+            color:#10b981;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+        /* NEW: Styling for Editable Price Span */
+        #price {
+            min-width: 40px; /* ضمان عرض كافٍ للتحرير */
+            padding: 0 4px;
+            outline: none; /* إزالة الخط الأزرق الافتراضي للتركيز */
+            border-bottom: 1px solid transparent; /* خط التحرير المخفي */
+            transition: border-bottom-color 0.2s;
+        }
+        #price:focus {
+            border-bottom-color: #10b981; /* إظهار خط التحرير عند التركيز */
+        }
+        /* End NEW Price Styles */
 
-        /* --- تأثير التطاير --- */
-        .particle {
+        /* Price control buttons - now single buttons */
+        .price-btn{
+            width: 50px;
+            min-height:50px;
+            border:none;
+            border-radius:8px;
+            background:linear-gradient(135deg,#0d9488,#0f766e);
+            color:#fff;
+            font-size:0.9rem;
+            font-weight:700;
+            cursor:pointer;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:2px;
+            box-shadow:0 3px 10px rgba(13,148,136,0.3);
+            transition:transform .2s;
+        }
+        .price-btn:active{transform:scale(0.95)}
+        /* NEW: SVG styling for price buttons */
+        .price-btn svg{width:20px;height:20px;stroke:#fff}
+        .price-btn span{font-size:0.65rem;opacity:0.9; display: none;} /* Hide the label */
+
+        /* Toggle */
+        .toggle-container{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:6px;
+            background:rgba(255,255,255,0.02);
+            border-radius:8px;
+            margin-bottom:6px;
+            font-size:0.7rem;
+        }
+        .toggle-btn{
+            width:45px;
+            height:24px;
+            border-radius:12px;
+            border:none;
+            cursor:pointer;
+            position:relative;
+            transition:background .3s;
+            box-shadow:inset 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .toggle-on{background:#10b981}
+        .toggle-off{background:#475569}
+        .toggle-btn:after{
+            content:''; 
+            position:absolute;
+            width:18px;
+            height:18px;
+            border-radius:50%;
+            background:#fff;
+            top:3px;
+            transition:right .3s;
+            box-shadow:0 2px 4px rgba(0,0,0,0.3);
+        }
+        .toggle-off:after{right:24px}
+        .toggle-on:after{right:3px}
+
+        /* Stats section */
+        .stats-section{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:6px;
+        }
+        .stat-item{text-align:center;padding:5px}
+        .stat-item-label{color:#9aa4b2;font-size:0.6rem;margin-bottom:2px}
+        .stat-item-value{font-size:0.85rem;font-weight:700}
+
+        /* Animations */
+        .pulse{animation:pulse 2s infinite}
+        @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+        .float{animation:float 3.4s ease-in-out infinite}
+        @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-5px)}100%{transform:translateY(0)}}
+        .glow-update{animation:glow .9s ease}
+        @keyframes glow{0%{box-shadow:0 0 0 rgba(125,211,252,0)}50%{box-shadow:0 0 15px rgba(125,211,252,0.4)}100%{box-shadow:0 0 0 rgba(125,211,252,0)}}
+        
+        /* تأثيرات الإيموجي المتطايرة - تمت الإضافة هنا */
+        .floating-emoji {
             position: absolute;
-            font-size: 1.2em;
-            color: yellow; /* لون الأيقونة المتطايرة */
+            font-size: 1.5rem;
+            opacity: 0;
             pointer-events: none;
             user-select: none;
-            z-index: 10000;
-            animation: fadeAndFly 1.5s forwards;
-            font-weight: bold;
+            z-index: 100;
+            animation: floatAndFade 1.2s ease-out forwards;
+        }
+
+        @keyframes floatAndFade {
+            0% {
+                transform: translate(-50%, 0) scale(0.7);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -100%) scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -200%) scale(0.5);
+                opacity: 0;
+            }
+        }
+        /* نهاية تأثيرات الإيموجي المتطايرة */
+
+        /* Modal */
+        .modal{
+            display:none;
+            position:fixed;
+            inset:0;
+            background:rgba(2,6,23,0.95);
+            align-items:center;
+            justify-content:center;
+            padding:12px;
+            z-index:60;
+            backdrop-filter:blur(8px);
+        }
+        .modal.active{display:flex}
+        .modal-content{
+            background:linear-gradient(145deg,#071022,#0a1628);
+            padding:16px;
+            border-radius:12px;
+            border:2px solid rgba(125,211,252,0.1);
+            max-width:500px;
+            width:100%;
+            max-height:90vh;
+            overflow:auto;
+        }
+        .modal-title{
+            text-align:center;
+            color:#7dd3fc;
+            margin-bottom:12px;
+            font-size:1.3rem;
+        }
+        .guide-section{
+            background:#061427;
+            padding:10px;
+            border-radius:10px;
+            margin-bottom:10px;
+            border:1px solid rgba(255,255,255,0.04);
+        }
+        .guide-section h3{
+            color:#60a5fa;
+            margin-bottom:6px;
+            font-size:0.9rem;
+        }
+        .guide-section ul,.guide-section p{
+            list-style:none;
+            padding:0;
+            color:#cbd5e1;
+            font-size:0.8rem;
+            line-height:1.5;
+        }
+        .guide-section ul li{margin-bottom:5px}
+
+        .dev-info{
+            text-align:center;
+            padding:10px;
+            border-radius:8px;
+            background:linear-gradient(90deg,#071433,#0b1b2c);
+            border:1px solid rgba(125,211,252,0.06);
+            margin-top:10px;
+            font-size:0.8rem;
         }
         
-        /* بانر الأحداث */
-        .event-banner {
-            background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%);
-            border: 2px solid #000;
-            border-radius: 8px;
-            padding: 8px;
+        /* New Challenge Modal Styles (تم إلغاء استخدامها واستبدالها بشريط الأخبار) */
+        #challengeModal, #gameOverModal {
+            display: none !important; 
+        }
+        
+        /* Game Over Modal Styles - New */
+        /* #gameOverModal .modal-content {
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            background: linear-gradient(145deg, #071022,#0a1628);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        } */
+
+        #insuranceTimer {
             text-align: center;
-            margin-bottom: 8px;
-            color: white;
+            font-size: 0.8rem;
             font-weight: bold;
-            font-size: 0.9em;
-            animation: pulse 2s infinite;
+            color: #fca5a5;
+            margin-top: -6px;
+            margin-bottom: 6px;
         }
 
-        @keyframes fadeAndFly {
-            0% { transform: translate(0, 0); opacity: 1; }
-            100% { transform: translate(var(--x), var(--y)); opacity: 0; }
+
+        /* TROPHY Styles - Full Page Glow */
+        .trophy-bronze {
+            box-shadow: 0 0 30px 10px rgba(176, 141, 87, 0.7), inset 0 0 20px rgba(176, 141, 87, 0.5);
+        }
+        .trophy-silver {
+            box-shadow: 0 0 40px 15px rgba(192, 192, 192, 0.8), inset 0 0 30px rgba(192, 192, 192, 0.6);
+        }
+        .trophy-gold {
+            box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.9), inset 0 0 40px rgba(255, 215, 0, 0.7);
         }
 
-        /* باقي الأنماط (لم تتغير) */
-        .weather-group {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .weather-icon-display {
-            font-size: 1.5em;
-            width: 24px;
-            height: 24px;
+        /* TROPHY Icon Styles (PNG Version) */
+        .trophy-icon {
+            position: fixed;
+            top: 8px;
+            right: 8px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: none;
-            border: none;
-            border-radius: 0;
-            padding: 0;
-        }
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        .action-btn {
-            background: linear-gradient(180deg, #7ab84a 0%, #5a8f3a 100%);
-            border: 2px solid #3d5e27;
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            color: white;
-            font-weight: bold;
-            font-size: 0.9em;
-            box-shadow: 0 3px 0 #2d4a1d, 0 3px 8px rgba(0,0,0,0.3);
-            transition: all 0.2s;
-        }
-        .action-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #2d4a1d, 0 1px 4px rgba(0,0,0,0.3);
-        }
-        .action-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            filter: grayscale(1);
-        }
-        .log-section {
-            background: linear-gradient(180deg, #2d5016 0%, #3d6520 100%);
-            border: 2px solid #1a3d0a;
-            border-radius: 8px;
-            padding: 10px;
-            color: white;
-        }
-        .log-title {
-            font-size: 1.1em;
-            font-weight: bold;
-            margin-bottom: 8px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-        .log-content {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 6px;
-            padding: 8px;
-            max-height: 180px;
-            overflow-y: auto;
-        }
-        .log-entry {
-            padding: 6px;
-            margin-bottom: 5px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            animation: slideIn 0.3s ease-out;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            z-index: 56;
+            display: none; /* مخفي افتراضياً */
+            animation: bounceIn 0.8s ease-out forwards;
+            background: transparent;
+
+            /* خصائص PNG */
+            background-size: 25px 25px; /* حجم الأيقونة الداخلية - كان 25px للسفج */
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
-        @keyframes slideIn {
-            from {
-                transform: translateX(30px);
+        /* Bronze Trophy Icon - Use background-image for PNG and gradient for color */
+        #trophyBronzeIcon {
+            background-image: url('trophy-bronze.png');
+        }
+
+        /* Silver Trophy Icon */
+        #trophySilverIcon {
+            background-image: url('trophy-silver.png');
+        }
+
+        /* Gold Trophy Icon */
+        #trophyGoldIcon {
+            background-image: url('trophy-gold.png');
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
                 opacity: 0;
             }
-            to {
-                transform: translateX(0);
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
                 opacity: 1;
             }
         }
 
-        .log-entry.success {
-            background: rgba(34, 139, 34, 0.3);
-            border-right: 3px solid #32CD32;
-        }
-
-        .log-entry.warning {
-            background: rgba(255, 165, 0, 0.3);
-            border-right: 3px solid #FFA500;
-        }
-
-        .log-entry.error {
-            background: rgba(220, 20, 60, 0.3);
-            border-right: 3px solid #DC143C;
-        }
-
-        .log-entry.info {
-            background: rgba(100, 149, 237, 0.3);
-            border-right: 3px solid #6495ED;
-        }
-        
-        /* أنماط القائمة المنزلقة الجديدة */
-        .settings-drawer {
-            position: absolute;
-            top: 0;
-            left: -320px; /* إخفاء القائمة خارج الشاشة لليسار */
-            height: 100%; 
-            width: 300px;
-            z-index: 600; 
-            transition: left 0.3s ease-in-out;
-            padding: 10px 0; 
-        }
-        
-        /* إضافة طبقة تظليل عند فتح القائمة لجعل باقي المحتوى أقل وضوحًا */
-        .image-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
+        /* --- شريط الأخبار الجديد (للتحديات والأرقام القياسية) --- */
+        #newsTicker {
+            position: fixed;
+            bottom: 0; /* تثبيت في أسفل الشاشة */
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0);
-            z-index: 550;
-            transition: background 0.3s ease-in-out;
-            pointer-events: none; /* للسماح بالنقر على الزر أثناء إغلاق القائمة */
-        }
-
-        .settings-drawer.open {
-            left: 0; /* إظهار القائمة */
-        }
-        
-        /* عند فتح القائمة، تظهر طبقة التظليل */
-        .image-container.drawer-open::before {
-            background: rgba(0, 0, 0, 0.5);
-            pointer-events: auto; /* لحجب النقر على باقي محتوى الصورة */
-        }
-        
-        .settings-toggle-btn {
-            position: absolute;
-            top: 50%;
-            left: 5px; /* موضع الزر الأولي */
-            transform: translateY(-50%);
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            border: 2px solid #FF8C00;
-            border-radius: 0 8px 8px 0; /* شكل نصف دائري من اليمين */
-            box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-            cursor: pointer;
-            font-size: 1.2em;
-            line-height: 1;
-            z-index: 700;
-            transition: left 0.3s ease-in-out;
+            width: 100%;
+            background: linear-gradient(90deg, #ef4444, #dc2626); /* خلفية حمراء */
+            color: #fff;
+            padding: 10px 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-align: center;
+            z-index: 100; /* لضمان ظهوره فوق كل شيء */
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        
-        .settings-drawer.open + .settings-toggle-btn {
-            left: 305px; /* تحريك الزر ليظهر بجانب القائمة المفتوحة */
-        }
-        
-        .settings-section {
-            background: linear-gradient(180deg, #2d5016 0%, #3d6520 100%);
-            border: 2px solid #1a3d0a;
-            border-radius: 8px;
-            padding: 10px;
-            color: white;
-            /* يجب إزالة الهامش ليعمل داخل القائمة المنزلقة */
-            margin-bottom: 0; 
-            height: 100%;
-            overflow-y: auto; /* للسماح بالتمرير داخل القائمة */
-        }
-
-        .settings-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-        .setting-row {
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 6px;
-            padding: 8px;
-            margin-bottom: 8px;
-        }
-        .setting-label {
-            font-weight: bold;
-            margin-bottom: 6px;
-            font-size: 0.85em;
-        }
-
-        .setting-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .slider {
-            flex: 1;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(0,0,0,0.3);
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .slider-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: bold;
-            background: rgba(0,0,0,0.3);
-            padding: 2px 6px;
-            border-radius: 5px;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #7ab84a;
-            font-size: 0.7em;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.85);
-            z-index: 2000;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .modal-content {
-            background: linear-gradient(180deg, #2d5016 0%, #3d6520 100%);
-            border: 3px solid #1a3d0a;
-            border-radius: 12px;
-            max-width: 450px;
-            margin: 20px auto;
-            padding: 15px;
-            color: white;
-        }
-        .modal-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 3px rgba(0,0,0,0.5);
-        }
-        
-        .upgrade-item, .achievement-item, .supply-item {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        .upgrade-header, .achievement-header, .supply-header {
-            font-size: 1em;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-        
-        .supply-item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 5px;
-            font-size: 0.9em;
-        }
-        
-        .supply-buy-btn {
-            background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
-            border: 2px solid #FF8C00;
-            border-radius: 6px;
-            padding: 5px 10px;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 0 #CD8500, 0 2px 6px rgba(0,0,0,0.3);
-            font-size: 0.8em;
-        }
-        
-        .supply-buy-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 0px 0 #CD8500;
-        }
-        
-        .supply-buy-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .upgrade-status, .achievement-progress {
-            margin-bottom: 8px;
-            color: #7ab84a;
-            font-size: 0.9em;
-        }
-
-        .upgrade-btn {
-            width: 100%;
-            background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
-            border: 2px solid #FF8C00;
-            border-radius: 6px;
-            padding: 8px;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 0 #CD8500, 0 2px 6px rgba(0,0,0,0.3);
-            font-size: 0.85em;
-        }
-
-        .upgrade-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 0px 0 #CD8500;
-        }
-
-        .upgrade-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .close-modal-btn {
-            width: 100%;
-            margin-top: 12px;
-            background: linear-gradient(180deg, #666 0%, #444 100%);
-            border: 2px solid #333;
-            border-radius: 6px;
-            padding: 10px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-
-        .achievement-unlocked {
-            border: 2px solid #FFD700;
-            background: rgba(255, 215, 0, 0.1);
-        }
-
-        .achievement-locked {
-            opacity: 0.6;
-        }
-
-        /* إشعار الإنجاز */
-        .achievement-notification {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            border: 3px solid #FF8C00;
-            border-radius: 12px;
-            padding: 15px 25px;
-            color: #000;
-            font-weight: bold;
-            font-size: 1.1em;
-            z-index: 3000;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            animation: achievementPop 3s ease-out;
-            display: none;
-        }
-
-        @keyframes achievementPop {
-            0% { transform: translateX(-50%) translateY(-100px); opacity: 0; }
-            10% { transform: translateX(-50%) translateY(0); opacity: 1; }
-            90% { transform: translateX(-50%) translateY(0); opacity: 1; }
-            100% { transform: translateX(-50%) translateY(-100px); opacity: 0; }
-        }
-
-        /* زر الصوت */
-        .sound-toggle {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            border: 2px solid #FF8C00;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-            cursor: pointer;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
-            z-index: 1500;
-        }
-
-        .sound-toggle:active {
-            transform: scale(0.95);
-        }
-        
-        /* نمط الزبون المتحرك */
-        .customer-icon {
-            font-size: 1.8em; /* تم تصغير الأيقونة */
-            position: relative;
-            animation: walkIn 0.5s ease-out;
-            transition: transform 0.3s, opacity 0.3s;
-            cursor: default;
-        }
-
-        .customer-icon.served {
-            opacity: 0.5;
-            transform: translateY(10px);
-        }
-
-        .feedback-bubble {
-            position: absolute;
-            top: -10px; /* تم تعديل الموضع */
-            right: -5px; /* تم تعديل الموضع */
-            background: white;
-            border-radius: 50%;
-            padding: 3px; /* تم تصغير الحجم */
-            font-size: 0.5em;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            animation: fadeInOut 2s ease-in-out forwards;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(10px); }
-            10% { opacity: 1; transform: translateY(0); }
-            90% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-10px); }
-        }
-
-        @keyframes walkIn {
-            from { transform: translateX(-50px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        /* أنماط المحاكاة المرئية المعدلة */
-        #liveSimulationModal .modal-content {
-            max-width: 250px; /* تصغير عرض النافذة */
-            margin: 10px auto; /* تعديل الهامش */
             
-            /* **التصحيح 1: إزالة خلفية الإطار الأساسي** */
-            background: none !important; 
-            border: none !important; 
-            padding: 0;
-        }
-        
-        #standView {
-            width: 100%; 
-            height: 200px !important; 
-            position: relative; 
+            /* **التعديل لجعل الشريط يبدأ خارج الشاشة من اليسار** */
+            transform: translateX(-100%); 
             
-            /* **التصحيح 2: جعل منطقة المحاكاة شفافة** */
-            background: none !important; 
-            border-bottom: none !important; 
-            overflow: hidden;
+            transition: transform 0.5s ease-out; /* حركة ظهور الشريط */
+            
+            /* إزالة الزوايا العلوية لجعل الشريط يغطي العرض بالكامل من الأسفل */
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
         }
-        
-        #standSetup {
-            right: 50%; 
-            transform: translateX(50%);
+        #newsTicker.show {
+            /* **التعديل لجعل الشريط ينتقل إلى موضعه الطبيعي داخل الشاشة** */
+            transform: translateX(0);
         }
-        
-        #standSetup #tableDisplay {
-            font-size: 2em; /* تصغير أيقونة الطاولة */
+        #newsTicker .emoji {
+            font-size: 1.1rem;
+            margin-left: 8px;
         }
-        
-        #standSetup #umbrellaDisplay {
-            font-size: 2em; /* تصغير أيقونة المظلة */
-            top: -20px !important; /* تعديل موضع المظلة */
-        }
-        
-        #standSetup #vendor {
-            font-size: 1.8em; /* تصغير أيقونة البائع */
-            top: -20px !important; /* تعديل موضع البائع */
-            left: 40px !important;
+        /* --- نهاية شريط الأخبار الجديد --- */
+
+        /* Record Notification (OLD - يتم إخفاؤه) */
+        .record-notification {
+            display: none !important;
         }
 
-        #customerQueue {
-            gap: 10px !important; /* تقليل المسافة بين الزبائن */
-            bottom: 5px !important;
+
+        /* TROPHY Icon Styles (PNG Version) */
+        /* Tablet & Desktop */
+        @media (min-width:768px){
+            .stats-grid{
+                gap:6px;
+                padding: 4px 6px; /* Increase padding for fixed header on desktop */
+                top: 8px; /* Keep the top position the same for fixed header */
+            }
+            .container{
+                padding-top: 50px; /* Increase compensation for fixed header on desktop */
+            }
+            .stat-card{padding:5px}
+            .stat-icon{width:20px;height:20px;margin-bottom:2px}
+            .stat-icon .emoji-icon-stat{font-size: 16px;}
+            .stat-label{font-size:0.6rem;margin-bottom:2px}
+            .stat-value{font-size:1rem}
+            .main-grid{grid-template-columns:repeat(2,1fr);gap:16px}
+            .section{padding:14px}
+            .title{font-size:2rem}
+            .icon-btn{min-height:70px;font-size:0.9rem}
+            .icon-btn .emoji-icon{font-size: 30px;}
+            .section-title{font-size:1rem}
+            .section-title .emoji-icon-section{font-size: 20px;}
+            .price-btn {
+                width: 60px; /* Wider button for desktop */
+            }
+            .price-btn svg{width:25px;height:25px;} /* Larger SVG for desktop */
         }
-        
-        #simulationControls {
-            padding: 5px 10px !important; /* تقليل حشوة التحكم */
-            
-            /* **التصحيح 3: جعل شريط التحكم السفلي شفافاً** */
-            background: none !important; 
-            border-top: none !important;
-        }
-        
-        #simTimer {
-             font-size: 0.9em !important; /* تصغير خط المؤقت */
-        }
-        
     </style>
 </head>
 <body>
-    <div class="resources-bar">
-        <div class="resource-item">
-            <div class="resource-icon">🍋</div>
-            <div class="resource-value" id="lemons">20</div>
+            <button class="guide-btn" onclick="toggleGuide()">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="2"/>
+                    <path d="M12 16v-4M12 8h.01" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+    <audio id="clickSound" src="click.mp3" preload="auto"></audio>
+    <audio id="cashSound" src="cash.mp3" preload="auto"></audio>
+    <audio id="buySound" src="buy.mp3" preload="auto"></audio>
+    <audio id="trophySound" src="Trophy.mp3" preload="auto"></audio>
+    <audio id="warningSound" src="warning.mp3" preload="auto"></audio>
+    <audio id="fireSound" src="fire.mp3" preload="auto"></audio>
+    <audio id="failSound" src="fail.mp3" preload="auto"></audio>
+    <audio id="completionSound" src="completion.mp3" preload="auto"></audio>
+
+    <div id="trophyBronzeIcon" class="trophy-icon"></div>
+    <div id="trophySilverIcon" class="trophy-icon"></div>
+    <div id="trophyGoldIcon" class="trophy-icon"></div>
+
+    <div id="recordNotification" class="record-notification" aria-live="polite" role="status">
+        <span class="emoji">🎉</span>
+        <span>🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!</span>
+    </div>
+
+    <div id="newsTicker">
+        <span id="tickerEmoji" class="emoji"></span>
+        <span id="tickerMessage"></span>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title"></h1> 
         </div>
-        <div class="resource-item">
-            <div class="resource-icon">🍯</div>
-            <div class="resource-value" id="sugar">20</div>
-        </div>
-        <div class="resource-item">
-            <div class="resource-icon">🧊</div>
-            <div class="resource-value" id="ice">20</div>
-        </div>
-        <div class="resource-item">
-            <div class="resource-icon">💰</div>
-            <div class="resource-value" id="money">100</div>
-        </div>
-        <div class="resource-item">
-            <div class="resource-icon">🥤</div>
-            <div class="resource-value" id="pitcher-display">normal</div>
-        </div>
-        <div class="resource-item">
-            <div class="weather-group">
-                 <div class="weather-icon-display" id="weatherIcon"></div>
-                 <div class="weather-icon-display">🌡️</div>
+
+        <div class="stats-grid">
+            <div class="stat-card" id="card-clips">
+                <div class="stat-icon">
+                    <span class="emoji-icon-stat">📎</span>
+                </div>
+                <div class="stat-label">المشابك <span id="clipsLimit" style="display:none">(5,000)</span></div>
+                <div class="stat-value" id="clips">0</div>
             </div>
+
+            <div class="stat-card" id="card-money">
+                <div class="stat-icon">
+                    <span class="emoji-icon-stat">💵</span>
+                </div>
+                <div class="stat-label">المال</div>
+                <div class="stat-value">$<span id="money">0.00</span></div>
+            </div>
+
+            <div class="stat-card" id="card-wire">
+                <div class="stat-icon">
+                    <span class="emoji-icon-stat">🧵</span>
+                </div>
+                <div class="stat-label">السلك</div>
+                <div class="stat-value" id="wire">1000</div>
+            </div>
+
+            <div class="stat-card" id="card-demand">
+                <div class="stat-icon">
+                    <span class="emoji-icon-stat">📈</span>
+                </div>
+                <div class="stat-label">الطلب</div>
+                <div class="stat-value" id="demand">50</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="section">
+                <div class="section-title" style="color:#7dd3fc">
+                    <span class="emoji-icon-section">🏭</span>
+                    مصنع مشابك الورق
+                </div>
+
+                <button id="makeBtn" class="icon-btn btn-make" onclick="makeClip()">
+                    <span class="emoji-icon">📎</span>
+                    <span id="makeBtnText">صنع مشبك</span>
+                </button>
+
+                <div class="item-box">
+                    <div class="item-header">
+                        <span>آلات صنع تلقائي</span>
+                        <span style="color:#60a5fa;font-weight:700" id="autoClippers">0</span>
+                    </div>
+                    <button id="autoClipperBtn" class="icon-btn btn-secondary" onclick="buyAutoClipper()">
+                        <span class="emoji-icon">🤖</span>
+                        <span>شراء آلة $<span id="autoClipperCost">5.00</span></span>
+                    </button>
+                </div>
+
+                <div class="item-box">
+                    <div class="item-header">
+                        <span>شراء سلك</span>
+                        <span style="color:#f59e0b;font-weight:700">شراء سلك (1000 وحدة)</span>
+                    </div>
+                    <button id="wireBtn" class="icon-btn btn-buy" onclick="buyWire()">
+                        <span class="emoji-icon">📦</span>
+                        <span>$<span id="wireCost">20.00</span></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title" style="color:#86efac">
+                    <span class="emoji-icon-section">🛒</span>
+                    المبيعات
+                </div>
+                
+                <div class="price-container">
+                    <button id="decreasePriceBtn" class="price-btn" 
+                            onmousedown="startPriceAdjust(-0.01)" 
+                            ontouchstart="startPriceAdjust(-0.01)" 
+                            onmouseup="stopPriceAdjust()" 
+                            ontouchend="stopPriceAdjust()"
+                            ontouchcancel="stopPriceAdjust()">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
+                            <path d="M12 5v14M19 12l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="price-display">
+                        <div class="price-label">السعر</div>
+                        <div class="price-value">
+                            $
+                            <span id="price" contenteditable="true" onblur="handlePriceEdit()">0.25</span>
+                        </div>
+                    </div>
+
+                    <button id="increasePriceBtn" class="price-btn" 
+                            onmousedown="startPriceAdjust(0.01)" 
+                            ontouchstart="startPriceAdjust(0.01)" 
+                            onmouseup="stopPriceAdjust()" 
+                            ontouchend="stopPriceAdjust()"
+                            ontouchcancel="stopPriceAdjust()">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
+                            <path d="M12 19V5M5 12l7-7 7 7"/>
+                        </svg>
+                    </button>
+                </div>
+                <button id="sellBtn" class="icon-btn btn-sell" onclick="sellClips()" style="margin-top:6px">
+                    <span class="emoji-icon">💰</span>
+                    <span>بيع المشابك (متوفر: <span id="availableClips">0</span>)</span>
+                </button>
+
+                <div class="toggle-container">
+                    <span>بيع تلقائي للمشابك</span>
+                    <button id="autoSellBtn" class="toggle-btn toggle-off" onclick="toggleAutoSell()"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title" style="color:#fbbf24">
+                <span class="emoji-icon-section">✨</span>
+                الترقيات
+            </div>
+
+            <div class="item-box">
+                <div class="item-header">
+                    <span>ترقية التسويق</span>
+                    <span style="color:#a78bfa;font-weight:700">المستوى <span id="marketingLevel">1</span></span>
+                </div>
+                <button id="marketingBtn" class="icon-btn btn-marketing" onclick="increaseMarketing()">
+                    <span class="emoji-icon">📣</span>
+                    <span> $<span id="marketingCost">100.00</span></span>
+                </button>
+            </div>
+            
+            <div class="item-box">
+                <div class="item-header">
+                    <span>توسعة المستودع لـ 5,000 مشبك إضافية</span>
+                    <span style="color:#f59e0b;font-weight:700">الحد الأقصى: <span id="clipsLimitCurrent">5,000</span></span>
+                </div>
+                <button id="warehouseBtn" class="icon-btn btn-upgrade" onclick="upgradeWarehouse()">
+                    <span class="emoji-icon">📦</span>
+                    <span> $<span id="warehouseCost">50.00</span></span>
+                </button>
+            </div>
+            <div class="item-box">
+                <div class="item-header">
+                    <span>زيادة كفاءة السلك</span>
+                    <span style="color:#fbbf24;font-weight:700">×<span id="wireEfficiency">1.0</span></span>
+                </div>
+                <button id="efficiencyBtn" class="icon-btn btn-upgrade" onclick="buyWireEfficiency()">
+                    <span class="emoji-icon">⚙️</span>
+                    <span> $<span id="efficiencyCost">1000.00</span></span>
+                </button>
+            </div>
+
+            <div class="item-box">
+                <div class="item-header">
+                    <span>توسعة المصنع لـ 100 آلة جديدة</span>
+                    <span style="color:#7dd3fc;font-weight:700">الحد الأقصى: <span id="maxClippers">100</span></span>
+                </div>
+                <button id="expansionBtn" class="icon-btn btn-secondary" onclick="buyExpansion()">
+                    <span class="emoji-icon">🏗️</span>
+                    <span> $<span id="expansionCost">2000.00</span></span>
+                </button>
+            </div>
+
+            <div class="item-box">
+                <div class="item-header">
+                    <span>تأمين المصنع من الحوادث لمدة 5 دقائق</span>
+                    <span style="color:#8b5cf6;font-weight:700">المستوى <span id="insuranceLevel">0</span></span>
+                </div>
+                <div id="insuranceTimer"></div>
+                <button id="insuranceBtn" class="icon-btn btn-upgrade" onclick="buyInsurance()">
+                    <span class="emoji-icon">🛡️</span>
+                    <span> $<span id="insuranceCost">1000.00</span></span>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="section">
+            <div class="section-title" style="color:#cbd5e1">
+                <span class="emoji-icon-section">📊</span>
+                الإحصائيات
+            </div>
+            <div class="stats-section">
+                <div class="stat-item">
+                    <div class="stat-item-label">إجمالي الإنتاج</div>
+                    <div class="stat-item-value" id="totalClips">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-item-label">إجمالي المبيعات</div>
+                    <div class="stat-item-value" id="totalSold">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-item-label">الآلات</div>
+                    <div class="stat-item-value" id="totalMachines">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-item-label">معدل الإنتاج</div>
+                    <div class="stat-item-value"><span id="productionRate">0</span>/ث</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="localLeaderboardSection" style="margin-top:12px;">
+            <div class="section-title" style="color:#ffd166">
+                <span class="emoji-icon-section">🏅</span>
+                أفضل النتائج المحلية
+            </div>
+
+            <div class="item-box" style="text-align:center;">
+                <div style="font-weight:700; font-size:1rem; color:#fff; margin-bottom:6px;">🥇 أفضل نتيجة</div>
+                <div id="bestInfo" style="color:#cbd5e1; font-size:0.95rem;">
+                    <div>المبيعات: <span id="bestTotalSold">0</span> مشبك</div>
+                    <div style="margin-top:6px;">المال: $<span id="bestMoney">0.00</span></div>
+                    <div style="margin-top:6px; color:#9aa4b2; font-size:0.8rem;">التاريخ: <span id="bestDate">—</span></div>
+                </div>
+
+                <div style="display:flex; gap:8px; margin-top:12px;">
+                    <button class="icon-btn btn-secondary" onclick="resetBestScore()" style="flex:1; min-height:44px;">
+                        إعادة تعيين النتائج المحلية
+                    </button>
+                    <button class="icon-btn btn-make" onclick="exportBestScore()" style="flex:1; min-height:44px;">
+                        تصدير (نسخ)
+                    </button>
+                </div>
+
+                <div style="margin-top:10px; color:#9aa4b2; font-size:0.75rem;">
+                    تُبنى اللوحة على إجمالي المبيعات <strong>(totalSold)</strong>. يتم حفظ المال عند تحطيم رقم قياسي.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title" style="color: #ef4444;">انتهت اللعبة! 🛑</h2>
+            <p style="text-align:center;color:#cbd5e1;margin-bottom:15px;" id="gameOverMessage">
+                لقد نفد منك السلك ولا تملك المال الكافي لشراء المزيد، ولا يوجد لديك مشابك لبيعها.
+            </p>
+            <div class="dev-info" style="margin-top:0; border:none; background:none;">
+                <div style="font-weight:700;color:#e6eef8">النقاط النهائية: $<span id="finalMoney">0.00</span></div>
+                <div style="margin-top:3px; font-size:0.75rem; color:#9aa4b2">تم بيع: <span id="finalSold">0</span> مشبك</div>
+            </div>
+            <button class="icon-btn btn-make" onclick="location.reload()" style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8); margin-top:15px;">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="M12 4v16M5 11l7-7 7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>إعادة اللعب</span>
+            </button>
         </div>
     </div>
     
-    <div class="image-container" id="imageContainer">
-        <img src="LEMONADE.jpg" alt="Lemonade Stand Image" class="lemonade-image">
-
-        <div class="icon-bar top-bar" id="topIconBar">
-            <div class="icon-display-item" id="angryDisplay">
-                <span class="icon-display-icon">😡</span>
-                <span class="icon-display-value">0</span>
-            </div>
-            <div class="icon-display-item" id="happyDisplay">
-                <span class="icon-display-icon">😊</span>
-                <span class="icon-display-value">0</span>
-            </div>
-            <div class="icon-display-item" id="waitingDisplay">
-                <span class="icon-display-icon">⏳</span>
-                <span class="icon-display-value">0</span>
-            </div>
-            <div class="icon-display-item" id="expensiveDisplay">
-                <span class="icon-display-icon">💵</span>
-                <span class="icon-display-value">0</span>
-            </div>
+    <div id="challengeModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="challengeTitle">حادث!</h2>
+            <p style="text-align:center;color:#cbd5e1;margin-bottom:15px;" id="challengeMessage">
+                تمت سرقة 500 دولار من المصنع بسبب ثغرة أمنية!
+            </p>
+            <button class="icon-btn btn-make" onclick="closeChallengeModal()" style="width:100%;background:linear-gradient(135deg,#ef4444,#dc2626)">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                    <path d="M6 18L18 6M6 6l12 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>حسناً</span>
+            </button>
         </div>
-
-        <div class="icon-bar bottom-bar" id="bottomIconBar">
-            <div class="icon-display-item" id="cupsSoldDisplay">
-                <span class="icon-display-value">0</span>
-                <span class="icon-display-icon">🥤</span>
-            </div>
-            <div class="icon-display-item" id="profitDisplay">
-                <span class="icon-display-value">0.00 $</span>
-                <span class="icon-display-icon">🪙</span>
-            </div>
-            <div class="icon-display-item" id="dayDisplay">
-                <span class="icon-display-value">1</span>
-                <span class="icon-display-icon">📅</span>
-            </div>
-            <div class="icon-display-item" id="reputationDisplay">
-                <span class="icon-display-value">50%</span>
-                <span class="icon-display-icon">👍</span>
-            </div>
-        </div>
-        
-        <div class="settings-drawer" id="settingsDrawer">
-            <div class="settings-section">
-                <div class="settings-title">TODAY'S SETTING</div>
-                
-                <div class="setting-row">
-                    <div class="setting-label">🍋 Lemons per cup:</div>
-                    <div class="setting-controls">
-                        <input type="range" class="slider" id="lemonSlider" min="1" max="10" value="3">
-                        <div class="slider-value" id="lemonValue">3</div>
-                    </div>
-                </div>
-
-                <div class="setting-row">
-                    <div class="setting-label">🍯 Sugar per cup:</div>
-                    <div class="setting-controls">
-                        <input type="range" class="slider" id="sugarSlider" min="1" max="10" value="3">
-                        <div class="slider-value" id="sugarValue">3</div>
-                    </div>
-                </div>
-
-                <div class="setting-row">
-                    <div class="setting-label">🧊 Ice per cup:</div>
-                    <div class="setting-controls">
-                        <input type="range" class="slider" id="iceSlider" min="1" max="10" value="3">
-                        <div class="slider-value" id="iceValue">3</div>
-                    </div>
-                </div>
-
-                <div class="setting-row">
-                    <div class="setting-label">💵 Cup Price:</div>
-                    <div class="setting-controls">
-                        <input type="range" class="slider" id="priceSlider" min="1" max="20" value="5">
-                        <div class="slider-value" id="priceValue">5 $</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <button class="settings-toggle-btn" id="settingsToggleBtn" aria-label="Toggle Settings Menu">⚙️</button>
-        </div>
+    </div>
     
-    <div class="sound-toggle" id="soundToggle">🔊</div>
+    <div id="guideModal" class="modal">
+        <div class="modal-content">
 
-    <div class="achievement-notification" id="achievementNotif"></div>
-
-    <div class="container">
-
-        <div class="weather-banner" style="display: none;">
-            <span id="weatherText">الطقس اليوم</span>
-        </div>
-
-        <div id="eventBanner" class="event-banner" style="display: none;"></div>
-
-
-        <div class="action-buttons">
-            <button class="action-btn" id="startDayBtn">🚀 START DAY</button>
-            <button class="action-btn" id="buySuppliesBtn">🛒 BUY SUPPLIES (Quick)</button>
-        </div>
-        
-        <div class="menu-buttons">
-            <button class="menu-btn" id="upgradesBtn">
-                <div class="menu-btn-icon">⬆️</div>
-                <div class="menu-btn-text">upgrades</div>
-            </button>
-            <button class="menu-btn" id="suppliesBtn">
-                <div class="menu-btn-icon">📦</div>
-                <div class="menu-btn-text">supplies</div>
-            </button>
-            <button class="menu-btn" id="recipeBtn">
-                <div class="menu-btn-icon">📋</div>
-                <div class="menu-btn-text">recipe</div>
-            </button>
-            <button class="menu-btn" id="achievementsBtn">
-                <div class="menu-btn-icon">🏆</div>
-                <div class="menu-btn-text">achievements</div>
-            </button>
-        </div>
-
-        <div class="log-section">
-            <div class="log-title">📋 Activity Log</div>
-            <div class="log-content" id="logContent">
-                <div class="log-entry info">🎮 Welcome to Lemonade Tycoon! Set your recipe and start selling.</div>
+            <div class="guide-section">
+                <h3>🎮 كيفية اللعب</h3>
+                <ul>
+                    <li>• اضغط صنع مشبك لصنع مشبك واحد (يستهلك سلك).</li>
+                    <li>• بيع المشابك لتحصل على المال. السعر يؤثر على الطلب.</li>
+                    <li>• اشترِ سلك وآلات لترفع الإنتاجية، ووسع مصنعك.</li>
+                </ul>
             </div>
-        </div>
-        
-        <div class="modal" id="liveSimulationModal">
-            <div class="modal-content" style="max-width: 250px; height: auto; padding: 0;">
-                <div class="modal-title" style="margin-bottom: 0;">LIVE - DAY <span id="simDayDisplay">1</span></div>
-                
-                <div id="standView" style="position: relative; width: 100%; height: 200px; background: linear-gradient(180deg, #b0e57c 0%, #8bc34a 100%); border-bottom: 3px solid #3d5e27; overflow: hidden;">
-                    
-                    <div id="standSetup" style="position: absolute; bottom: 0; right: 50%; transform: translateX(50%); display: flex; flex-direction: column; align-items: center; z-index: 10;">
-                        <div id="tableDisplay" style="font-size: 2em;">🪑</div>
-                        <div id="umbrellaDisplay" style="font-size: 2em; position: absolute; top: -20px; display: none;">☂️</div>
-                        <div id="vendor" style="font-size: 1.8em; position: absolute; top: -20px; left: 40px;">👨‍🍳</div>
-                    </div>
 
-                    <div id="customerQueue" style="position: absolute; bottom: 5px; left: 10px; display: flex; gap: 10px; align-items: flex-end; z-index: 5;">
-                        </div>
-
-                </div>
-                <div id="simulationControls" style="display: flex; justify-content: space-around; padding: 5px 10px; background: #3d6520; border-top: 2px solid #1a3d0a;">
-                    <button id="speedToggleBtn" class="action-btn" style="width: 30%; padding: 8px 10px;">⏩ x1</button>
-                    <div id="simTimer" style="color: white; font-weight: bold; align-self: center; font-size: 0.9em;">TIME: 0%</div>
-                    <button id="skipDayBtn" class="action-btn" style="width: 30%; padding: 8px 10px; background: linear-gradient(180deg, #ff4d4d 0%, #cc0000 100%); border-color: #990000;">⏭️ SKIP</button>
-                </div>
+            <div class="guide-section">
+                <h3>⚡ الأتمتة</h3>
+                <ul>
+                    <li>• الآلة تنتج مشابك كل ثانية.</li>
+                    <li>• فعّل البيع التلقائي للبيع بدون ضغط منك.</li>
+                </ul>
             </div>
-        </div>
 
-        <div class="modal" id="upgradesModal">
-            <div class="modal-content">
-                <div class="modal-title">🏪 UPGRADES</div>
-                
-                <div class="upgrade-item">
-                    <div class="upgrade-header">🥤 Pitcher Quality</div>
-                    <div class="upgrade-status">Level: <span id="pitcherLevel">Basic</span></div>
-                    <button class="upgrade-btn" id="pitcherUpgradeBtn">Upgrade (50 $)</button>
-                </div>
-
-                <div class="upgrade-item">
-                    <div class="upgrade-header">🪧 Sign</div>
-                    <div class="upgrade-status">Level: <span id="signLevel">None</span></div>
-                    <button class="upgrade-btn" id="signUpgradeBtn">Upgrade (40 $)</button>
-                </div>
-
-                <div class="upgrade-item">
-                    <div class="upgrade-header">🪑 Table</div>
-                    <div class="upgrade-status">Level: <span id="tableLevel">Basic</span></div>
-                    <button class="upgrade-btn" id="tableUpgradeBtn">Upgrade (60 $)</button>
-                </div>
-
-                <div class="upgrade-item">
-                    <div class="upgrade-header">☂️ Umbrella</div>
-                    <div class="upgrade-status">Status: <span id="umbrellaStatus">Not Owned</span></div>
-                    <button class="upgrade-btn" id="umbrellaUpgradeBtn">Buy (80 $)</button>
-                </div>
-
-                <button class="close-modal-btn" id="closeUpgradesBtn">❌ CLOSE</button>
+            <div class="guide-section">
+                <h3>🚀 الترقيات</h3>
+                <ul>
+                    <li>• زيادة كفاءة السلك تعطيك سلك أكثر عند الشراء.</li>
+                    <li>• التسويق يزيد الطلب على منتجاتك.</li>
+                    <li>• التأمين يقفل الحوادث السرقة والحريق مؤقتاً.</li>
+                    <li>• توسعة المصنع وترقية المستودع تتيح مساحة إضافية.</li>
+                </ul>
             </div>
-        </div>
-        
-        <div class="modal" id="suppliesModal">
-            <div class="modal-content">
-                <div class="modal-title">📦 BUY SUPPLIES</div>
-                <div id="supplyList">
-                    <div class="supply-item">
-                        <div class="supply-header">🍋 Lemons</div>
-                        <div id="lemonPacks">
-                            <div class="supply-item-row">
-                                <span>20 Lemons: <span id="lemonPrice1">4</span> $</span>
-                                <button class="supply-buy-btn" data-type="lemons" data-amount="20" data-cost-id="lemonPrice1">Buy</button>
-                            </div>
-                            <div class="supply-item-row">
-                                <span>50 Lemons: <span id="lemonPrice2">10</span> $</span>
-                                <button class="supply-buy-btn" data-type="lemons" data-amount="50" data-cost-id="lemonPrice2">Buy</button>
-                            </div>
-                            <div class="supply-item-row">
-                                <span>100 Lemons: <span id="lemonPrice3">18</span> $</span>
-                                <button class="supply-buy-btn" data-type="lemons" data-amount="100" data-cost-id="lemonPrice3">Buy</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="supply-item">
-                        <div class="supply-header">🍯 Sugar</div>
-                        <div id="sugarPacks">
-                            <div class="supply-item-row">
-                                <span>20 Sugar: <span id="sugarPrice1">3</span> $</span>
-                                <button class="supply-buy-btn" data-type="sugar" data-amount="20" data-cost-id="sugarPrice1">Buy</button>
-                            </div>
-                            <div class="supply-item-row">
-                                <span>50 Sugar: <span id="sugarPrice2">7</span> $</span>
-                                <button class="supply-buy-btn" data-type="sugar" data-amount="50" data-cost-id="sugarPrice2">Buy</button>
-                            </div>
-                            <div class="supply-item-row">
-                                <span>100 Sugar: <span id="sugarPrice3">13</span> $</span>
-                                <button class="supply-buy-btn" data-type="sugar" data-amount="100" data-cost-id="sugarPrice3">Buy</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="supply-item">
-                        <div class="supply-header">🧊 Ice</div>
-                        <div id="icePacks">
-                            <div class="supply-item-row">
-                                <span>20 Ice: <span id="icePrice1">2</span> $</span>
-                                <button class="supply-buy-btn" data-type="ice" data-amount="20" data-cost-id="icePrice1">Buy</button>
-                            </div>
-                            <div class="supply-item-row">
-                                <span>50 Ice: <span id="icePrice2">4</span> $</span>
-                                <button class="supply-buy-btn" data-type="ice" data-amount="50" data-cost-id="icePrice2">Buy</button>
-                            </div>
-                            <div class="supply-item-row">
-                                <span>100 Ice: <span id="icePrice3">7</span> $</span>
-                                <button class="supply-buy-btn" data-type="ice" data-amount="100" data-cost-id="icePrice3">Buy</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button class="close-modal-btn" id="closeSuppliesBtn">❌ CLOSE</button>
-            </div>
-        </div>
 
-        <div class="modal" id="achievementsModal">
-            <div class="modal-content">
-                <div class="modal-title">🏆 ACHIEVEMENTS</div>
-                <div id="achievementsList"></div>
-                <button class="close-modal-btn" id="closeAchievementsBtn">❌ CLOSE</button>
+            <div class="dev-info">
+                <div style="font-weight:700;color:#e6eef8">المطور — ABDULKARIM ALOBUD</div>
+                <div style="margin-top:6px"><a href="mailto:abo.saleh.g@gmail.com" style="color:#60a5fa;text-decoration:none">abo.saleh.g@gmail.com</a></div>
+            </div>
+
+            <div style="margin-top:16px">
+                <button class="icon-btn btn-make" onclick="toggleGuide()" style="width:100%">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>ابدأ اللعب</span>
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // نظام الأصوات
-        const sounds = {
-            bgMusic: 'background-music.mp3',
-            click: 'button-click.mp3',
-            sell: 'cash-register.mp3',
-            upgrade: 'upgrade-sound.mp3',
-            achievement: 'achievement.mp3',
-            happy: 'happy-customer.mp3',
-            angry: 'angry-customer.mp3'
+        let gameState = {
+            clips: 0,
+            money: 0,
+            price: 0.25,
+            demand: 50,
+            wire: 1000,
+            wireCost: 20,
+            autoClippers: 0,
+            autoClipperCost: 5,
+            autoClipperRate: 0,
+            wireEfficiency: 1,
+            marketingLevel: 1,
+            autoSellEnabled: false,
+            totalClips: 0,
+            totalSold: 0,
+            // الإضافات الجديدة
+            insuranceLevel: 0,
+            insuranceCost: 1000,
+            insuranceEndTime: 0, // Timestamp of when insurance expires
+            maxClippersLimit: 100, // الحد الأقصى لآلات الصنع
+            expansionCost: 2000, // تكلفة التوسعة الأولية
+            
+            // NEW: توسعة المستودع
+            maxClipsLimit: 5000, // الحد الأقصى المبدئي للمشابك
+            warehouseCost: 100, // تكلفة ترقية المستودع المبدئية
+            
+            // حالة الإنجازات
+            trophyBronze: false,
+            trophySilver: false,
+            trophyGold: false
         };
 
-        let soundEnabled = true;
-        let audioElements = {};
+        // Best local score object (loaded from localStorage)
+        let bestLocalScore = {
+            totalSold: 0,
+            money: 0,
+            date: null
+        };
+
+        const clickSound = document.getElementById('clickSound');
+        const cashSound = document.getElementById('cashSound');
+        const buySound = document.getElementById('buySound');
+        const trophySound = document.getElementById('trophySound');
+        const warningSound = document.getElementById('warningSound');
+        const fireSound = document.getElementById('fireSound');
+        const failSound = document.getElementById('failSound'); // NEW: Fail Sound
+        const completionSound = document.getElementById('completionSound'); // NEW: completion.mp3
+
+        // عناصر الكؤوس
+        const trophyBronzeIcon = document.getElementById('trophyBronzeIcon');
+        const trophySilverIcon = document.getElementById('trophySilverIcon');
+        const trophyGoldIcon = document.getElementById('trophyGoldIcon');
         
-        // المتغيرات السابقة لتتبع التغيرات وتشغيل تأثير التطاير
-        let prevCupsSold = 0;
-        let prevProfit = 0;
-        let prevDay = 0;
-        let prevReputation = 0;
-        let prevAngry = 0;
-        let prevHappy = 0;
-        let prevWaiting = 0;
-        let prevExpensive = 0;
+        // عناصر الحوادث (المودال أصبحت غير مستخدمة)
+        // const challengeModal = document.getElementById('challengeModal');
+        // const challengeTitle = document.getElementById('challengeTitle');
+        // const challengeMessage = document.getElementById('challengeMessage');
+        const insuranceTimerEl = document.getElementById('insuranceTimer');
+        
+        // عناصر الخسارة (المودال أصبحت غير مستخدمة)
+        // const gameOverModal = document.getElementById('gameOverModal');
+        // const finalMoneyEl = document.getElementById('finalMoney');
+        // const finalSoldEl = document.getElementById('finalSold');
 
+        // عناصر اللوحة المحلية (تم إخفاء إشعار recordNotification)
+        // const recordNotificationEl = document.getElementById('recordNotification');
+        const bestTotalSoldEl = document.getElementById('bestTotalSold');
+        const bestMoneyEl = document.getElementById('bestMoney');
+        const bestDateEl = document.getElementById('bestDate');
+        
+        const makeBtn = document.getElementById('makeBtn'); // تم جلب زر الصنع
+        const sellBtn = document.getElementById('sellBtn'); // تم جلب زر البيع
+        const insuranceBtn = document.getElementById('insuranceBtn'); // تم جلب زر التأمين
 
-        // تحميل الأصوات (لم يتغير)
-        function initSounds() {
-            for (let key in sounds) {
-                const audio = new Audio(sounds[key]);
-                audio.onerror = function() {
-                    console.log(`Sound file not found: ${sounds[key]}`);
-                };
-                audioElements[key] = audio;
-            }
-            
-            if (audioElements.bgMusic) {
-                audioElements.bgMusic.loop = true;
-                audioElements.bgMusic.volume = 0.3;
-            }
+        // NEW: Price Control Variables for Hold-down
+        let priceAdjustInterval = null;
+        
+        // NEW: عناصر شريط الأخبار
+        const newsTickerEl = document.getElementById('newsTicker');
+        const tickerEmojiEl = document.getElementById('tickerEmoji');
+        const tickerMessageEl = document.getElementById('tickerMessage');
+        let tickerTimeout = null; // مؤقت لإخفاء الشريط
+        
+        const priceEl = document.getElementById('price'); // عنصر السعر القابل للتحرير
+
+        function playSound(audioElement) {
+            if(!audioElement) return;
+            try{
+                audioElement.currentTime = 0;
+                audioElement.play().catch(e => {/*ignore autoplay issues*/});
+            }catch(e){}
         }
 
-        function playSound(soundName) {
-            if (!soundEnabled || !audioElements[soundName]) return;
-            try {
-                audioElements[soundName].currentTime = 0;
-                audioElements[soundName].play().catch(e => console.log('Audio play failed:', e));
-            } catch(e) {
-                console.log('Error playing sound:', e);
-            }
-        }
-
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
-            
-            if (soundEnabled) {
-                playSound('bgMusic');
-            } else {
-                if (audioElements.bgMusic) audioElements.bgMusic.pause();
-            }
+        function flash(id){
+            const el = document.getElementById(id);
+            if(!el) return;
+            el.classList.add('glow-update');
+            setTimeout(()=>el.classList.remove('glow-update'),900);
         }
         
-        // **الدالة الجديدة لتأثير التطاير (Particle Effect)**
-        function createParticleEffect(elementId, icon) {
-            const container = document.getElementById(elementId);
-            if (!container) return;
-
-            // تحديد موقع العنصر بالنسبة للنافذة
-            const rect = container.getBoundingClientRect();
-            
-            // إنشاء 10 جزيئات
-            for (let i = 0; i < 10; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.textContent = icon; // استخدام الأيقونة المطلوبة (مثل 🪙 أو 🥤)
+        // **وظيفة جديدة: إنشاء وتطاير الإيموجي**
+        function createFloatingEmoji(buttonElement, emoji, count = 5) {
+            const rect = buttonElement.getBoundingClientRect();
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('span');
+                particle.textContent = emoji;
+                particle.classList.add('floating-emoji');
                 
-                // تحديد موضع البداية (داخل العنصر الأب)
-                const startX = rect.left + rect.width / 2;
-                const startY = rect.top + rect.height / 2;
+                // تحديد موضع البدء بشكل عشوائي داخل حدود الزر
+                const x = rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width * 0.4;
+                const y = rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height * 0.4;
                 
-                particle.style.left = `${startX}px`;
-                particle.style.top = `${startY}px`;
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
                 
-                // تحديد موضع النهاية العشوائي
-                const endX = (Math.random() - 0.5) * 80; // من -40 إلى 40
-                const endY = (Math.random() - 0.5) * 80 - 40; // من -80 إلى 0 (للأعلى)
-                
-                particle.style.setProperty('--x', `${endX}px`);
-                particle.style.setProperty('--y', `${endY}px`);
-
                 document.body.appendChild(particle);
 
-                // إزالة الجسيم بعد انتهاء الأنميشن
+                // إزالة الإيموجي بعد انتهاء الحركة
                 setTimeout(() => {
                     particle.remove();
-                }, 1500);
+                }, 1200); 
             }
         }
-
-        // نظام المحاكاة المرئية (لم يتغير)
-        let simulationInterval = null;
-        let simTime = 0;
-        let simDuration = 20;
-        let simSpeed = 1;
-
-        // قائمة أيقونات الزبائن (لم تتغير)
-        const customerIcons = ['🚶', '🚶‍♂️', '🚶‍♀️', '🧍', '🧍‍♂️', '🧍‍♀️'];
-
-        // نظام الإنجازات (لم يتغير)
-        const achievements = [
-            { id: 'first_sale', name: 'First Sale', desc: 'Sell your first cup', icon: '🎉', req: () => game.cupsSold >= 1 },
-            { id: 'big_day', name: 'Big Day', desc: 'Sell 50 cups in one day', icon: '📈', req: () => game.dailyCups >= 50 },
-            { id: 'rich', name: 'Getting Rich', desc: 'Earn 500$', icon: '💰', req: () => game.money >= 500 },
-            { id: 'tycoon', name: 'Lemonade Tycoon', desc: 'Earn 1000$', icon: '👑', req: () => game.money >= 1000 && game.reputation >= 80 },
-            { id: 'week', name: 'One Week', desc: 'Survive 7 days', icon: '📅', req: () => game.day >= 8 },
-            { id: 'month', name: 'One Month', desc: 'Survive 30 days', icon: '🗓️', req: () => game.day >= 31 },
-            { id: 'popular', name: 'Popular Stand', desc: 'Reach 90% reputation', icon: '⭐', req: () => game.reputation >= 90 },
-            { id: 'perfect', name: 'Perfect Recipe', desc: 'Get 50 happy customers in one day', icon: '😊', req: () => game.feedback.happy >= 50 },
-            { id: 'monopoly', name: 'Monopoly', desc: 'Eliminate all competitors', icon: '🏆', req: () => game.competitors === 0 },
-            { id: 'upgraded', name: 'Fully Upgraded', desc: 'Max all upgrades', icon: '⬆️', req: () => game.upgrades.pitcher >= 2 && game.upgrades.sign >= 2 && game.upgrades.table >= 2 && game.upgrades.umbrella }
-        ];
-
-        let game = {
-            money: 100,
-            lemons: 20,
-            sugar: 20,
-            ice: 20,
-            day: 1,
-            weather: 'sunny',
-            reputation: 50,
-            cupsSold: 0,
-            dailyCups: 0,
-            totalProfit: 0,
-            feedback: { angry: 0, happy: 0, waiting: 0, expensive: 0 },
-            upgrades: {
-                pitcher: 0,
-                sign: 0,
-                table: 0,
-                umbrella: false
-            },
-            supplyPrices: { // إضافة لأسعار الإمدادات
-                lemons: { 20: 4, 50: 10, 100: 18 },
-                sugar: { 20: 3, 50: 7, 100: 13 },
-                ice: { 20: 2, 50: 4, 100: 7 }
-            },
-            competitors: 2,
-            lastEvent: null,
-            unlockedAchievements: []
-        };
-
-        const weatherTypes = [
-            { type: 'sunny', name: 'Sunny', icon: '☀️', demand: 1.5 },
-            { type: 'hot', name: 'Very Hot', icon: '🥵', demand: 2.0 },
-            { type: 'cloudy', name: 'Cloudy', icon: '☁️', demand: 1.0 },
-            { type: 'rainy', name: 'Rainy', icon: '🌧️', demand: 0.5 }
-        ];
-
-        const events = [
-            { type: 'festival', name: 'Festival in the Park', icon: '🎉', demandBonus: 2.0 },
-            { type: 'competition', name: 'New Competitor Nearby', icon: '🏪', demandPenalty: 0.7 },
-            { type: 'celebrity', name: 'Celebrity Visit', icon: '⭐', demandBonus: 1.5 },
-            { type: 'roadwork', name: 'Road Construction', icon: '🚧', demandPenalty: 0.6 },
-            null, null, null
-        ];
-
-        // حفظ اللعبة تلقائياً (لم يتغير)
-        function saveGame() {
-            localStorage.setItem('lemonadeTycoonSave', JSON.stringify(game));
-        }
-
-        function loadGame() {
-            const saved = localStorage.getItem('lemonadeTycoonSave');
-            if (saved) {
-                try {
-                    const loadedGame = JSON.parse(saved);
-                    game = { ...game, ...loadedGame };
-                    addLog('💾 Game loaded successfully!', 'success');
-                } catch(e) {
-                    console.log('Error loading game:', e);
-                }
+        
+        // NEW: وظيفة إظهار شريط الأخبار
+        function showNewsTicker(message, emoji, duration = 3000) {
+            // مسح أي مؤقت سابق
+            if (tickerTimeout) {
+                clearTimeout(tickerTimeout);
+                tickerTimeout = null;
             }
-        }
 
-        function checkAchievements() {
-            achievements.forEach(achievement => {
-                if (!game.unlockedAchievements.includes(achievement.id) && achievement.req()) {
-                    game.unlockedAchievements.push(achievement.id);
-                    showAchievement(achievement);
-                    playSound('achievement');
-                }
-            });
-        }
-
-        function showAchievement(achievement) {
-            const notif = document.getElementById('achievementNotif');
-            notif.textContent = `🏆 ${achievement.name} Unlocked!`;
-            notif.style.display = 'block';
+            tickerEmojiEl.textContent = emoji;
+            tickerMessageEl.textContent = message;
+            newsTickerEl.classList.add('show');
             
-            setTimeout(() => {
-                notif.style.display = 'none';
-            }, 3000);
+            // تعيين مؤقت لإخفاء الشريط
+            tickerTimeout = setTimeout(() => {
+                newsTickerEl.classList.remove('show');
+            }, duration);
         }
 
-        function updateAchievementsList() {
-            const list = document.getElementById('achievementsList');
-            list.innerHTML = '';
-            
-            achievements.forEach(achievement => {
-                const unlocked = game.unlockedAchievements.includes(achievement.id);
-                const item = document.createElement('div');
-                item.className = `achievement-item ${unlocked ? 'achievement-unlocked' : 'achievement-locked'}`;
-                item.innerHTML = `
-                    <div class="achievement-header">${achievement.icon} ${achievement.name}</div>
-                    <div class="achievement-progress">${achievement.desc}</div>
-                    <div style="text-align: center; font-weight: bold; color: ${unlocked ? '#FFD700' : '#999'};">
-                        ${unlocked ? '✅ UNLOCKED' : '🔒 LOCKED'}
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        // **دالة تحديث العرض المعدلة**
-        function updateDisplay() {
-            // التحقق من التغيرات قبل التحديث
-            const currentCupsSold = game.cupsSold;
-            const currentProfit = game.totalProfit;
-            const currentDay = game.day;
-            const currentReputation = game.reputation;
-            const currentAngry = game.feedback.angry;
-            const currentHappy = game.feedback.happy;
-            const currentWaiting = game.feedback.waiting;
-            const currentExpensive = game.feedback.expensive;
-
-            // 1. تحديث الأيقونات في الشريط العلوي (الموارد)
-            document.getElementById('money').textContent = Math.floor(game.money);
-            document.getElementById('lemons').textContent = game.lemons;
-            document.getElementById('sugar').textContent = game.sugar;
-            document.getElementById('ice').textContent = game.ice;
-            const pitcherLevels = ['normal', 'Good', 'premium'];
-            document.getElementById('pitcher-display').textContent = pitcherLevels[game.upgrades.pitcher];
-            const weatherIcon = weatherTypes.find(w => w.type === game.weather).icon;
-            document.getElementById('weatherIcon').textContent = weatherIcon;
-
-            // 2. تحديث الأيقونات على الصورة مع تشغيل تأثير التطاير
-            
-            // الأيقونات السفلية (Cups Sold, Profit, Day, Reputation)
-            const cupsDisplay = document.querySelector('#cupsSoldDisplay .icon-display-value');
-            if (currentCupsSold > prevCupsSold) createParticleEffect('cupsSoldDisplay', '🥤');
-            cupsDisplay.textContent = currentCupsSold;
-
-            const profitDisplay = document.querySelector('#profitDisplay .icon-display-value');
-            if (currentProfit > prevProfit) createParticleEffect('profitDisplay', '🪙');
-            profitDisplay.textContent = currentProfit.toFixed(2) + ' $';
-
-            const dayDisplay = document.querySelector('#dayDisplay .icon-display-value');
-            if (currentDay > prevDay) createParticleEffect('dayDisplay', '📅');
-            dayDisplay.textContent = currentDay;
-
-            const reputationDisplay = document.querySelector('#reputationDisplay .icon-display-value');
-            if (currentReputation > prevReputation) createParticleEffect('reputationDisplay', '👍');
-            reputationDisplay.textContent = game.reputation + '%';
-
-            // الأيقونات العلوية (😡, 😊, ⏳, 💵)
-            const angryDisplay = document.querySelector('#angryDisplay .icon-display-value');
-            if (currentAngry > prevAngry) createParticleEffect('angryDisplay', '😡');
-            angryDisplay.textContent = currentAngry;
-
-            const happyDisplay = document.querySelector('#happyDisplay .icon-display-value');
-            if (currentHappy > prevHappy) createParticleEffect('happyDisplay', '😊');
-            happyDisplay.textContent = currentHappy;
-
-            const waitingDisplay = document.querySelector('#waitingDisplay .icon-display-value');
-            if (currentWaiting > prevWaiting) createParticleEffect('waitingDisplay', '⏳');
-            waitingDisplay.textContent = currentWaiting;
-
-            const expensiveDisplay = document.querySelector('#expensiveDisplay .icon-display-value');
-            if (currentExpensive > prevExpensive) createParticleEffect('expensiveDisplay', '💵');
-            expensiveDisplay.textContent = currentExpensive;
-
-
-            // 3. تحديث القيم السابقة
-            prevCupsSold = currentCupsSold;
-            prevProfit = currentProfit;
-            prevDay = currentDay;
-            prevReputation = currentReputation;
-            prevAngry = currentAngry;
-            prevHappy = currentHappy;
-            prevWaiting = currentWaiting;
-            prevExpensive = currentExpensive;
-            
-            // 4. تحديث حالة أزرار الشراء في قائمة الإمدادات
-            updateSuppliesModalButtons();
-
-            saveGame();
-            checkAchievements();
-        }
-        // **نهاية دالة تحديث العرض المعدلة**
-        
-        // **دالة تبديل قائمة الإعدادات المنزلقة الجديدة والمصححة**
-        function toggleSettingsDrawer() {
-            playSound('click');
-            const drawer = document.getElementById('settingsDrawer');
-            const container = document.getElementById('imageContainer');
-            
-            drawer.classList.toggle('open');
-            container.classList.toggle('drawer-open');
-            
-            const toggleBtn = document.getElementById('settingsToggleBtn');
-            toggleBtn.textContent = drawer.classList.contains('open') ? '❌' : '⚙️';
-        }
-
-        function showUpgrades() {
-            playSound('click');
-            document.getElementById('upgradesModal').style.display = 'block';
-            updateUpgradeDisplay();
-        }
-
-        function closeUpgrades() {
-            playSound('click');
-            document.getElementById('upgradesModal').style.display = 'none';
-        }
-
-        function showAchievements() {
-            playSound('click');
-            document.getElementById('achievementsModal').style.display = 'block';
-            updateAchievementsList();
-        }
-
-        function closeAchievements() {
-            playSound('click');
-            document.getElementById('achievementsModal').style.display = 'none';
-        }
-
-        function showRecipe() {
-            playSound('click');
-            // عرض الإعدادات الحالية من القائمة المنزلقة بدلاً من عرض القائمة
-            const lemons = document.getElementById('lemonSlider').value;
-            const sugar = document.getElementById('sugarSlider').value;
-            const ice = document.getElementById('iceSlider').value;
-            const price = document.getElementById('priceSlider').value;
-            addLog(`📋 Recipe: ${lemons}🍋 + ${sugar}🍯 + ${ice}🧊 = ${price}$`, 'info');
-        }
-        
-        // **الدوال الجديدة لقائمة الشراء**
-        function showSuppliesModal() {
-            playSound('click');
-            document.getElementById('suppliesModal').style.display = 'block';
-            updateSuppliesModalButtons();
-        }
-        
-        function closeSuppliesModal() {
-            playSound('click');
-            document.getElementById('suppliesModal').style.display = 'none';
-        }
-
-        function updateSuppliesModalButtons() {
-            const buttons = document.querySelectorAll('#supplyList .supply-buy-btn');
-            buttons.forEach(btn => {
-                const type = btn.getAttribute('data-type');
-                const amount = parseInt(btn.getAttribute('data-amount'));
-                const cost = game.supplyPrices[type][amount];
+        // NEW: Game Over Check (معدّل ليستخدم شريط الأخبار)
+        function checkGameOver() {
+            // شرط الخسارة: لا يوجد سلك AND المال < تكلفة السلك AND لا يوجد مشابك لبيعها
+            if (gameState.wire === 0 && gameState.money < gameState.wireCost && gameState.clips === 0) {
                 
-                // تحديث نص السعر (في حالة تغير السعر مستقبلاً)
-                const costId = btn.getAttribute('data-cost-id');
-                if (costId) {
-                     document.getElementById(costId).textContent = cost;
+                // finalMoneyEl.textContent = gameState.money.toFixed(2);
+                // finalSoldEl.textContent = gameState.totalSold.toLocaleString();
+                
+                // gameOverModal.classList.add('active'); // تم إلغاء استخدام المودال
+                
+                // إظهار رسالة الخسارة في شريط الأخبار
+                const finalMessage = `انتهت اللعبة! 🛑 النقاط النهائية: $${gameState.money.toFixed(2)} (تم بيع: ${gameState.totalSold.toLocaleString()})`;
+                showNewsTicker(finalMessage, '🔴', 60000); // إبقاء الشريط مرئياً لوقت طويل (60 ثانية)
+
+                playSound(failSound); // تشغيل صوت الخسارة
+                
+                // إيقاف جميع الأزرار لمنع أي تفاعل آخر عدا "إعادة اللعب"
+                document.querySelectorAll('button:not(.guide-btn)').forEach(btn => btn.disabled = true);
+                document.getElementById('autoSellBtn').disabled = true;
+                // إبقاء زر الدليل نشطًا
+                // document.querySelector('.guide-btn').style.display = 'none'; // لا نخفي زر الدليل
+
+                console.log("Game Over: Stuck without clips or wire!");
+                return true;
+            }
+            return false;
+        }
+
+        function checkTrophy(newTotalSold) {
+            const body = document.body;
+
+            // إخفاء جميع الكؤوس أولاً
+            trophyBronzeIcon.style.display = 'none';
+            trophySilverIcon.style.display = 'none';
+            trophyGoldIcon.style.display = 'none';
+
+            // إزالة جميع تأثيرات الجسم أولاً
+            body.classList.remove('trophy-bronze', 'trophy-silver', 'trophy-gold');
+
+
+            // إنجاز برونزي (1000 مبيعة)
+            if (!gameState.trophyBronze && newTotalSold >= 1000) {
+                gameState.trophyBronze = true;
+                body.classList.add('trophy-bronze');
+                trophyBronzeIcon.style.display = 'flex';
+                playSound(trophySound);
+                showNewsTicker("🏆 إنجاز جديد: البرونزي (1,000 مشبك مُباع)!", '🌟');
+                console.log("Trophy Unlocked: Bronze (1,000 Clips Sold)");
+            }
+            // إذا كان الإنجاز البرونزي محققًا بالفعل ولم يتم تحقيق الفضي أو الذهبي بعد
+            else if (gameState.trophyBronze && newTotalSold < 10000) {
+                body.classList.add('trophy-bronze');
+                trophyBronzeIcon.style.display = 'flex';
+            }
+
+
+            // إنجاز فضي (10000 مبيعة)
+            if (!gameState.trophySilver && newTotalSold >= 10000) {
+                gameState.trophySilver = true;
+                body.classList.remove('trophy-bronze');
+                trophyBronzeIcon.style.display = 'none';
+                body.classList.add('trophy-silver');
+                trophySilverIcon.style.display = 'flex';
+                playSound(trophySound);
+                showNewsTicker("🏆 إنجاز جديد: الفضي (10,000 مشبك مُباع)!", '✨');
+                console.log("Trophy Unlocked: Silver (10,000 Clips Sold)");
+            }
+            // إذا كان الإنجاز الفضي محققًا بالفعل ولم يتم تحقيق الذهبي بعد
+            else if (gameState.trophySilver && newTotalSold < 100000) {
+                body.classList.add('trophy-silver');
+                trophySilverIcon.style.display = 'flex';
+            }
+
+
+            // إنجاز ذهبي (100000 مبيعة)
+            if (!gameState.trophyGold && newTotalSold >= 100000) {
+                gameState.trophyGold = true;
+                body.classList.remove('trophy-silver');
+                trophySilverIcon.style.display = 'none';
+                body.classList.add('trophy-gold');
+                trophyGoldIcon.style.display = 'flex';
+                playSound(trophySound);
+                showNewsTicker("🏆 إنجاز جديد: الذهبي (100,000 مشبك مُباع)! تهانينا!", '🌟');
+                console.log("Trophy Unlocked: Gold (100,000 Clips Sold)");
+            }
+            // إذا كان الإنجاز الذهبي محققًا بالفعل
+            else if (gameState.trophyGold) {
+                body.classList.add('trophy-gold');
+                trophyGoldIcon.style.display = 'flex';
+            }
+        }
+
+        // تحديث عرض مؤقت التأمين
+        function updateInsuranceTimer() {
+            const remainingTime = gameState.insuranceEndTime - Date.now();
+            // const insuranceBtn = document.getElementById('insuranceBtn'); // تم جلبه مسبقًا
+            const insuranceCostSpan = document.getElementById('insuranceCost');
+
+            if (remainingTime > 0) {
+                const minutes = Math.floor(remainingTime / 60000);
+                const seconds = Math.floor((remainingTime % 60000) / 1000);
+                insuranceTimerEl.textContent = `التأمين نشط: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                insuranceTimerEl.style.display = 'block';
+                // التعديل المطلوب: لا يتم تعطيل الزر إلا إذا كان المال أقل من التكلفة
+                insuranceBtn.disabled = gameState.money < gameState.insuranceCost;
+            } else {
+                gameState.insuranceEndTime = 0; // تأكد من أن الوقت ينتهي
+                insuranceTimerEl.textContent = '';
+                insuranceTimerEl.style.display = 'none';
+                // تفعيل/تعطيل الزر بناءً على المال
+                insuranceBtn.disabled = gameState.money < gameState.insuranceCost;
+            }
+            
+            insuranceCostSpan.textContent = gameState.insuranceCost.toFixed(2);
+        }
+        
+        // مؤقت تحديث التأمين
+        setInterval(updateInsuranceTimer, 1000);
+
+
+        function updateUI(){
+            document.getElementById('clips').textContent = gameState.clips.toLocaleString();
+            document.getElementById('money').textContent = gameState.money.toFixed(2);
+            document.getElementById('wire').textContent = gameState.wire.toLocaleString();
+            document.getElementById('demand').textContent = gameState.demand;
+            
+            // التعديل هنا: تحديث قيمة عنصر السعر القابل للتحرير
+            if (document.activeElement !== priceEl) {
+                 priceEl.textContent = gameState.price.toFixed(2);
+            }
+            
+            document.getElementById('autoClippers').textContent = gameState.autoClippers;
+            // تم حذف تحديث 'autoRate' من هنا أيضاً لأنه تم حذف العنصر من HTML
+            // document.getElementById('autoRate').textContent = gameState.autoClipperRate; 
+            document.getElementById('autoClipperCost').textContent = gameState.autoClipperCost.toFixed(2);
+            document.getElementById('wireCost').textContent = gameState.wireCost.toFixed(2);
+            document.getElementById('wireEfficiency').textContent = gameState.wireEfficiency.toFixed(1);
+            document.getElementById('efficiencyCost').textContent = (gameState.wireEfficiency * 1000).toFixed(2);
+            document.getElementById('marketingLevel').textContent = gameState.marketingLevel;
+            document.getElementById('marketingCost').textContent = (gameState.marketingLevel * 100).toFixed(2);
+            document.getElementById('availableClips').textContent = gameState.clips;
+            document.getElementById('totalClips').textContent = gameState.totalClips.toLocaleString();
+            document.getElementById('totalSold').textContent = gameState.totalSold.toLocaleString();
+            document.getElementById('totalMachines').textContent = gameState.autoClippers;
+            document.getElementById('productionRate').textContent = gameState.autoClipperRate;
+            
+            // تحديث عناصر التأمين الجديدة
+            document.getElementById('insuranceLevel').textContent = gameState.insuranceLevel;
+            document.getElementById('insuranceCost').textContent = gameState.insuranceCost.toFixed(2);
+            
+            // NEW: تحديث عناصر التوسعة
+            document.getElementById('maxClippers').textContent = gameState.maxClippersLimit.toLocaleString();
+            document.getElementById('expansionCost').textContent = gameState.expansionCost.toFixed(2);
+            
+            // NEW: تحديث عناصر المستودع
+            document.getElementById('clipsLimit').textContent = gameState.maxClipsLimit.toLocaleString();
+            document.getElementById('clipsLimitCurrent').textContent = gameState.maxClipsLimit.toLocaleString();
+            document.getElementById('warehouseCost').textContent = gameState.warehouseCost.toFixed(2);
+            
+            updateInsuranceTimer(); // تحديث خاص بحالة التأمين والزر
+            
+            // const makeBtn = document.getElementById('makeBtn'); // تم نقلها إلى نطاق أوسع
+            // NEW: يجب أن يتعطل زر الصنع إذا نفد السلك أو إذا امتلأ المستودع
+            makeBtn.disabled = gameState.wire < 1 || gameState.clips >= gameState.maxClipsLimit;
+            document.getElementById('makeBtnText').textContent = gameState.wire < 1 ? 'لا يوجد سلك' : 
+                                                               gameState.clips >= gameState.maxClipsLimit ? 'المستودع ممتلئ' : 'صنع مشبك';
+
+            // const sellBtn = document.getElementById('sellBtn'); // تم نقلها إلى نطاق أوسع
+            sellBtn.disabled = gameState.clips === 0;
+            // NEW: الحد الأقصى للآلات
+            document.getElementById('autoClipperBtn').disabled = gameState.money < gameState.autoClipperCost || gameState.autoClippers >= gameState.maxClippersLimit;
+            document.getElementById('wireBtn').disabled = gameState.money < gameState.wireCost;
+            document.getElementById('efficiencyBtn').disabled = gameState.money < gameState.wireEfficiency * 1000;
+            document.getElementById('marketingBtn').disabled = gameState.money < gameState.marketingLevel * 100;
+            document.getElementById('expansionBtn').disabled = gameState.money < gameState.expansionCost; // NEW: زر التوسعة
+            document.getElementById('warehouseBtn').disabled = gameState.money < gameState.warehouseCost; // NEW: زر المستودع
+            
+            // تحديث واجهة أفضل نتيجة محلية
+            bestTotalSoldEl.textContent = bestLocalScore.totalSold.toLocaleString();
+            bestMoneyEl.textContent = parseFloat(bestLocalScore.money || 0).toFixed(2);
+            bestDateEl.textContent = bestLocalScore.date ? new Date(bestLocalScore.date).toLocaleString() : '—';
+            
+            checkGameOver(); // NEW: فحص الخسارة
+        }
+        
+        // دالة جديدة لمعالجة تحرير السعر
+        function handlePriceEdit() {
+            let newPriceStr = priceEl.textContent.trim();
+            // إزالة أي رموز غير ضرورية (مثل $)
+            newPriceStr = newPriceStr.replace(/[^\d.]/g, ''); 
+            
+            // تحويل إلى رقم، والتأكد من أنه رقم موجب
+            let newPrice = parseFloat(newPriceStr);
+            
+            if (isNaN(newPrice) || newPrice <= 0) {
+                // إذا كان الإدخال غير صالح، أعد تعيين القيمة القديمة
+                priceEl.textContent = gameState.price.toFixed(2);
+            } else {
+                // قص القيمة إلى منزلتين عشريتين والتأكد من الحد الأدنى
+                newPrice = Math.max(0.01, Math.round(newPrice * 100) / 100); 
+                
+                // تحديث حالة اللعبة
+                gameState.price = newPrice;
+                
+                // تحديث العرض بالقيمة الجديدة الصحيحة
+                priceEl.textContent = gameState.price.toFixed(2);
+            }
+            
+            // بعد التحرير، يتم تحديث الطلب أيضًا
+            // (افتراضياً: الطلب ينخفض قليلاً عند تعديل السعر يدوياً لأعلى/لأسفل)
+            gameState.demand = Math.max(10, gameState.demand - 5); 
+            flash('card-demand');
+            updateUI(); // تأكد من مزامنة الواجهة
+        }
+
+        function makeClip(){
+            // NEW: فحص الحد الأقصى للمشابك
+            if(gameState.wire >= 1 && gameState.clips < gameState.maxClipsLimit){
+                gameState.clips++;
+                gameState.totalClips++;
+                gameState.wire--;
+                
+                // **إضافة تأثير تطاير المشابك**
+                createFloatingEmoji(makeBtn, '📎', 1);
+
+                playSound(clickSound); // صوت صنع مشبك
+                flash('card-clips');
+                flash('card-wire');
+                updateUI();
+            }
+        }
+
+        function sellClips(){
+            if(gameState.clips > 0){
+                const sellAmount = Math.min(gameState.clips, gameState.demand);
+                gameState.clips -= sellAmount;
+                const revenue = sellAmount * gameState.price;
+                gameState.money += revenue;
+                gameState.totalSold += sellAmount;
+                gameState.demand = Math.max(10, gameState.demand - Math.floor(sellAmount * 0.1));
+                
+                if (sellAmount > 0) {
+                    // **إضافة تأثير تطاير الأوراق النقدية**
+                    createFloatingEmoji(sellBtn, '💵', Math.min(sellAmount, 8)); // يتطاير 8 كحد أقص
+
+                    playSound(cashSound); // صوت بيع المشابك
+                    checkTrophy(gameState.totalSold);
+                    checkLocalRecord(); // NEW: فحص وتحديث لوحة المتصدرين المحلية
                 }
                 
-                // تحديث حالة الزر
-                btn.disabled = game.money < cost;
-            });
-        }
-        
-        function buySupplyPack(event) {
-            const btn = event.target;
-            const type = btn.getAttribute('data-type');
-            const amount = parseInt(btn.getAttribute('data-amount'));
-            const cost = game.supplyPrices[type][amount];
-            
-            if (game.money >= cost) {
-                game.money -= cost;
-                game[type] += amount;
-                playSound('sell');
-                
-                let icon;
-                if (type === 'lemons') icon = '🍋';
-                else if (type === 'sugar') icon = '🍯';
-                else if (type === 'ice') icon = '🧊';
-                
-                addLog(`🛒 Bought ${amount} ${icon} for ${cost}$.`, 'success');
-                updateDisplay();
-            } else {
-                addLog('❌ Not enough money!', 'error');
-            }
-        }
-        // **نهاية الدوال الجديدة لقائمة الشراء**
-
-        function updateUpgradeDisplay() {
-            const pitcherLevels = ['Basic', 'Good', 'Excellent'];
-            const pitcherCosts = [50, 100];
-            document.getElementById('pitcherLevel').textContent = pitcherLevels[game.upgrades.pitcher];
-            const pitcherBtn = document.getElementById('pitcherUpgradeBtn');
-            if (game.upgrades.pitcher >= 2) {
-                pitcherBtn.textContent = '✅ MAX LEVEL';
-                pitcherBtn.disabled = true;
-            } else {
-                pitcherBtn.textContent = `Upgrade (${pitcherCosts[game.upgrades.pitcher]} $)`;
-                pitcherBtn.disabled = game.money < pitcherCosts[game.upgrades.pitcher];
-            }
-
-            const signLevels = ['None', 'Small', 'Large'];
-            const signCosts = [40, 80];
-            document.getElementById('signLevel').textContent = signLevels[game.upgrades.sign];
-            const signBtn = document.getElementById('signUpgradeBtn');
-            if (game.upgrades.sign >= 2) {
-                signBtn.textContent = '✅ MAX LEVEL';
-                signBtn.disabled = true;
-            } else {
-                signBtn.textContent = `Upgrade (${signCosts[game.upgrades.sign]} $)`;
-                signBtn.disabled = game.money < signCosts[game.upgrades.sign];
-            }
-
-            const tableLevels = ['Basic', 'Good', 'Luxury'];
-            const tableCosts = [60, 120];
-            document.getElementById('tableLevel').textContent = tableLevels[game.upgrades.table];
-            const tableBtn = document.getElementById('tableUpgradeBtn');
-            if (game.upgrades.table >= 2) {
-                tableBtn.textContent = '✅ MAX LEVEL';
-                tableBtn.disabled = true;
-            } else {
-                tableBtn.textContent = `Upgrade (${tableCosts[game.upgrades.table]} $)`;
-                tableBtn.disabled = game.money < tableCosts[game.upgrades.table];
-            }
-
-            document.getElementById('umbrellaStatus').textContent = game.upgrades.umbrella ? 'Owned ✅' : 'Not Owned';
-            const umbrellaBtn = document.getElementById('umbrellaUpgradeBtn');
-            if (game.upgrades.umbrella) {
-                umbrellaBtn.textContent = '✅ PURCHASED';
-                umbrellaBtn.disabled = true;
-            } else {
-                umbrellaBtn.disabled = game.money < 80;
+                flash('card-money');
+                flash('card-clips');
+                updateUI();
             }
         }
 
-        function buyUpgrade(type) {
-            const costs = {
-                pitcher: [50, 100],
-                sign: [40, 80],
-                table: [60, 120],
-                umbrella: 80
-            };
-
-            if (type === 'umbrella') {
-                if (game.money >= costs.umbrella && !game.upgrades.umbrella) {
-                    game.money -= costs.umbrella;
-                    game.upgrades.umbrella = true;
-                    playSound('upgrade');
-                    addLog('☂️ Purchased umbrella! Better sales in hot weather.', 'success');
-                }
-            } else {
-                const level = game.upgrades[type];
-                if (level < 2 && game.money >= costs[type][level]) {
-                    game.money -= costs[type][level];
-                    game.upgrades[type]++;
-                    playSound('upgrade');
-                    const names = {
-                        pitcher: 'Pitcher',
-                        sign: 'Sign',
-                        table: 'Table'
-                    };
-                    addLog(`⬆️ Upgraded ${names[type]} to level ${game.upgrades[type] + 1}!`, 'success');
-                }
-            }
-            
-            updateDisplay();
-            updateUpgradeDisplay();
-        }
-
-        function setWeather() {
-            const weather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
-            game.weather = weather.type;
-            return weather;
-        }
-
-        function triggerEvent() {
-            const event = events[Math.floor(Math.random() * events.length)];
-            game.lastEvent = event;
-            
-            const banner = document.getElementById('eventBanner');
-            if (event) {
-                banner.style.display = 'block';
-                banner.textContent = `${event.icon} Event: ${event.name}`;
-            } else {
-                banner.style.display = 'none';
-            }
-            
-            return event;
-        }
-
-        function addLog(message, type = '') {
-            const log = document.getElementById('logContent');
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${type}`;
-            entry.textContent = `[Day ${game.day}] ${message}`;
-            log.insertBefore(entry, log.firstChild);
-            log.scrollTop = 0;
-        }
-        
-        // دالة لعرض الزبائن والتفاعلات (لم تتغير)
-        function spawnCustomer(feedbackIcon = '⏳', isServed = false) {
-            const queue = document.getElementById('customerQueue');
-            
-            if (queue.children.length >= 7) return; 
-
-            const customer = document.createElement('div');
-            customer.className = 'customer-icon';
-            customer.textContent = customerIcons[Math.floor(Math.random() * customerIcons.length)];
-            
-            if (isServed) {
-                const bubble = document.createElement('span');
-                bubble.className = 'feedback-bubble';
-                bubble.textContent = feedbackIcon;
-                customer.appendChild(bubble);
-
-                setTimeout(() => {
-                    customer.remove();
-                }, 1800 / simSpeed);
-
-                setTimeout(() => {
-                    bubble.remove();
-                }, 2000 / simSpeed);
-            } else {
-                queue.appendChild(customer);
+        function buyWire(){
+            if(gameState.money >= gameState.wireCost){
+                gameState.money -= gameState.wireCost;
+                gameState.wire += 1000 * gameState.wireEfficiency;
+                playSound(buySound); // صوت شراء سلك
+                flash('card-wire');
+                flash('card-money');
+                updateUI();
             }
         }
-        
-        // تحديث إعدادات المحل في نافذة المحاكاة (لم تتغير)
-        function updateStandVisuals() {
-            document.getElementById('simDayDisplay').textContent = game.day;
-            
-            const umbrella = document.getElementById('umbrellaDisplay');
-            umbrella.style.display = game.upgrades.umbrella ? 'block' : 'none';
 
-            const tableLevels = ['🪑', '🛋️', '👑'];
-            document.getElementById('tableDisplay').textContent = tableLevels[game.upgrades.table];
-        }
-
-        // دالة لإنهاء المحاكاة وتطبيق النتائج (لم تتغير)
-        function finalizeDay(totalMaxCups, actualDemand, recipeQuality, price, comfortBonus) {
-            if (simulationInterval) {
-                clearInterval(simulationInterval);
-                simulationInterval = null;
-            }
-
-            const maxCups = totalMaxCups;
-            
-            if (maxCups <= 0) {
-                if(actualDemand > 0) {
-                    addLog('⚠️ Demand exists, but no supplies!', 'error');
+        function buyAutoClipper(){
+            // NEW: إضافة شرط الحد الأقصى للآلات
+            if(gameState.money >= gameState.autoClipperCost && gameState.autoClippers < gameState.maxClippersLimit){
+                gameState.money -= gameState.autoClipperCost;
+                gameState.autoClippers++;
+                // يتم زيادة التكلفة بشكل طبيعي إذا لم نصل للحد الأقصى الحالي
+                if (gameState.autoClippers % 100 !== 0) {
+                    gameState.autoClipperCost = Math.floor(gameState.autoClipperCost * 1.15);
                 } else {
-                    addLog('📉 No customers today.', 'warning');
-                }
-            } else {
-                const lemons = parseInt(document.getElementById('lemonSlider').value);
-                const sugar = parseInt(document.getElementById('sugarSlider').value);
-                const ice = parseInt(document.getElementById('iceSlider').value);
-                
-                game.lemons -= maxCups * lemons;
-                game.sugar -= maxCups * sugar;
-                game.ice -= maxCups * ice;
-
-                const revenue = maxCups * price;
-                const cost = maxCups * (lemons * 0.2 + sugar * 0.15 + ice * 0.1);
-                const profit = revenue - cost;
-                
-                game.money += revenue;
-                game.cupsSold += maxCups;
-                game.dailyCups = maxCups;
-                game.totalProfit += profit;
-                
-                const satisfactionRate = ((recipeQuality / 4) / (price / 7)) * comfortBonus;
-
-                if (satisfactionRate > 2.0) {
-                    game.reputation = Math.min(100, game.reputation + 10);
-                    addLog(`⭐⭐⭐ Customers love it! Sold ${maxCups} cups! Rep +10`, 'success');
-                } else if (satisfactionRate > 1.5) {
-                    game.reputation = Math.min(100, game.reputation + 7);
-                    addLog(`⭐⭐ Very happy! Sold ${maxCups} cups! Rep +7`, 'success');
-                } else if (satisfactionRate >= 1) {
-                    game.reputation = Math.min(100, game.reputation + 3);
-                    addLog(`⭐ Satisfied. Sold ${maxCups} cups. Rep +3`, 'success');
-                } else if (satisfactionRate < 0.7) {
-                    game.reputation = Math.max(0, game.reputation - 5);
-                    addLog(`😞 Customers unhappy. Rep -5`, 'error');
-                } else {
-                    addLog(`✅ Good day! Sold ${maxCups} cups.`, 'info');
+                    // إذا وصلنا للحد الأقصى، تثبيت التكلفة مؤقتاً
+                    // عند التوسعة، سيعاد تعيين التكلفة وفقاً لمنطق اللعبة
                 }
                 
-                addLog(`💰 Earned ${revenue}$ selling ${maxCups} cups.`, 'success');
+                playSound(buySound); // صوت شراء آلة
+                flash('card-clips');
+                flash('card-money');
+                updateUI();
             }
-
-            if (Math.random() < 0.15 && game.reputation > 70) {
-                game.competitors = Math.max(0, game.competitors - 1);
-                if (game.competitors === 0) {
-                    addLog('🏆 You are the only stand!', 'success');
-                } else {
-                    addLog('👋 A competitor closed!', 'success');
-                }
-            } else if (Math.random() < 0.1) {
-                game.competitors++;
-                addLog('🏪 New competitor opened!', 'warning');
-            }
-            
-            document.getElementById('liveSimulationModal').style.display = 'none';
-            game.day++;
-            setWeather();
-            triggerEvent();
-            updateDisplay();
         }
 
-        // دالة المحاكاة الرئيسية (تم تعديل تحديث المؤقت)
-        function startDay() {
-            playSound('click');
-            
-            const lemons = parseInt(document.getElementById('lemonSlider').value);
-            const sugar = parseInt(document.getElementById('sugarSlider').value);
-            const ice = parseInt(document.getElementById('iceSlider').value);
-            const price = parseInt(document.getElementById('priceSlider').value);
-            
-            if (game.lemons < lemons || game.sugar < sugar || game.ice < ice) {
-                addLog('❌ Not enough supplies for even one cup! Buy supplies.', 'error');
-                return;
-            }
+        function adjustPrice(delta){
+            gameState.price = Math.max(0.01, Math.round((gameState.price + delta)*100)/100);
+            if(delta > 0) gameState.demand = Math.max(5, gameState.demand - 5);
+            else gameState.demand = Math.min(100 * gameState.marketingLevel, gameState.demand + 5); // ضمان عدم تجاوز الحد الأقصى
+            flash('card-demand');
+            updateUI();
+        }
+        
+        // NEW: Price Adjust with Hold-down logic
+        function startPriceAdjust(delta) {
+            adjustPrice(delta); // Run once immediately
+            // Clear any existing interval to prevent overlapping
+            if (priceAdjustInterval) clearInterval(priceAdjustInterval);
+            // Set a new interval for continuous adjustment
+            priceAdjustInterval = setInterval(() => {
+                adjustPrice(delta);
+            }, 180); // تم تخفيف الحساسية إلى 180ms
+        }
 
-            const weather = weatherTypes.find(w => w.type === game.weather);
-            game.feedback = { angry: 0, happy: 0, waiting: 0, expensive: 0 };
-            game.dailyCups = 0;
-            
-            let baseDemand = Math.floor(10 + Math.random() * 20) + Math.floor(game.reputation / 10);
-            let demandMultiplier = weather.demand;
-            
-            if (game.weather === 'hot' && game.upgrades.umbrella) {
-                demandMultiplier *= 1.3;
+        function stopPriceAdjust() {
+            if (priceAdjustInterval) {
+                clearInterval(priceAdjustInterval);
+                priceAdjustInterval = null;
             }
-            if (game.upgrades.sign === 1) baseDemand += 5; 
-            else if (game.upgrades.sign === 2) baseDemand += 12;
-            
-            const comfortBonus = 1 + (game.upgrades.table * 0.15);
-            
-            if (game.lastEvent) {
-                if (game.lastEvent.demandBonus) demandMultiplier *= game.lastEvent.demandBonus;
-                if (game.lastEvent.demandPenalty) demandMultiplier *= game.lastEvent.demandPenalty;
+        }
+
+        function increaseMarketing(){
+            const cost = gameState.marketingLevel * 100;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.marketingLevel++;
+                gameState.demand = Math.min(100 * gameState.marketingLevel, gameState.demand + 20); // ضمان عدم تجاوز الحد الأقصى للمستوى الجديد
+                playSound(buySound); 
+                flash('card-demand');
+                flash('card-money');
+                updateUI();
             }
-            const competitorEffect = Math.max(0.5, 1 - (game.competitors * 0.1));
-            demandMultiplier *= competitorEffect;
-            
-            const totalDemand = Math.floor(baseDemand * demandMultiplier);
-            const recipeQuality = (lemons + sugar + ice) / 3;
-            const pitcherBonus = 1 + (game.upgrades.pitcher * 0.2);
-            const finalQuality = recipeQuality * pitcherBonus;
-            const qualityFactor = Math.min(finalQuality / 5, 2.0);
-            const priceResistance = Math.max(0.2, 1 - (price - 5) / 10);
-            const actualDemand = Math.floor(totalDemand * qualityFactor * priceResistance);
+        }
 
-            const maxCups = Math.min(
-                Math.floor(game.lemons / lemons),
-                Math.floor(game.sugar / sugar),
-                Math.floor(game.ice / ice),
-                actualDemand
-            );
-            
-            const satisfactionRate = ((recipeQuality / 4) / (price / 7)) * comfortBonus;
-            const happyRatio = satisfactionRate > 2.0 ? 0.8 : (satisfactionRate > 1.5 ? 0.6 : (satisfactionRate >= 1 ? 0.4 : (satisfactionRate < 0.7 ? 0.3 : 0.3)));
-            const angryRatio = satisfactionRate < 0.7 ? 0.3 : 0;
-            const expensiveRatio = (price > 10) ? 0.2 : 0;
-            
-            document.getElementById('startDayBtn').disabled = true;
-            document.getElementById('liveSimulationModal').style.display = 'block';
-            document.getElementById('customerQueue').innerHTML = '';
-            simTime = 0;
-            simSpeed = 1;
-            document.getElementById('speedToggleBtn').textContent = '⏩ x1';
-            updateStandVisuals();
-            
-            let currentCupsSold = 0;
-            const cupsToSell = maxCups;
-            const cupsToMiss = actualDemand - cupsToSell;
-            const totalEvents = cupsToSell + cupsToMiss;
-            const eventsPerSecond = totalEvents / simDuration;
-            const totalSteps = simDuration / (50 / 1000); // عدد الخطوات الإجمالي
+        // NEW: دالة ترقية المستودع
+        function upgradeWarehouse(){
+            const cost = gameState.warehouseCost;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.maxClipsLimit += 5000; // إضافة 5000 مشبك للحد الأقصى
+                gameState.warehouseCost = Math.floor(gameState.warehouseCost * 1.5); // زيادة التكلفة بنسبة 50%
+                
+                playSound(buySound); 
+                flash('card-clips');
+                flash('card-money');
+                updateUI();
+            }
+        }
 
-            function runSimulationStep() {
-                if (simTime >= totalSteps) {
-                    finalizeDay(maxCups, actualDemand, recipeQuality, price, comfortBonus);
-                    document.getElementById('startDayBtn').disabled = false;
-                    return;
+        function buyWireEfficiency(){
+            const cost = gameState.wireEfficiency * 1000;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.wireEfficiency += 0.5;
+                playSound(buySound); 
+                flash('card-wire');
+                flash('card-money');
+                updateUI();
+            }
+        }
+        
+        // NEW: وظيفة توسعة المصنع
+        function buyExpansion(){
+            const cost = gameState.expansionCost;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.maxClippersLimit += 100; // زيادة الحد الأقصى بمقدار 100
+                gameState.expansionCost = Math.floor(gameState.expansionCost * 2); // مضاعفة تكلفة التوسعة
+                
+                playSound(buySound); 
+                flash('card-money');
+                updateUI();
+            }
+        }
+        
+        // وظيفة شراء التأمين الجديدة والمعدلة
+        function buyInsurance(){
+            const cost = gameState.insuranceCost;
+            if(gameState.money >= cost){
+                gameState.money -= cost;
+                gameState.insuranceLevel++;
+                
+                // يتم إعادة حساب التكلفة عند الشراء فقط
+                gameState.insuranceCost = gameState.insuranceLevel * 1000; 
+                
+                // إضافة 5 دقائق (300,000 مللي ثانية)
+                const now = Date.now();
+                // يتم تمديد الوقت إذا كان نشطاً، أو يبدأ الآن.
+                gameState.insuranceEndTime = Math.max(gameState.insuranceEndTime, now) + 300000; 
+                
+                playSound(buySound); 
+                flash('card-money');
+                showNewsTicker("🛡️ تم تمديد/تفعيل تأمين المصنع لمدة 5 دقائق!", '👍', 4000);
+                updateUI();
+            } else {
+                // صوت تحذير إذا لم يكن هناك ما يكفي من المال
+                playSound(warningSound);
+                // إظهار رسالة تحذير في شريط الأخبار
+                showNewsTicker("❌ لا يوجد مال كافٍ لشراء التأمين!", '💰', 3000);
+            }
+        }
+
+        function toggleAutoSell(){
+            gameState.autoSellEnabled = !gameState.autoSellEnabled;
+            const btn = document.getElementById('autoSellBtn');
+            btn.className = gameState.autoSellEnabled ? 'toggle-btn toggle-on' : 'toggle-btn toggle-off';
+        }
+
+        function toggleGuide(){
+            const modal = document.getElementById('guideModal');
+            modal.classList.toggle('active');
+        }
+        
+        // تم إلغاء استخدام هذه الوظيفة
+        // function closeChallengeModal(){
+        //      challengeModal.classList.remove('active');
+        //      updateUI();
+        // }
+        
+        // منطق الحوادث العشوائية (معدّل ليستخدم شريط الأخبار)
+        function triggerRandomChallenge() {
+            // تحقق ما إذا كان التأمين نشطًا
+            if (gameState.insuranceEndTime > Date.now()) {
+                console.log("Challenge blocked by insurance!");
+                return; 
+            }
+            
+            // فرصة 10% لوقوع حادث عشوائي
+            if (Math.random() < 0.10) { 
+                
+                let challengeType = null;
+
+                // تحدي 1: سرقة المال (إذا كان المال > 4500)
+                if (gameState.money >= 4500 && Math.random() < 0.25) { 
+                    challengeType = 'money';
+                } 
+                
+                // تحدي 2: حريق المشابك (إذا كانت المشابك > 7500)
+                else if (gameState.clips >= 7500 && Math.random() < 0.25) {
+                    challengeType = 'clips';
+                }
+                
+                // تحدي 3: تلف الآلات (إذا كان لديك 100 آلة أو أكثر) - NEW REQUIREMENT 1
+                else if (gameState.autoClippers >= 100 && Math.random() < 0.25) {
+                    challengeType = 'clippers';
+                }
+                
+                // تحدي 4: دعاية سلبية (إذا كان الطلب 100 أو أكثر) - NEW REQUIREMENT 2
+                else if (gameState.demand >= 100 && Math.random() < 0.25) {
+                    challengeType = 'demand';
+                }
+                
+                // إذا لم يتحقق أي شرط، لا يتم تشغيل التحدي
+                if (!challengeType) return;
+
+
+                if (challengeType === 'money') {
+                    const lossAmount = 500;
+                    gameState.money = Math.max(0, gameState.money - lossAmount);
+                    
+                    showNewsTicker(`⚠️ حادث: سرقة! سُرق $${lossAmount.toFixed(2)} من أموالك.`, '🚨', 4500);
+                    playSound(warningSound); // تشغيل نغمة التحذير
+                    flash('card-money');
+
+                } else if (challengeType === 'clips') {
+                    const lossAmount = 500;
+                    gameState.clips = Math.max(0, gameState.clips - lossAmount);
+                    
+                    showNewsTicker(`🔥 حادث: حريق! تلف ${lossAmount.toLocaleString()} مشبك ورقي.`, '🚒', 4500);
+                    playSound(fireSound); // تشغيل نغمة الحريق
+                    flash('card-clips');
+
+                } else if (challengeType === 'clippers') { // NEW: Clipper Loss Challenge
+                    const lossAmount = 20;
+                    gameState.autoClippers = Math.max(0, gameState.autoClippers - lossAmount);
+                    
+                    showNewsTicker(`⚙️ حادث: تلف آلات! تعطلت ${lossAmount} آلة صنع تلقائي.`, '💥', 4500);
+                    playSound(fireSound); // استخدام صوت الحريق/خسارة (يمكن تغيير الصوت)
+                    flash('autoClippers');
+
+                } else if (challengeType === 'demand') { // NEW: Negative Publicity Challenge
+                    const oldDemand = gameState.demand;
+                    gameState.demand = 1; // تخفيض الطلب إلى 1
+                    
+                    showNewsTicker(`📉 تحدي: دعاية سلبية! انخفض الطلب من ${oldDemand} إلى ${gameState.demand}.`, '📢', 4500);
+                    playSound(warningSound); // استخدام صوت التحذير
+                    flash('card-demand');
+                }
+                
+                // challengeModal.classList.add('active'); // تم إلغاء استخدام المودال
+                updateUI();
+            }
+        }
+
+        // Auto production
+        setInterval(()=>{
+            // NEW: إذا كانت اللعبة قد انتهت، لا تكمل الإنتاج
+            if (checkGameOver()) return;
+            
+            if(gameState.autoClippers > 0 && gameState.wire >= gameState.autoClippers){
+                
+                // NEW: حساب المشابك التي سيتم صنعها مع الأخذ في الاعتبار الحد الأقصى للمستودع
+                let potentialClips = gameState.autoClippers;
+                let availableSpace = gameState.maxClipsLimit - gameState.clips;
+                let clipsMade = Math.min(potentialClips, availableSpace);
+
+                if (clipsMade > 0) {
+                    gameState.clips += clipsMade;
+                    gameState.totalClips += clipsMade;
+                    gameState.wire -= clipsMade;
+                    gameState.autoClipperRate = gameState.autoClippers;
+                    flash('card-clips');
+                    flash('card-wire');
+                    updateUI();
+                } else if (gameState.clips >= gameState.maxClipsLimit) {
+                    gameState.autoClipperRate = 0; // معدل إنتاج صفر إذا كان ممتلئاً
+                    updateUI();
+                }
+            }
+        },1000);
+
+        // Auto sell
+        setInterval(()=>{
+            // NEW: إذا كانت اللعبة قد انتهت، لا تكمل البيع
+            if (checkGameOver()) return;
+            
+            if(gameState.autoSellEnabled && gameState.clips > 0){
+                const sellAmount = Math.min(gameState.clips, Math.max(1, Math.floor(gameState.demand * 0.1)), 10);
+                gameState.clips -= sellAmount;
+                gameState.money += sellAmount * gameState.price;
+                gameState.totalSold += sellAmount;
+                
+                if (sellAmount > 0) {
+                    // ملاحظة: البيع التلقائي لا يضيف تأثير التطاير لأنه يحدث في الخلفية
+                    playSound(cashSound); // صوت بيع المشابك للبيع التلقائي
+                    checkTrophy(gameState.totalSold);
+                    checkLocalRecord(); // NEW: فحص وتحديث لوحة المتصدرين المحلية
                 }
 
-                simTime++;
-                const timeRatio = simTime / totalSteps;
-                // تم تصحيح عرض النسبة المئوية
-                document.getElementById('simTimer').textContent = `TIME: ${Math.min(100, Math.floor(timeRatio * 100))}%`; 
+                flash('card-money');
+                flash('card-clips');
+                updateUI();
+            }
+        },2000);
 
-                if (totalEvents > 0 && simTime % Math.max(1, Math.round(50 / eventsPerSecond)) === 0) {
-                    if (currentCupsSold < cupsToSell) {
-                        if (Math.random() < angryRatio) {
-                             spawnCustomer('😡', true);
-                             game.feedback.angry++;
-                             playSound('angry');
-                        } else if (Math.random() < happyRatio) {
-                            spawnCustomer('😊', true);
-                            game.feedback.happy++;
-                            playSound('happy');
-                        } else {
-                            spawnCustomer('👍', true);
-                        }
-                        
-                        currentCupsSold++;
-                        playSound('sell');
-                    } else if (cupsToMiss > 0 && Math.random() < 0.5) {
-                        if (Math.random() < expensiveRatio) {
-                            spawnCustomer('💵', true);
-                            game.feedback.expensive++;
-                        } else {
-                            spawnCustomer('⏳', true);
-                            game.feedback.waiting++;
-                        }
+        // Restore demand and check random challenges
+        setInterval(()=>{
+            // NEW: إذا كانت اللعبة قد انتهت، لا تكمل التحديثات
+            if (checkGameOver()) return;
+            
+            // تحديث الطلب
+            gameState.demand = Math.min(100 * gameState.marketingLevel, gameState.demand + gameState.marketingLevel);
+            
+            // تحقق من الحوادث العشوائية كل 3 ثوان (بالتزامن مع تحديث الطلب)
+            triggerRandomChallenge();
+            
+            updateUI();
+        },3000);
+
+        // ========== Local Leaderboard: load / save / notify ==========
+        const STORAGE_KEY = 'bestLocalScore';
+
+        function loadBestScore() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed.totalSold !== 'undefined') {
+                        bestLocalScore.totalSold = parsed.totalSold || 0;
+                        bestLocalScore.money = parsed.money || 0;
+                        bestLocalScore.date = parsed.date || null;
                     }
                 }
-
-                if (Math.random() < 0.2) {
-                    spawnCustomer('⏳', false);
-                }
+            } catch(e){
+                console.error("Error loading bestLocalScore:", e);
             }
-
-            simulationInterval = setInterval(runSimulationStep, 50 / simSpeed);
-            
-            document.getElementById('speedToggleBtn').onclick = function() {
-                if (simulationInterval) {
-                    clearInterval(simulationInterval);
-                    simSpeed = simSpeed === 1 ? 10 : 1;
-                    this.textContent = simSpeed === 1 ? '⏩ x1' : '🚀 x10';
-                    simulationInterval = setInterval(runSimulationStep, 50 / simSpeed);
-                }
-            };
-            
-            document.getElementById('skipDayBtn').onclick = function() {
-                finalizeDay(maxCups, actualDemand, recipeQuality, price, comfortBonus);
-                document.getElementById('startDayBtn').disabled = false;
-            };
         }
 
-        // دالة الشراء السريع (لم تتغير)
-        function quickBuySupplies() {
-            playSound('click');
-            const cost = 30;
-            const items = 20;
-            if (game.money < cost) {
-                addLog('❌ Not enough money! Need 30$.', 'error');
-                return;
+        function saveBestScore() {
+            try {
+                const payload = {
+                    totalSold: bestLocalScore.totalSold,
+                    money: bestLocalScore.money,
+                    date: bestLocalScore.date
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+            } catch(e){
+                console.error("Error saving bestLocalScore:", e);
             }
-
-            game.money -= cost;
-            game.lemons += items;
-            game.sugar += items;
-            game.ice += items;
-
-            playSound('sell');
-            addLog(`🛒 QUICK BUY: ${items}🍋 ${items}🍯 ${items}🧊 (-${cost}$)`, 'success');
-            updateDisplay();
         }
 
-        // ربط الأزرار (تم تحديث ربط زر الإعدادات)
-        document.getElementById('upgradesBtn').onclick = showUpgrades;
-        document.getElementById('suppliesBtn').onclick = showSuppliesModal;
-        document.getElementById('recipeBtn').onclick = showRecipe;
-        document.getElementById('achievementsBtn').onclick = showAchievements;
-        document.getElementById('startDayBtn').onclick = startDay;
-        document.getElementById('buySuppliesBtn').onclick = quickBuySupplies;
-        document.getElementById('closeUpgradesBtn').onclick = closeUpgrades;
-        document.getElementById('closeSuppliesBtn').onclick = closeSuppliesModal;
-        document.getElementById('closeAchievementsBtn').onclick = closeAchievements;
-        document.getElementById('soundToggle').onclick = toggleSound;
-        document.getElementById('settingsToggleBtn').onclick = toggleSettingsDrawer; // ربط الزر الجديد
-        
-        document.querySelectorAll('.supply-buy-btn').forEach(btn => {
-            btn.onclick = buySupplyPack;
-        });
-        
-        document.getElementById('pitcherUpgradeBtn').onclick = function() { buyUpgrade('pitcher'); };
-        document.getElementById('signUpgradeBtn').onclick = function() { buyUpgrade('sign'); };
-        document.getElementById('tableUpgradeBtn').onclick = function() { buyUpgrade('table'); };
-        document.getElementById('umbrellaUpgradeBtn').onclick = function() { buyUpgrade('umbrella'); };
+       function checkLocalRecord() {
+           const previousBest = bestLocalScore.totalSold || 0;
 
-        // ربط السلايدرات (لم يتغير)
-        document.getElementById('lemonSlider').oninput = function() {
-            document.getElementById('lemonValue').textContent = this.value;
-        };
+            if (gameState.totalSold > previousBest + 1000) {
+                bestLocalScore.totalSold = gameState.totalSold;
+                bestLocalScore.money = parseFloat(gameState.money.toFixed(2));
+                bestLocalScore.date = new Date().toISOString();
+                saveBestScore();
 
-        document.getElementById('sugarSlider').oninput = function() {
-            document.getElementById('sugarValue').textContent = this.value;
-        };
-
-        document.getElementById('iceSlider').oninput = function() {
-            document.getElementById('iceValue').textContent = this.value;
-        };
-
-        document.getElementById('priceSlider').oninput = function() {
-            document.getElementById('priceValue').textContent = this.value + ' $';
-        };
-
-        // بدء اللعبة (تمت إضافة حفظ القيم السابقة للتحكم في التطاير)
-        initSounds();
-        loadGame();
-        setWeather();
-        triggerEvent();
-        
-        // إعداد القيم السابقة لعدم تشغيل التطاير عند التحميل
-        prevCupsSold = game.cupsSold;
-        prevProfit = game.totalProfit;
-        prevDay = game.day;
-        prevReputation = game.reputation;
-        prevAngry = game.feedback.angry;
-        prevHappy = game.feedback.happy;
-        prevWaiting = game.feedback.waiting;
-        prevExpensive = game.feedback.expensive;
-
-        updateDisplay();
-        
-        document.body.addEventListener('click', function() {
-            if (soundEnabled && audioElements.bgMusic && audioElements.bgMusic.paused) {
-                playSound('bgMusic');
+                showNewsTicker(`🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!`, '🏅', 3500);
+                playSound(completionSound);
+                flash('card-clips');
+                flash('card-money');
+                console.log("New local record saved:", bestLocalScore);
+                updateUI();
             }
-        }, { once: true });
+        }
+
+        function resetBestScore() {
+            bestLocalScore = { totalSold: 0, money: 0, date: null };
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch(e){ console.error(e); }
+            updateUI();
+            
+            // استخدام شريط الأخبار للإشعار
+            showNewsTicker('تمت إعادة تعيين النتائج المحلية.', '🔄', 3500);
+            playSound(completionSound);
+        }
+
+        // تصدير سريع للنتيجة (نسخ للنص)
+        function exportBestScore() {
+            const text = `أفضل مبيعات محلية: ${bestLocalScore.totalSold.toLocaleString()} مشبك — المال: $${parseFloat(bestLocalScore.money || 0).toFixed(2)} — التاريخ: ${bestLocalScore.date ? new Date(bestLocalScore.date).toLocaleString() : '—'}`;
+            try {
+                navigator.clipboard.writeText(text).then(()=> {
+                    // استخدام شريط الأخبار للإشعار
+                    showNewsTicker('تم نسخ أفضل نتيجة إلى الحافظة!', '📋', 3500);
+                    playSound(completionSound);
+                }).catch(()=> {
+                    // fallback: alert
+                    alert(text);
+                });
+            } catch(e){
+                alert(text);
+            }
+        }
+
+        // قم بفتح نافذة الدليل عند أول تحميل
+        window.onload = function() {
+            toggleGuide();
+            // حمل أفضل نتيجة محلية
+            loadBestScore();
+            // لضمان عرض أي كأس تم تحقيقه بعد تحميل الصفحة (إذا كانت البيانات محفوظة)
+            checkTrophy(gameState.totalSold); 
+            updateUI();
+        }
+        
+        // Ensure price adjustment stops when mouse/touch leaves button area
+        document.addEventListener('mouseup', stopPriceAdjust);
+        document.addEventListener('touchend', stopPriceAdjust);
+        document.addEventListener('touchcancel', stopPriceAdjust);
+
     </script>
 </body>
 </html>
