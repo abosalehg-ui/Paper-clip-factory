@@ -1,0 +1,27 @@
+{
+  "name": "مصنع مشابك الورق",
+  "short_name": "مشابك الورق",
+  "description": "لعبة إدارة وأتمتة لمصنع مشابك الورق",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1736",
+  "theme_color": "#0b1736",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "assets/images/trophy-gold.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/trophy-gold.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

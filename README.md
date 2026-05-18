@@ -141,20 +141,51 @@ start index.html
 
 | التقنية | الاستخدام |
 |---------|-----------|
-| **HTML5** | الهيكلة والتخطيط |
+| **HTML5** | هيكل اللعبة |
 | **CSS3** | التصميم والحركات |
-| **JavaScript** | منطق اللعبة والتفاعلات |
-| **LocalStorage** | حفظ الأرقام القياسية |
+| **JavaScript (ES Modules)** | منطق اللعبة (وحدات معيارية، بدون خطوة بناء) |
+| **LocalStorage** | حفظ الحالة الكاملة والأرقام القياسية |
+| **Service Worker + PWA** | العمل بدون إنترنت والتثبيت على الجوال |
 | **GitHub Pages** | الاستضافة |
 
 ## 📁 هيكل المشروع
 
 ```
 Paper-clip-factory/
-├── index.html          # ملف اللعبة الرئيسي
-├── README.md           # التوثيق
-└── assets/             # الموارد (إن وجدت)
+├── index.html              # هيكل اللعبة (HTML فقط)
+├── manifest.json           # PWA manifest
+├── service-worker.js       # تخزين مؤقت للعمل بدون إنترنت
+├── css/
+│   └── styles.css          # كل التنسيقات
+├── js/
+│   ├── main.js             # نقطة الدخول (ES modules)
+│   ├── config.js           # الثوابت
+│   ├── state.js            # حالة اللعبة
+│   ├── save.js             # حفظ/تحميل/تصدير
+│   ├── game-loop.js        # حلقة اللعبة (requestAnimationFrame)
+│   ├── production.js       # صنع وبيع المشابك
+│   ├── upgrades.js         # الترقيات
+│   ├── events.js           # الأحداث العشوائية
+│   ├── achievements.js     # الإنجازات
+│   ├── ui.js               # تحديث الواجهة
+│   ├── effects.js          # الجسيمات والإشعارات
+│   └── audio.js            # المؤثرات الصوتية
+├── assets/
+│   ├── audio/              # ملفات MP3
+│   └── images/             # الخلفية وأيقونات الكؤوس
+└── README.md
 ```
+
+## 🆕 الميزات التقنية الحديثة
+
+- 💾 **حفظ تلقائي شامل** كل 30 ثانية وعند إغلاق الصفحة
+- ⏰ **التقدم في وضع عدم الاتصال** — يحسب الإنتاج خلال غيابك (حتى 8 ساعات)
+- 📤 **تصدير/استيراد الحفظ** كنص Base64
+- ⌨️ **اختصارات لوحة المفاتيح**: `Space` صنع، `S` بيع، `B` سلك، `A` آلة، `Esc` إغلاق
+- 📱 **PWA** — يمكن تثبيت اللعبة على الجوال وتعمل بدون إنترنت
+- 🔊 **زر كتم الصوت**
+- ♿ **دعم الوصولية**: ARIA labels، اختصارات، `prefers-reduced-motion`
+- 🚀 **حلقة لعبة موحدة** عبر `requestAnimationFrame` بدلاً من `setInterval` متعدد
 
 ## 💡 نصائح للمحترفين
 
@@ -288,20 +319,40 @@ start index.html
 
 | Technology | Purpose |
 |------------|---------|
-| **HTML5** | Structure & Layout |
+| **HTML5** | Game markup |
 | **CSS3** | Styling & Animations |
-| **JavaScript** | Game Logic & Interactions |
-| **LocalStorage** | High Score Storage |
+| **JavaScript (ES Modules)** | Modular game logic (no build step) |
+| **LocalStorage** | Full game state + high scores |
+| **Service Worker + PWA** | Offline play & mobile installation |
 | **GitHub Pages** | Hosting |
 
 ## 📁 Project Structure
 
 ```
 Paper-clip-factory/
-├── index.html          # Main game file
-├── README.md           # Documentation
-└── assets/             # Resources (if any)
+├── index.html              # Game markup (HTML only)
+├── manifest.json           # PWA manifest
+├── service-worker.js       # Offline caching
+├── css/styles.css          # All styles
+├── js/                     # ES module game logic
+│   ├── main.js, config.js, state.js, save.js
+│   ├── game-loop.js, production.js, upgrades.js
+│   ├── events.js, achievements.js
+│   └── ui.js, effects.js, audio.js
+├── assets/                 # Audio + images
+└── README.md
 ```
+
+## 🆕 Modern Technical Features
+
+- 💾 **Full auto-save** every 30s and on page close
+- ⏰ **Offline progress** — clips and earnings while away (up to 8 hours)
+- 📤 **Export/import save** as Base64 string
+- ⌨️ **Keyboard shortcuts**: `Space` make, `S` sell, `B` wire, `A` machine, `Esc` close
+- 📱 **PWA** — installable on mobile, works offline
+- 🔊 **Sound toggle**
+- ♿ **Accessibility**: ARIA labels, shortcuts, `prefers-reduced-motion`
+- 🚀 **Unified game loop** via `requestAnimationFrame` (replacing multiple `setInterval` timers)
 
 ## 💡 Pro Tips
 
