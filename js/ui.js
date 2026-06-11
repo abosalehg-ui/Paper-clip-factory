@@ -1,6 +1,28 @@
 import { gameState, bestLocalScore } from './state.js';
+import { GAME_CONFIG } from './config.js';
+import { formatNumber, formatMoney } from './format.js';
 
 const els = {};
+
+// Dirty-check writes: skip DOM mutations when the rendered value is unchanged.
+// This keeps the throttled render loop cheap and avoids needless reflows.
+function setText(el, value) {
+    if (!el) return;
+    const str = String(value);
+    if (el._txt !== str) {
+        el.textContent = str;
+        el._txt = str;
+    }
+}
+
+function setDisabled(el, disabled) {
+    if (!el) return;
+    disabled = !!disabled;
+    if (el.disabled !== disabled) {
+        el.disabled = disabled;
+        el.setAttribute('aria-disabled', String(disabled));
+    }
+}
 
 export function initUI() {
     const ids = [
@@ -25,75 +47,79 @@ export function updateInsuranceTimer() {
     if (remaining > 0) {
         const minutes = Math.floor(remaining / 60000);
         const seconds = Math.floor((remaining % 60000) / 1000);
-        els.insuranceTimer.textContent =
-            `التأمين نشط: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        setText(els.insuranceTimer,
+            `التأمين نشط: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
         els.insuranceTimer.style.display = 'block';
     } else {
         gameState.insuranceEndTime = 0;
-        els.insuranceTimer.textContent = '';
+        setText(els.insuranceTimer, '');
         els.insuranceTimer.style.display = 'none';
     }
-    els.insuranceBtn.disabled = gameState.money < gameState.insuranceCost;
+    setDisabled(els.insuranceBtn, gameState.money < gameState.insuranceCost);
 }
 
 export function updateUI() {
     if (!els.clips) return;
-    els.clips.textContent = gameState.clips.toLocaleString();
-    els.money.textContent = gameState.money.toFixed(2);
-    els.wire.textContent = gameState.wire.toLocaleString();
-    els.demand.textContent = gameState.demand;
+
+    const efficiencyCost = gameState.wireEfficiency * GAME_CONFIG.EFFICIENCY_BASE_COST;
+    const marketingCost = gameState.marketingLevel * GAME_CONFIG.MARKETING_BASE_COST;
+
+    setText(els.clips, formatNumber(gameState.clips));
+    setText(els.money, formatMoney(gameState.money));
+    setText(els.wire, formatNumber(gameState.wire));
+    setText(els.demand, gameState.demand);
 
     if (document.activeElement !== els.price) {
-        els.price.textContent = gameState.price.toFixed(2);
+        setText(els.price, gameState.price.toFixed(2));
     }
 
-    els.autoClippers.textContent = gameState.autoClippers;
-    els.autoClipperCost.textContent = gameState.autoClipperCost.toFixed(2);
-    els.wireCost.textContent = gameState.wireCost.toFixed(2);
-    els.wireEfficiency.textContent = gameState.wireEfficiency.toFixed(1);
-    els.efficiencyCost.textContent = (gameState.wireEfficiency * 1000).toFixed(2);
-    els.marketingLevel.textContent = gameState.marketingLevel;
-    els.marketingCost.textContent = (gameState.marketingLevel * 100).toFixed(2);
-    els.availableClips.textContent = gameState.clips;
-    els.totalClips.textContent = gameState.totalClips.toLocaleString();
-    els.totalSold.textContent = gameState.totalSold.toLocaleString();
-    els.totalMachines.textContent = gameState.autoClippers;
-    els.productionRate.textContent = gameState.autoClipperRate;
+    setText(els.autoClippers, formatNumber(gameState.autoClippers));
+    setText(els.autoClipperCost, formatMoney(gameState.autoClipperCost));
+    setText(els.wireCost, formatMoney(gameState.wireCost));
+    setText(els.wireEfficiency, gameState.wireEfficiency.toFixed(1));
+    setText(els.efficiencyCost, formatMoney(efficiencyCost));
+    setText(els.marketingLevel, gameState.marketingLevel);
+    setText(els.marketingCost, formatMoney(marketingCost));
+    setText(els.availableClips, formatNumber(gameState.clips));
+    setText(els.totalClips, formatNumber(gameState.totalClips));
+    setText(els.totalSold, formatNumber(gameState.totalSold));
+    setText(els.totalMachines, formatNumber(gameState.autoClippers));
+    setText(els.productionRate, formatNumber(gameState.autoClipperRate));
 
-    els.insuranceLevel.textContent = gameState.insuranceLevel;
-    els.insuranceCost.textContent = gameState.insuranceCost.toFixed(2);
+    setText(els.insuranceLevel, gameState.insuranceLevel);
+    setText(els.insuranceCost, formatMoney(gameState.insuranceCost));
 
-    els.maxClippers.textContent = gameState.maxClippersLimit.toLocaleString();
-    els.expansionCost.textContent = gameState.expansionCost.toFixed(2);
+    setText(els.maxClippers, formatNumber(gameState.maxClippersLimit));
+    setText(els.expansionCost, formatMoney(gameState.expansionCost));
 
-    els.clipsLimit.textContent = gameState.maxClipsLimit.toLocaleString();
-    els.clipsLimitCurrent.textContent = gameState.maxClipsLimit.toLocaleString();
-    els.warehouseCost.textContent = gameState.warehouseCost.toFixed(2);
+    setText(els.clipsLimit, formatNumber(gameState.maxClipsLimit));
+    setText(els.clipsLimitCurrent, formatNumber(gameState.maxClipsLimit));
+    setText(els.warehouseCost, formatMoney(gameState.warehouseCost));
 
     updateInsuranceTimer();
 
-    els.makeBtn.disabled = gameState.wire < 1 || gameState.clips >= gameState.maxClipsLimit;
-    els.makeBtnText.textContent = gameState.wire < 1
+    const warehouseFull = gameState.clips >= gameState.maxClipsLimit;
+    const noWire = gameState.wire < 1;
+    setDisabled(els.makeBtn, noWire || warehouseFull);
+    setText(els.makeBtnText, noWire
         ? 'لا يوجد سلك'
-        : gameState.clips >= gameState.maxClipsLimit
-            ? 'المستودع ممتلئ'
-            : 'صنع مشبك';
+        : warehouseFull ? 'المستودع ممتلئ' : 'صنع مشبك');
 
-    els.sellBtn.disabled = gameState.clips === 0;
-    els.autoClipperBtn.disabled =
+    setDisabled(els.sellBtn, gameState.clips === 0);
+    setDisabled(els.autoClipperBtn,
         gameState.money < gameState.autoClipperCost ||
-        gameState.autoClippers >= gameState.maxClippersLimit;
-    els.wireBtn.disabled = gameState.money < gameState.wireCost;
-    els.efficiencyBtn.disabled = gameState.money < gameState.wireEfficiency * 1000;
-    els.marketingBtn.disabled = gameState.money < gameState.marketingLevel * 100;
-    els.expansionBtn.disabled = gameState.money < gameState.expansionCost;
-    els.warehouseBtn.disabled = gameState.money < gameState.warehouseCost;
+        gameState.autoClippers >= gameState.maxClippersLimit);
+    setDisabled(els.wireBtn, gameState.money < gameState.wireCost);
+    setDisabled(els.efficiencyBtn, gameState.money < efficiencyCost);
+    setDisabled(els.marketingBtn, gameState.money < marketingCost);
+    setDisabled(els.expansionBtn, gameState.money < gameState.expansionCost);
+    setDisabled(els.warehouseBtn, gameState.money < gameState.warehouseCost);
 
-    els.bestTotalSold.textContent = bestLocalScore.totalSold.toLocaleString();
-    els.bestMoney.textContent = parseFloat(bestLocalScore.money || 0).toFixed(2);
-    els.bestDate.textContent = bestLocalScore.date
+    setText(els.bestTotalSold, formatNumber(bestLocalScore.totalSold));
+    setText(els.bestMoney, formatMoney(bestLocalScore.money || 0));
+    setText(els.bestDate, bestLocalScore.date
         ? new Date(bestLocalScore.date).toLocaleString()
-        : '—';
+        : '—');
 }
 
 export function updateAutoSellToggle() {
@@ -101,6 +127,7 @@ export function updateAutoSellToggle() {
     els.autoSellBtn.className = gameState.autoSellEnabled
         ? 'toggle-btn toggle-on'
         : 'toggle-btn toggle-off';
+    els.autoSellBtn.setAttribute('aria-pressed', String(gameState.autoSellEnabled));
 }
 
 export function showGameOverState() {

@@ -1,6 +1,7 @@
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export function flash(id) {
+    if (reduceMotion) return;
     const el = document.getElementById(id);
     if (!el) return;
     el.classList.add('glow-update');

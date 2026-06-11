@@ -58,4 +58,22 @@ export const GAME_CONFIG = {
     PRICE_ADJUST_INTERVAL_MS: 180,
     PRICE_ADJUST_DELTA: 0.01,
     MIN_PRICE: 0.01,
+
+    // UI render throttle: cap DOM refresh rate independent of rAF (~60fps).
+    RENDER_TICK_MS: 50,
+
+    // Demand dynamics (previously hard-coded magic numbers).
+    DEMAND_MIN_AFTER_SALE: 10,      // demand floor after a manual sale
+    DEMAND_DECAY_FRACTION: 0.1,     // demand lost per clip sold (manual)
+    PRICE_DEMAND_STEP: 5,           // demand shift per price adjustment
+    DEMAND_MIN_ON_PRICE_UP: 5,      // demand floor when raising price
+    SET_PRICE_DEMAND_MIN: 10,       // demand floor when typing a new price
+
+    // Auto-sell tuning.
+    AUTO_SELL_DEMAND_FRACTION: 0.1, // fraction of demand sold per auto tick
+    AUTO_SELL_MIN_PER_TICK: 1,
+    AUTO_SELL_MAX_PER_TICK: 10,
+
+    // Negative-PR event: demand is scaled by this (min 1) instead of zeroed.
+    NEGATIVE_PR_DEMAND_FACTOR: 0.5,
 };

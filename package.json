@@ -1,0 +1,12 @@
+{
+  "name": "paper-clip-factory",
+  "version": "1.0.0",
+  "description": "📎 Paper Clip Factory — idle/incremental factory management game",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "lint": "for f in js/*.js; do node --check \"$f\" || exit 1; done"
+  },
+  "license": "MIT"
+}

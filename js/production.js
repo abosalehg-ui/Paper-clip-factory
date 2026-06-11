@@ -25,7 +25,10 @@ export function sellClips(buttonEl) {
     gameState.clips -= sellAmount;
     gameState.money += sellAmount * gameState.price;
     gameState.totalSold += sellAmount;
-    gameState.demand = Math.max(10, gameState.demand - Math.floor(sellAmount * 0.1));
+    gameState.demand = Math.max(
+        GAME_CONFIG.DEMAND_MIN_AFTER_SALE,
+        gameState.demand - Math.floor(sellAmount * GAME_CONFIG.DEMAND_DECAY_FRACTION),
+    );
 
     if (sellAmount > 0) {
         if (buttonEl) createFloatingEmoji(buttonEl, '💵', Math.min(sellAmount, 8));
@@ -55,10 +58,13 @@ export function adjustPrice(delta) {
         Math.round((gameState.price + delta) * 100) / 100,
     );
     if (delta > 0) {
-        gameState.demand = Math.max(5, gameState.demand - 5);
+        gameState.demand = Math.max(
+            GAME_CONFIG.DEMAND_MIN_ON_PRICE_UP,
+            gameState.demand - GAME_CONFIG.PRICE_DEMAND_STEP,
+        );
     } else {
         const cap = GAME_CONFIG.DEMAND_CAP_PER_LEVEL * gameState.marketingLevel;
-        gameState.demand = Math.min(cap, gameState.demand + 5);
+        gameState.demand = Math.min(cap, gameState.demand + GAME_CONFIG.PRICE_DEMAND_STEP);
     }
     flash('card-demand');
 }
@@ -69,7 +75,10 @@ export function setPrice(newPrice) {
         GAME_CONFIG.MIN_PRICE,
         Math.round(newPrice * 100) / 100,
     );
-    gameState.demand = Math.max(10, gameState.demand - 5);
+    gameState.demand = Math.max(
+        GAME_CONFIG.SET_PRICE_DEMAND_MIN,
+        gameState.demand - GAME_CONFIG.PRICE_DEMAND_STEP,
+    );
     flash('card-demand');
     return true;
 }
@@ -106,8 +115,11 @@ export function autoSellTick() {
 
     const sellAmount = Math.min(
         gameState.clips,
-        Math.max(1, Math.floor(gameState.demand * 0.1)),
-        10,
+        Math.max(
+            GAME_CONFIG.AUTO_SELL_MIN_PER_TICK,
+            Math.floor(gameState.demand * GAME_CONFIG.AUTO_SELL_DEMAND_FRACTION),
+        ),
+        GAME_CONFIG.AUTO_SELL_MAX_PER_TICK,
     );
     gameState.clips -= sellAmount;
     gameState.money += sellAmount * gameState.price;

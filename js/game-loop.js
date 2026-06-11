@@ -14,6 +14,7 @@ import { updateUI, showGameOverState } from './ui.js';
 let lastProductionTime = 0;
 let lastSellTime = 0;
 let lastEventTime = 0;
+let lastRenderTime = 0;
 let running = false;
 let gameOverShown = false;
 
@@ -51,9 +52,14 @@ function tick(currentTime) {
         lastEventTime = currentTime;
     }
 
-    // updateUI() also refreshes the insurance timer each render, so no
-    // separate throttled timer tick is needed here.
-    updateUI();
+    // Throttle rendering: state changes at most a few times per second, so
+    // there is no need to repaint on every animation frame. updateUI() also
+    // refreshes the insurance timer, so no separate timer tick is needed.
+    // Manual actions still call updateUI() directly for instant feedback.
+    if (currentTime - lastRenderTime >= GAME_CONFIG.RENDER_TICK_MS) {
+        updateUI();
+        lastRenderTime = currentTime;
+    }
     requestAnimationFrame(tick);
 }
 
@@ -65,6 +71,7 @@ export function startGameLoop() {
     lastProductionTime = now;
     lastSellTime = now;
     lastEventTime = now;
+    lastRenderTime = now;
     requestAnimationFrame(tick);
 }
 
