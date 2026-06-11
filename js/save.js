@@ -120,10 +120,13 @@ export function calculateOfflineProgress() {
     }
 
     const availableSpace = Math.max(0, gameState.maxClipsLimit - gameState.clips);
-    const wireLimit = gameState.wire;
-    const productionLimit = clippers * elapsedSec;
 
-    const clipsProduced = Math.max(0, Math.min(productionLimit, wireLimit, availableSpace));
+    // Mirror autoProduceTick: each 1s tick only fires when wire >= clippers,
+    // consuming `clippers` wire per tick, so the wire sustains only whole
+    // ticks and any remainder below one tick's worth is stranded (as live).
+    const wireTicks = Math.floor(gameState.wire / clippers);
+    const firingTicks = Math.min(elapsedSec, wireTicks);
+    const clipsProduced = Math.max(0, Math.min(clippers * firingTicks, availableSpace));
 
     let moneyEarned = 0;
     let clipsSold = 0;

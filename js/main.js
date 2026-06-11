@@ -1,5 +1,5 @@
 import { GAME_CONFIG } from './config.js';
-import { gameState } from './state.js';
+import { gameState, bestLocalScore } from './state.js';
 import { initAudio, playSound, setSoundsEnabled, areSoundsEnabled } from './audio.js';
 import { initTicker, showNewsTicker, flash } from './effects.js';
 import {
@@ -44,13 +44,12 @@ function stopPriceAdjust() {
 
 function handlePriceEdit() {
     const priceEl = getPriceElement();
-    let newPriceStr = priceEl.textContent.trim().replace(/[^\d.]/g, '');
+    const newPriceStr = priceEl.textContent.trim().replace(/[^\d.]/g, '');
     const newPrice = parseFloat(newPriceStr);
-    if (!setPrice(newPrice)) {
-        priceEl.textContent = gameState.price.toFixed(2);
-    } else {
-        priceEl.textContent = gameState.price.toFixed(2);
-    }
+    // setPrice clamps to a valid value; on invalid input the state price is
+    // left unchanged. Either way we re-render from the authoritative state.
+    setPrice(newPrice);
+    priceEl.textContent = gameState.price.toFixed(2);
     updateUI();
 }
 
@@ -84,8 +83,8 @@ const actions = {
 };
 
 function exportBestScore() {
-    const { totalSold, money, date } = gameState;
-    const text = `أفضل مبيعات محلية: ${totalSold.toLocaleString()} مشبك — المال: $${money.toFixed(2)} — التاريخ: ${date ? new Date(date).toLocaleString() : '—'}`;
+    const { totalSold, money, date } = bestLocalScore;
+    const text = `أفضل مبيعات محلية: ${totalSold.toLocaleString()} مشبك — المال: $${parseFloat(money || 0).toFixed(2)} — التاريخ: ${date ? new Date(date).toLocaleString() : '—'}`;
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text)
             .then(() => {

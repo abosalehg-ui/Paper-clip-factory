@@ -9,12 +9,11 @@ import {
 import { triggerRandomChallenge } from './events.js';
 import { playSound } from './audio.js';
 import { showNewsTicker } from './effects.js';
-import { updateUI, updateInsuranceTimer, showGameOverState } from './ui.js';
+import { updateUI, showGameOverState } from './ui.js';
 
 let lastProductionTime = 0;
 let lastSellTime = 0;
 let lastEventTime = 0;
-let lastInsuranceUpdateTime = 0;
 let running = false;
 let gameOverShown = false;
 
@@ -52,11 +51,8 @@ function tick(currentTime) {
         lastEventTime = currentTime;
     }
 
-    if (currentTime - lastInsuranceUpdateTime >= 1000) {
-        updateInsuranceTimer();
-        lastInsuranceUpdateTime = currentTime;
-    }
-
+    // updateUI() also refreshes the insurance timer each render, so no
+    // separate throttled timer tick is needed here.
     updateUI();
     requestAnimationFrame(tick);
 }
@@ -69,7 +65,6 @@ export function startGameLoop() {
     lastProductionTime = now;
     lastSellTime = now;
     lastEventTime = now;
-    lastInsuranceUpdateTime = now;
     requestAnimationFrame(tick);
 }
 
