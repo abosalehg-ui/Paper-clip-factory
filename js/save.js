@@ -131,9 +131,16 @@ export function calculateOfflineProgress() {
     let moneyEarned = 0;
     let clipsSold = 0;
     if (gameState.autoSellEnabled && clipsProduced > 0) {
-        const sellPerTick = Math.max(1, Math.floor(gameState.demand * 0.1));
+        const sellPerTick = Math.max(
+            GAME_CONFIG.AUTO_SELL_MIN_PER_TICK,
+            Math.floor(gameState.demand * GAME_CONFIG.AUTO_SELL_DEMAND_FRACTION),
+        );
         const ticks = Math.floor(elapsedMs / GAME_CONFIG.SELL_TICK_MS);
-        clipsSold = Math.min(clipsProduced, sellPerTick * ticks, 10 * ticks);
+        clipsSold = Math.min(
+            clipsProduced,
+            sellPerTick * ticks,
+            GAME_CONFIG.AUTO_SELL_MAX_PER_TICK * ticks,
+        );
         moneyEarned = clipsSold * gameState.price;
     }
 

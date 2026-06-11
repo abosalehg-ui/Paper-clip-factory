@@ -40,7 +40,7 @@ export function triggerRandomChallenge() {
         playSound('fire');
     } else if (challengeType === 'demand') {
         const oldDemand = gameState.demand;
-        gameState.demand = 1;
+        gameState.demand = Math.max(1, Math.floor(gameState.demand * GAME_CONFIG.NEGATIVE_PR_DEMAND_FACTOR));
         showNewsTicker(`📉 تحدي: دعاية سلبية! انخفض الطلب من ${oldDemand} إلى ${gameState.demand}.`, '📢', 4500);
         playSound('warning');
         flash('card-demand');
