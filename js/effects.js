@@ -1,4 +1,4 @@
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export function flash(id) {
     if (reduceMotion) return;

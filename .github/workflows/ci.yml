@@ -13,7 +13,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Lint (syntax check)
+          cache: npm
+      - name: Install dev dependencies
+        run: npm ci
+      - name: Lint
         run: npm run lint
       - name: Run tests
         run: npm test
+      - name: Verify service worker asset list is up to date
+        run: npm run build-sw:check

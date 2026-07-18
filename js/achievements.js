@@ -61,14 +61,27 @@ export function checkTrophy(newTotalSold) {
     }
 }
 
+// The best score updates on ANY new record so the leaderboard never lies;
+// the celebration (ticker + sound) only fires every RECORD_THRESHOLD clips
+// to avoid notification spam.
+let lastCelebratedSold = null;
+
+export function resetRecordTracking() {
+    lastCelebratedSold = null;
+}
+
 export function checkLocalRecord() {
     const previousBest = bestLocalScore.totalSold || 0;
-    if (gameState.totalSold > previousBest + GAME_CONFIG.RECORD_THRESHOLD) {
-        bestLocalScore.totalSold = gameState.totalSold;
-        bestLocalScore.money = parseFloat(gameState.money.toFixed(2));
-        bestLocalScore.date = new Date().toISOString();
-        saveBestScore();
+    if (lastCelebratedSold === null) lastCelebratedSold = previousBest;
+    if (gameState.totalSold <= previousBest) return;
 
+    bestLocalScore.totalSold = gameState.totalSold;
+    bestLocalScore.money = parseFloat(gameState.money.toFixed(2));
+    bestLocalScore.date = new Date().toISOString();
+
+    if (gameState.totalSold >= lastCelebratedSold + GAME_CONFIG.RECORD_THRESHOLD) {
+        lastCelebratedSold = gameState.totalSold;
+        saveBestScore();
         showNewsTicker('🎉 رقم قياسي جديد! تم تحطيم أفضل مبيعاتك السابقة!', '🏅', 3500);
         playSound('completion');
         flash('card-clips');

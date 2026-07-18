@@ -37,13 +37,13 @@
 
     <div class="container">
         <div class="header">
-            <h1 class="title"></h1>
+            <h1 class="title">📎 مصنع مشابك الورق</h1>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card" id="card-clips">
                 <div class="stat-icon"><span class="emoji-icon-stat">📎</span></div>
-                <div class="stat-label">المشابك <span id="clipsLimit" style="display:none">(5,000)</span></div>
+                <div class="stat-label">المشابك</div>
                 <div class="stat-value" id="clips">0</div>
             </div>
 
@@ -266,7 +266,28 @@
         </div>
     </div>
 
-    <div id="saveModal" class="modal" role="dialog" aria-labelledby="saveModalTitle">
+    <div id="gameOverModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="gameOverModalTitle">
+        <div class="modal-content">
+            <h2 class="modal-title" id="gameOverModalTitle">🛑 انتهت اللعبة!</h2>
+            <p style="text-align:center;color:#cbd5e1;margin-bottom:12px;">
+                نفد السلك والمال معاً — لكن كل نهاية هي بداية جديدة!
+            </p>
+            <div class="offline-stat">
+                💰 المال النهائي: <strong>$<span id="gameOverMoney">0.00</span></strong>
+            </div>
+            <div class="offline-stat">
+                📎 إجمالي المبيعات: <strong><span id="gameOverSold">0</span></strong> مشبك
+            </div>
+            <div class="offline-stat">
+                🏅 أفضل نتيجة محلية: <strong><span id="gameOverBest">0</span></strong> مشبك
+            </div>
+            <button class="icon-btn btn-make" data-action="new-game" style="width:100%; margin-top:12px;">
+                <span>🔄 لعبة جديدة</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="saveModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="saveModalTitle">
         <div class="modal-content">
             <h2 class="modal-title" id="saveModalTitle">💾 إدارة الحفظ</h2>
             <p style="text-align:center;color:#cbd5e1;margin-bottom:12px;font-size:0.85rem;">
@@ -295,7 +316,7 @@
         </div>
     </div>
 
-    <div id="offlineModal" class="modal" role="dialog" aria-labelledby="offlineModalTitle">
+    <div id="offlineModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="offlineModalTitle">
         <div class="modal-content">
             <h2 class="modal-title" id="offlineModalTitle">⏰ تقدم خلال غيابك</h2>
             <p style="text-align:center;color:#cbd5e1;margin-bottom:12px;">
@@ -313,7 +334,7 @@
         </div>
     </div>
 
-    <div id="guideModal" class="modal" role="dialog" aria-labelledby="guideModalTitle">
+    <div id="guideModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="guideModalTitle">
         <div class="modal-content">
             <h2 class="modal-title" id="guideModalTitle" style="display:none">دليل اللعب</h2>
 

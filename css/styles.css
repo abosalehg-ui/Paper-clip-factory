@@ -387,10 +387,6 @@ body{
     font-size:0.8rem;
 }
 
-#challengeModal, #gameOverModal {
-    display: none !important;
-}
-
 #insuranceTimer {
     text-align: center;
     font-size: 0.8rem;
@@ -431,15 +427,15 @@ body{
 }
 
 #trophyBronzeIcon {
-    background-image: url('../assets/images/trophy-bronze.png');
+    background-image: url('../assets/images/trophy-bronze-64.webp');
 }
 
 #trophySilverIcon {
-    background-image: url('../assets/images/trophy-silver.png');
+    background-image: url('../assets/images/trophy-silver-64.webp');
 }
 
 #trophyGoldIcon {
-    background-image: url('../assets/images/trophy-gold.png');
+    background-image: url('../assets/images/trophy-gold-64.webp');
 }
 
 @keyframes bounceIn {
@@ -492,21 +488,18 @@ body{
     margin-left: 8px;
 }
 
-.record-notification {
-    display: none !important;
-}
-
-#offlineModal .modal-content {
+#offlineModal .modal-content,
+#gameOverModal .modal-content {
     text-align: center;
 }
-#offlineModal .offline-stat {
+.offline-stat {
     background:#061427;
     padding:8px;
     border-radius:8px;
     margin: 6px 0;
     font-size: 0.9rem;
 }
-#offlineModal .offline-stat strong {
+.offline-stat strong {
     color: #10b981;
 }
 

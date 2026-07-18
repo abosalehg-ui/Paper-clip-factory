@@ -1,6 +1,7 @@
 import { gameState, bestLocalScore } from './state.js';
-import { GAME_CONFIG } from './config.js';
+import { getUpgradeCost } from './upgrades.js';
 import { formatNumber, formatMoney } from './format.js';
+import { reduceMotion } from './effects.js';
 
 const els = {};
 
@@ -15,18 +16,28 @@ function setText(el, value) {
     }
 }
 
-function setDisabled(el, disabled) {
+// Optional `reason` renders as a tooltip explaining WHY the button is
+// disabled ("not enough money", "at machine cap", ...).
+function setDisabled(el, disabled, reason = '') {
     if (!el) return;
     disabled = !!disabled;
     if (el.disabled !== disabled) {
         el.disabled = disabled;
         el.setAttribute('aria-disabled', String(disabled));
     }
+    const title = disabled ? reason : '';
+    if (el._title !== title) {
+        el._title = title;
+        if (title) el.setAttribute('title', title);
+        else el.removeAttribute('title');
+    }
 }
+
+const REASON_NO_MONEY = 'مال غير كافٍ';
 
 export function initUI() {
     const ids = [
-        'clips', 'clipsLimit', 'clipsLimitCurrent', 'money', 'wire', 'demand',
+        'clips', 'clipsLimitCurrent', 'money', 'wire', 'demand',
         'autoClippers', 'autoClipperCost', 'wireCost', 'wireEfficiency',
         'efficiencyCost', 'marketingLevel', 'marketingCost', 'availableClips',
         'totalClips', 'totalSold', 'totalMachines', 'productionRate',
@@ -35,6 +46,8 @@ export function initUI() {
         'autoClipperBtn', 'wireBtn', 'efficiencyBtn', 'marketingBtn',
         'expansionBtn', 'warehouseBtn', 'insuranceBtn', 'insuranceTimer',
         'autoSellBtn', 'bestTotalSold', 'bestMoney', 'bestDate',
+        'decreasePriceBtn', 'increasePriceBtn',
+        'gameOverMoney', 'gameOverSold', 'gameOverBest',
     ];
     for (const id of ids) {
         els[id] = document.getElementById(id);
@@ -55,17 +68,39 @@ export function updateInsuranceTimer() {
         setText(els.insuranceTimer, '');
         els.insuranceTimer.style.display = 'none';
     }
-    setDisabled(els.insuranceBtn, gameState.money < gameState.insuranceCost);
+    setDisabled(els.insuranceBtn, gameState.money < gameState.insuranceCost, REASON_NO_MONEY);
+}
+
+// The money readout eases toward the real value so gains "count up" instead
+// of jumping — a cheap but effective game-feel win. Skipped under
+// prefers-reduced-motion.
+let displayedMoney = null;
+
+export function snapMoneyDisplay() {
+    displayedMoney = gameState.money;
+}
+
+function easedMoney() {
+    if (
+        reduceMotion ||
+        displayedMoney === null ||
+        Math.abs(displayedMoney - gameState.money) < 0.01
+    ) {
+        displayedMoney = gameState.money;
+    } else {
+        displayedMoney += (gameState.money - displayedMoney) * 0.35;
+    }
+    return displayedMoney;
 }
 
 export function updateUI() {
     if (!els.clips) return;
 
-    const efficiencyCost = gameState.wireEfficiency * GAME_CONFIG.EFFICIENCY_BASE_COST;
-    const marketingCost = gameState.marketingLevel * GAME_CONFIG.MARKETING_BASE_COST;
+    const efficiencyCost = getUpgradeCost('efficiency');
+    const marketingCost = getUpgradeCost('marketing');
 
     setText(els.clips, formatNumber(gameState.clips));
-    setText(els.money, formatMoney(gameState.money));
+    setText(els.money, formatMoney(easedMoney()));
     setText(els.wire, formatNumber(gameState.wire));
     setText(els.demand, gameState.demand);
 
@@ -92,7 +127,6 @@ export function updateUI() {
     setText(els.maxClippers, formatNumber(gameState.maxClippersLimit));
     setText(els.expansionCost, formatMoney(gameState.expansionCost));
 
-    setText(els.clipsLimit, formatNumber(gameState.maxClipsLimit));
     setText(els.clipsLimitCurrent, formatNumber(gameState.maxClipsLimit));
     setText(els.warehouseCost, formatMoney(gameState.warehouseCost));
 
@@ -105,15 +139,16 @@ export function updateUI() {
         ? 'لا يوجد سلك'
         : warehouseFull ? 'المستودع ممتلئ' : 'صنع مشبك');
 
-    setDisabled(els.sellBtn, gameState.clips === 0);
+    setDisabled(els.sellBtn, gameState.clips === 0, 'لا توجد مشابك للبيع');
+    const clippersMaxed = gameState.autoClippers >= gameState.maxClippersLimit;
     setDisabled(els.autoClipperBtn,
-        gameState.money < gameState.autoClipperCost ||
-        gameState.autoClippers >= gameState.maxClippersLimit);
-    setDisabled(els.wireBtn, gameState.money < gameState.wireCost);
-    setDisabled(els.efficiencyBtn, gameState.money < efficiencyCost);
-    setDisabled(els.marketingBtn, gameState.money < marketingCost);
-    setDisabled(els.expansionBtn, gameState.money < gameState.expansionCost);
-    setDisabled(els.warehouseBtn, gameState.money < gameState.warehouseCost);
+        gameState.money < gameState.autoClipperCost || clippersMaxed,
+        clippersMaxed ? 'وصلت للحد الأقصى — اشترِ توسعة المصنع' : REASON_NO_MONEY);
+    setDisabled(els.wireBtn, gameState.money < gameState.wireCost, REASON_NO_MONEY);
+    setDisabled(els.efficiencyBtn, gameState.money < efficiencyCost, REASON_NO_MONEY);
+    setDisabled(els.marketingBtn, gameState.money < marketingCost, REASON_NO_MONEY);
+    setDisabled(els.expansionBtn, gameState.money < gameState.expansionCost, REASON_NO_MONEY);
+    setDisabled(els.warehouseBtn, gameState.money < gameState.warehouseCost, REASON_NO_MONEY);
 
     setText(els.bestTotalSold, formatNumber(bestLocalScore.totalSold));
     setText(els.bestMoney, formatMoney(bestLocalScore.money || 0));
@@ -130,11 +165,59 @@ export function updateAutoSellToggle() {
     els.autoSellBtn.setAttribute('aria-pressed', String(gameState.autoSellEnabled));
 }
 
-export function showGameOverState() {
-    document.querySelectorAll('button:not(.guide-btn)').forEach(btn => {
-        btn.disabled = true;
-    });
-    if (els.autoSellBtn) els.autoSellBtn.disabled = true;
+// Only gameplay controls lock on game over — save management, sound and the
+// guide stay usable. The list is explicit so new admin buttons can never be
+// caught by accident.
+const GAMEPLAY_BUTTONS = [
+    'makeBtn', 'sellBtn', 'autoClipperBtn', 'wireBtn', 'efficiencyBtn',
+    'marketingBtn', 'expansionBtn', 'warehouseBtn', 'insuranceBtn',
+    'autoSellBtn', 'decreasePriceBtn', 'increasePriceBtn',
+];
+
+export function setGameplayDisabled(disabled) {
+    for (const id of GAMEPLAY_BUTTONS) {
+        setDisabled(els[id], disabled, disabled ? 'انتهت اللعبة' : '');
+    }
+}
+
+export function showGameOverModal() {
+    snapMoneyDisplay();
+    updateUI();
+    setText(els.gameOverMoney, formatMoney(gameState.money));
+    setText(els.gameOverSold, formatNumber(gameState.totalSold));
+    setText(els.gameOverBest, formatNumber(bestLocalScore.totalSold));
+    setGameplayDisabled(true);
+    openModal('gameOverModal');
+}
+
+// Focus management: opening a modal moves focus inside it; closing returns
+// focus to where the player was. The Tab-cycle trap lives in main.js.
+let lastFocusedElement = null;
+
+export function toggleModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    if (modal.classList.contains('active')) closeModal(modalId);
+    else openModal(modalId);
+}
+
+export function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    lastFocusedElement = document.activeElement;
+    modal.classList.add('active');
+    const target = modal.querySelector('button, textarea, [href], [tabindex]');
+    if (target && target.focus) target.focus();
+}
+
+export function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.remove('active');
+    if (lastFocusedElement && lastFocusedElement.focus) {
+        lastFocusedElement.focus();
+        lastFocusedElement = null;
+    }
 }
 
 export function getPriceElement() {
@@ -147,19 +230,4 @@ export function getMakeBtn() {
 
 export function getSellBtn() {
     return els.sellBtn;
-}
-
-export function toggleModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.toggle('active');
-}
-
-export function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.add('active');
-}
-
-export function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.remove('active');
 }

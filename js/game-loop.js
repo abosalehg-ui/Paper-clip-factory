@@ -9,7 +9,7 @@ import {
 import { triggerRandomChallenge } from './events.js';
 import { playSound } from './audio.js';
 import { showNewsTicker } from './effects.js';
-import { updateUI, showGameOverState } from './ui.js';
+import { updateUI, showGameOverModal } from './ui.js';
 
 let lastProductionTime = 0;
 let lastSellTime = 0;
@@ -21,11 +21,11 @@ let gameOverShown = false;
 function handleGameOver() {
     if (gameOverShown) return;
     gameOverShown = true;
-    gameState.gameOver = true;
+    running = false;
     const msg = `انتهت اللعبة! 🛑 النقاط النهائية: $${gameState.money.toFixed(2)} (تم بيع: ${gameState.totalSold.toLocaleString()})`;
-    showNewsTicker(msg, '🔴', 60000);
+    showNewsTicker(msg, '🔴', 10000);
     playSound('fail');
-    showGameOverState();
+    showGameOverModal();
 }
 
 function tick(currentTime) {
@@ -63,18 +63,21 @@ function tick(currentTime) {
     requestAnimationFrame(tick);
 }
 
-export function startGameLoop() {
-    if (running) return;
-    running = true;
-    gameOverShown = false;
+// Re-anchors all logical timers to "now". Called on start and after the tab
+// returns from the background (rAF pauses while hidden), so a long absence
+// does not register as one giant elapsed interval.
+export function resetLoopTimers() {
     const now = performance.now();
     lastProductionTime = now;
     lastSellTime = now;
     lastEventTime = now;
     lastRenderTime = now;
-    requestAnimationFrame(tick);
 }
 
-export function stopGameLoop() {
-    running = false;
+export function startGameLoop() {
+    if (running) return;
+    running = true;
+    gameOverShown = false;
+    resetLoopTimers();
+    requestAnimationFrame(tick);
 }

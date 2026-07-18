@@ -1,27 +1,24 @@
 import { GAME_CONFIG } from './config.js';
 import { gameState, bestLocalScore } from './state.js';
 import { initAudio, playSound, setSoundsEnabled, areSoundsEnabled } from './audio.js';
-import { initTicker, showNewsTicker, flash } from './effects.js';
+import { initTicker, showNewsTicker } from './effects.js';
 import {
-    loadBestScore, loadGameState, saveGameState, startAutoSave,
+    loadBestScore, loadGameState, startAutoSave,
     calculateOfflineProgress, resetGameState, resetBestScore,
     exportSaveString, importSaveString,
 } from './save.js';
 import {
     initUI, updateUI, updateAutoSellToggle,
-    toggleModal, openModal, closeModal,
+    toggleModal, openModal, closeModal, setGameplayDisabled,
     getPriceElement, getMakeBtn, getSellBtn,
 } from './ui.js';
 import {
     makeClip, sellClips, buyWire, adjustPrice, setPrice,
     toggleAutoSell,
 } from './production.js';
-import {
-    buyAutoClipper, increaseMarketing, upgradeWarehouse,
-    buyWireEfficiency, buyExpansion, buyInsurance,
-} from './upgrades.js';
-import { checkTrophy } from './achievements.js';
-import { startGameLoop } from './game-loop.js';
+import { buyAutoClipper, buyUpgrade } from './upgrades.js';
+import { checkTrophy, resetRecordTracking } from './achievements.js';
+import { startGameLoop, resetLoopTimers } from './game-loop.js';
 
 let priceAdjustInterval = null;
 
@@ -58,16 +55,29 @@ const actions = {
     'sell-clips': () => { sellClips(getSellBtn()); updateUI(); },
     'buy-wire': () => { buyWire(); updateUI(); },
     'buy-auto-clipper': () => { buyAutoClipper(); updateUI(); },
-    'increase-marketing': () => { increaseMarketing(); updateUI(); },
-    'upgrade-warehouse': () => { upgradeWarehouse(); updateUI(); },
-    'buy-wire-efficiency': () => { buyWireEfficiency(); updateUI(); },
-    'buy-expansion': () => { buyExpansion(); updateUI(); },
-    'buy-insurance': () => { buyInsurance(); updateUI(); },
+    'increase-marketing': () => { buyUpgrade('marketing'); updateUI(); },
+    'upgrade-warehouse': () => { buyUpgrade('warehouse'); updateUI(); },
+    'buy-wire-efficiency': () => { buyUpgrade('efficiency'); updateUI(); },
+    'buy-expansion': () => { buyUpgrade('expansion'); updateUI(); },
+    'buy-insurance': () => { buyUpgrade('insurance'); updateUI(); },
     'toggle-auto-sell': () => { toggleAutoSell(); updateAutoSellToggle(); },
     'toggle-guide': () => toggleModal('guideModal'),
+    'new-game': () => {
+        resetGameState();
+        resetRecordTracking();
+        document.body.classList.remove('trophy-bronze', 'trophy-silver', 'trophy-gold');
+        setGameplayDisabled(false);
+        updateAutoSellToggle();
+        checkTrophy(gameState.totalSold);
+        closeModal('gameOverModal');
+        updateUI();
+        startGameLoop();
+        showNewsTicker('لعبة جديدة! بالتوفيق 🍀', '📎', 3500);
+    },
     'reset-best-score': () => {
         if (!confirm('هل أنت متأكد من إعادة تعيين أفضل النتائج؟')) return;
         resetBestScore();
+        resetRecordTracking();
         updateUI();
         showNewsTicker('تمت إعادة تعيين النتائج المحلية.', '🔄', 3500);
         playSound('completion');
@@ -129,8 +139,12 @@ function doImportSave() {
         playSound('completion');
         checkTrophy(gameState.totalSold);
         updateAutoSellToggle();
+        // If we were on the game-over screen, the imported save revives play.
+        setGameplayDisabled(false);
+        closeModal('gameOverModal');
         updateUI();
         closeModal('saveModal');
+        startGameLoop();
     } else {
         showNewsTicker('فشل استيراد الحفظ — البيانات غير صالحة.', '❌', 3500);
         playSound('warning');
@@ -139,11 +153,9 @@ function doImportSave() {
 
 function doResetGame() {
     if (!confirm('تحذير: سيتم حذف كل تقدمك. هل أنت متأكد؟')) return;
-    resetGameState();
-    document.body.classList.remove('trophy-bronze', 'trophy-silver', 'trophy-gold');
-    updateAutoSellToggle();
-    checkTrophy(gameState.totalSold);
-    updateUI();
+    // Same path as starting fresh from the game-over screen: it also restarts
+    // the loop and unlocks gameplay controls in case we got here after a loss.
+    actions['new-game']();
     closeModal('saveModal');
     showNewsTicker('تمت إعادة ضبط اللعبة.', '🔄', 3500);
     playSound('completion');
@@ -193,8 +205,33 @@ function setupPriceEdit() {
     });
 }
 
+// Keep Tab inside the topmost open modal (simple focus trap).
+function trapModalTab(e) {
+    const modal = document.querySelector('.modal.active');
+    if (!modal) return;
+    const focusables = modal.querySelectorAll(
+        'button:not(:disabled), textarea, [href], input, [tabindex]:not([tabindex="-1"])',
+    );
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+    }
+}
+
 function setupKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+            trapModalTab(e);
+            return;
+        }
+        // Never hijack browser/system shortcuts (Ctrl+A must not buy a machine).
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
         if (e.target.isContentEditable || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         const key = e.key.toLowerCase();
         if (key === ' ' || key === 'enter') {
@@ -209,7 +246,11 @@ function setupKeyboardShortcuts() {
         } else if (key === 'a') {
             actions['buy-auto-clipper']();
         } else if (key === 'escape') {
-            document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+            // The game-over modal is the only path back into the game — it
+            // must not be dismissable into a dead screen.
+            document.querySelectorAll('.modal.active').forEach((m) => {
+                if (m.id !== 'gameOverModal') m.classList.remove('active');
+            });
         }
     });
 }
@@ -226,6 +267,24 @@ function showOfflineModal(progress) {
     document.getElementById('offlineMoneyEarned').textContent = `$${(progress.moneyEarned || 0).toFixed(2)}`;
     document.getElementById('offlineClipsSold').textContent = (progress.clipsSold || 0).toLocaleString();
     modal.classList.add('active');
+}
+
+// rAF (and thus production) pauses while the tab is hidden. On return, pay
+// out the away time through the same offline-progress engine used at load,
+// then re-anchor the loop timers so the pause is not seen as one huge tick.
+function setupVisibilityCatchUp() {
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible') return;
+        const progress = calculateOfflineProgress();
+        resetLoopTimers();
+        if (progress && progress.clipsProduced > 0) {
+            const sold = progress.clipsSold
+                ? ` وبيع ${progress.clipsSold.toLocaleString()} مشبك`
+                : '';
+            showNewsTicker(`⏰ أثناء غيابك: إنتاج ${progress.clipsProduced.toLocaleString()} مشبك${sold}!`, '🏭', 5000);
+            updateUI();
+        }
+    });
 }
 
 function registerServiceWorker() {
@@ -253,6 +312,7 @@ function init() {
     setupPriceButtons();
     setupPriceEdit();
     setupKeyboardShortcuts();
+    setupVisibilityCatchUp();
 
     updateAutoSellToggle();
     checkTrophy(gameState.totalSold);

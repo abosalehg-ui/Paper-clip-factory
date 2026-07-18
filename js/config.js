@@ -37,7 +37,8 @@ export const GAME_CONFIG = {
     EVENT_SUB_CHANCE: 0.25,
     THEFT_AMOUNT: 500,
     FIRE_CLIP_LOSS: 500,
-    CLIPPER_LOSS: 20,
+    // Machine-damage event destroys this fraction of owned machines (min 1).
+    CLIPPER_LOSS_FRACTION: 0.03,
     MONEY_THRESHOLD_FOR_THEFT: 4500,
     CLIPS_THRESHOLD_FOR_FIRE: 7500,
     CLIPPERS_THRESHOLD_FOR_DAMAGE: 100,
@@ -69,10 +70,16 @@ export const GAME_CONFIG = {
     DEMAND_MIN_ON_PRICE_UP: 5,      // demand floor when raising price
     SET_PRICE_DEMAND_MIN: 10,       // demand floor when typing a new price
 
-    // Auto-sell tuning.
+    // Auto-sell tuning. The per-tick cap scales with the marketing level so
+    // automation keeps up with production growth instead of hard-capping at
+    // 5 clips/second forever.
     AUTO_SELL_DEMAND_FRACTION: 0.1, // fraction of demand sold per auto tick
     AUTO_SELL_MIN_PER_TICK: 1,
-    AUTO_SELL_MAX_PER_TICK: 10,
+    AUTO_SELL_MAX_PER_TICK: 10,     // multiplied by marketingLevel
+
+    // Save validation: any imported insuranceEndTime further out than this is
+    // clamped (protects against clock-skewed or hand-edited saves).
+    MAX_INSURANCE_FUTURE_MS: 24 * 60 * 60 * 1000,
 
     // Negative-PR event: demand is scaled by this (min 1) instead of zeroed.
     NEGATIVE_PR_DEMAND_FACTOR: 0.5,
