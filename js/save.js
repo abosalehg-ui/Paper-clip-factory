@@ -50,6 +50,9 @@ export function saveGameState() {
     } catch (e) {
         console.error('Error saving game state:', e);
     }
+    // Best score is updated in memory on every record; persist it alongside
+    // the state so quiet (non-celebrated) records survive a page close.
+    saveBestScore();
 }
 
 export function loadGameState() {
@@ -78,10 +81,15 @@ export function resetGameState() {
     }
 }
 
+// Base64 of the UTF-8 payload. Byte-compatible with the previous
+// escape/unescape implementation, so old exported saves keep importing.
 export function exportSaveString() {
     const payload = JSON.stringify(gameState);
     try {
-        return btoa(unescape(encodeURIComponent(payload)));
+        const bytes = new TextEncoder().encode(payload);
+        let binary = '';
+        for (const byte of bytes) binary += String.fromCharCode(byte);
+        return btoa(binary);
     } catch (e) {
         console.error('Export encoding failed:', e);
         return '';
@@ -90,7 +98,9 @@ export function exportSaveString() {
 
 export function importSaveString(encoded) {
     try {
-        const decoded = decodeURIComponent(escape(atob(encoded.trim())));
+        const binary = atob(encoded.trim());
+        const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+        const decoded = new TextDecoder().decode(bytes);
         const parsed = JSON.parse(decoded);
         if (!parsed || typeof parsed !== 'object') return false;
         applySavedState(parsed);
@@ -121,26 +131,26 @@ export function calculateOfflineProgress() {
 
     const availableSpace = Math.max(0, gameState.maxClipsLimit - gameState.clips);
 
-    // Mirror autoProduceTick: each 1s tick only fires when wire >= clippers,
-    // consuming `clippers` wire per tick, so the wire sustains only whole
-    // ticks and any remainder below one tick's worth is stranded (as live).
-    const wireTicks = Math.floor(gameState.wire / clippers);
-    const firingTicks = Math.min(elapsedSec, wireTicks);
-    const clipsProduced = Math.max(0, Math.min(clippers * firingTicks, availableSpace));
+    // Mirror autoProduceTick: one clip per wire per machine-second, with
+    // partial ticks allowed when the wire runs low, capped by warehouse space.
+    const clipsProduced = Math.max(
+        0,
+        Math.min(clippers * elapsedSec, gameState.wire, availableSpace),
+    );
 
     let moneyEarned = 0;
     let clipsSold = 0;
     if (gameState.autoSellEnabled && clipsProduced > 0) {
-        const sellPerTick = Math.max(
-            GAME_CONFIG.AUTO_SELL_MIN_PER_TICK,
-            Math.floor(gameState.demand * GAME_CONFIG.AUTO_SELL_DEMAND_FRACTION),
+        // Mirror autoSellTick, including the marketing-scaled per-tick cap.
+        const sellPerTick = Math.min(
+            Math.max(
+                GAME_CONFIG.AUTO_SELL_MIN_PER_TICK,
+                Math.floor(gameState.demand * GAME_CONFIG.AUTO_SELL_DEMAND_FRACTION),
+            ),
+            GAME_CONFIG.AUTO_SELL_MAX_PER_TICK * gameState.marketingLevel,
         );
         const ticks = Math.floor(elapsedMs / GAME_CONFIG.SELL_TICK_MS);
-        clipsSold = Math.min(
-            clipsProduced,
-            sellPerTick * ticks,
-            GAME_CONFIG.AUTO_SELL_MAX_PER_TICK * ticks,
-        );
+        clipsSold = Math.min(clipsProduced, sellPerTick * ticks);
         moneyEarned = clipsSold * gameState.price;
     }
 
@@ -160,7 +170,14 @@ export function calculateOfflineProgress() {
 }
 
 export function startAutoSave() {
-    setInterval(saveGameState, GAME_CONFIG.AUTO_SAVE_INTERVAL_MS);
+    // While hidden the rAF loop is paused, so nothing changes — and saving
+    // would advance lastSaveTime, eating the away-time credit that the
+    // visibility catch-up in main.js pays out on return. Save once on hide,
+    // then stay quiet until visible again.
+    setInterval(() => {
+        if (document.visibilityState === 'hidden') return;
+        saveGameState();
+    }, GAME_CONFIG.AUTO_SAVE_INTERVAL_MS);
     window.addEventListener('beforeunload', saveGameState);
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {

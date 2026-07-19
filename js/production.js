@@ -89,25 +89,24 @@ export function toggleAutoSell() {
 }
 
 export function autoProduceTick() {
-    if (gameState.autoClippers <= 0 || gameState.wire < gameState.autoClippers) return false;
-
-    const potentialClips = gameState.autoClippers;
-    const availableSpace = gameState.maxClipsLimit - gameState.clips;
-    const clipsMade = Math.min(potentialClips, availableSpace);
-
-    if (clipsMade > 0) {
-        gameState.clips += clipsMade;
-        gameState.totalClips += clipsMade;
-        gameState.wire -= clipsMade;
-        gameState.autoClipperRate = gameState.autoClippers;
-        flash('card-clips');
-        flash('card-wire');
-        return true;
-    }
-    if (gameState.clips >= gameState.maxClipsLimit) {
+    // Partial production: with less wire than machines, the remaining wire is
+    // still consumed (one clip per wire) instead of stalling the whole floor.
+    // autoClipperRate always reflects what was actually produced this tick.
+    if (gameState.autoClippers <= 0) {
         gameState.autoClipperRate = 0;
+        return false;
     }
-    return false;
+    const availableSpace = gameState.maxClipsLimit - gameState.clips;
+    const clipsMade = Math.max(0, Math.min(gameState.autoClippers, gameState.wire, availableSpace));
+    gameState.autoClipperRate = clipsMade;
+    if (clipsMade <= 0) return false;
+
+    gameState.clips += clipsMade;
+    gameState.totalClips += clipsMade;
+    gameState.wire -= clipsMade;
+    flash('card-clips');
+    flash('card-wire');
+    return true;
 }
 
 export function autoSellTick() {
@@ -119,7 +118,7 @@ export function autoSellTick() {
             GAME_CONFIG.AUTO_SELL_MIN_PER_TICK,
             Math.floor(gameState.demand * GAME_CONFIG.AUTO_SELL_DEMAND_FRACTION),
         ),
-        GAME_CONFIG.AUTO_SELL_MAX_PER_TICK,
+        GAME_CONFIG.AUTO_SELL_MAX_PER_TICK * gameState.marketingLevel,
     );
     gameState.clips -= sellAmount;
     gameState.money += sellAmount * gameState.price;
@@ -142,8 +141,8 @@ export function restoreDemand() {
 
 export function isGameOver() {
     return (
-        gameState.wire === 0 &&
+        gameState.wire < 1 &&
         gameState.money < gameState.wireCost &&
-        gameState.clips === 0
+        gameState.clips < 1
     );
 }

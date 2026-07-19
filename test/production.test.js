@@ -73,13 +73,23 @@ test('autoProduceTick produces one clip per clipper', () => {
     assert.equal(gameState.wire, 90);
 });
 
-test('autoProduceTick does not fire when wire is below clipper count', () => {
+test('autoProduceTick produces partially when wire is below clipper count', () => {
     gameState.autoClippers = 10;
     gameState.wire = 5;
     const ok = autoProduceTick();
+    assert.equal(ok, true);
+    assert.equal(gameState.clips, 5); // the remaining wire is still used
+    assert.equal(gameState.wire, 0);
+    assert.equal(gameState.autoClipperRate, 5); // rate reflects actual output
+});
+
+test('autoProduceTick reports a zero rate when nothing can be produced', () => {
+    gameState.autoClippers = 10;
+    gameState.autoClipperRate = 10;
+    gameState.wire = 0;
+    const ok = autoProduceTick();
     assert.equal(ok, false);
-    assert.equal(gameState.clips, 0);
-    assert.equal(gameState.wire, 5);
+    assert.equal(gameState.autoClipperRate, 0);
 });
 
 test('autoSellTick is capped at the per-tick maximum', () => {
@@ -87,8 +97,20 @@ test('autoSellTick is capped at the per-tick maximum', () => {
     gameState.clips = 1000;
     gameState.demand = 1000;
     gameState.price = 1;
+    gameState.marketingLevel = 1;
     const ok = autoSellTick();
     assert.equal(ok, true);
     assert.equal(gameState.clips, 990); // capped at 10 per tick
     assert.equal(gameState.money, 10);
+});
+
+test('autoSellTick cap scales with the marketing level', () => {
+    gameState.autoSellEnabled = true;
+    gameState.clips = 1000;
+    gameState.demand = 1000;
+    gameState.price = 1;
+    gameState.marketingLevel = 5;
+    autoSellTick();
+    assert.equal(gameState.clips, 950); // 10 * marketingLevel per tick
+    assert.equal(gameState.money, 50);
 });

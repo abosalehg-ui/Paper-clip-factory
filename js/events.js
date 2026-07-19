@@ -2,7 +2,7 @@ import { GAME_CONFIG } from './config.js';
 import { gameState } from './state.js';
 import { playSound } from './audio.js';
 import { flash, showNewsTicker } from './effects.js';
-import { isInsuranceActive } from './upgrades.js';
+import { isInsuranceActive, computeAutoClipperCost } from './upgrades.js';
 
 export function triggerRandomChallenge() {
     if (isInsuranceActive()) return false;
@@ -34,8 +34,11 @@ export function triggerRandomChallenge() {
         playSound('fire');
         flash('card-clips');
     } else if (challengeType === 'clippers') {
-        const loss = GAME_CONFIG.CLIPPER_LOSS;
+        // Proportional loss; the machine price de-escalates with the count so
+        // replacing destroyed machines is painful but never ruinous.
+        const loss = Math.max(1, Math.floor(gameState.autoClippers * GAME_CONFIG.CLIPPER_LOSS_FRACTION));
         gameState.autoClippers = Math.max(0, gameState.autoClippers - loss);
+        gameState.autoClipperCost = computeAutoClipperCost(gameState.autoClippers);
         showNewsTicker(`⚙️ حادث: تلف آلات! تعطلت ${loss} آلة صنع تلقائي.`, '💥', 4500);
         playSound('fire');
     } else if (challengeType === 'demand') {

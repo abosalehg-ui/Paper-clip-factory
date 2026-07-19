@@ -1,12 +1,19 @@
 {
   "name": "paper-clip-factory",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "📎 Paper Clip Factory — idle/incremental factory management game",
   "type": "module",
   "private": true,
   "scripts": {
     "test": "node --test",
-    "lint": "for f in js/*.js; do node --check \"$f\" || exit 1; done"
+    "lint": "eslint .",
+    "build-sw": "node tools/generate-sw-assets.mjs",
+    "build-sw:check": "node tools/generate-sw-assets.mjs --check"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.7.0",
+    "globals": "^17.7.0"
+  }
 }
