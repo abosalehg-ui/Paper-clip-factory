@@ -1,28 +1,28 @@
 import { GAME_CONFIG } from './config.js';
 import { gameState } from './state.js';
+import {
+    computeAutoClipperCost, computeMarketingCost, effectiveDemandCap,
+} from './economy.js';
 import { playSound } from './audio.js';
 import { flash, showNewsTicker } from './effects.js';
 
-// The machine price is a pure function of how many machines you own, so it
-// de-escalates when machines are destroyed by events and stays consistent
-// across saves.
-export function computeAutoClipperCost(count) {
-    return Math.floor(
-        GAME_CONFIG.INITIAL_AUTO_CLIPPER_COST *
-        Math.pow(GAME_CONFIG.AUTO_CLIPPER_COST_MULTIPLIER, count),
-    );
-}
+// Re-exported so callers keep a single import site for machine pricing.
+export { computeAutoClipperCost };
 
 // Every upgrade is data: a cost function (single source of truth — the UI
 // renders from the same function) and an apply function. Adding an upgrade
 // means adding one entry here plus its markup.
 export const UPGRADES = {
     marketing: {
-        cost: (s) => s.marketingLevel * GAME_CONFIG.MARKETING_BASE_COST,
+        // Exponential, like machines. It used to be linear (100 x level),
+        // which made it strictly the best buy and let it swallow the economy.
+        cost: (s) => computeMarketingCost(s.marketingLevel),
         apply(s) {
             s.marketingLevel++;
-            const cap = GAME_CONFIG.DEMAND_CAP_PER_LEVEL * s.marketingLevel;
-            s.demand = Math.min(cap, s.demand + GAME_CONFIG.MARKETING_DEMAND_BONUS);
+            // A higher level widens the demand curve, so re-derive the cap
+            // before topping demand up.
+            const cap = effectiveDemandCap(s.marketingLevel, s.price);
+            s.demand = Math.max(1, Math.min(cap, s.demand + GAME_CONFIG.MARKETING_DEMAND_BONUS));
         },
         flashCards: ['card-demand', 'card-money'],
     },
@@ -35,7 +35,7 @@ export const UPGRADES = {
         flashCards: ['card-clips', 'card-money'],
     },
     efficiency: {
-        cost: (s) => s.wireEfficiency * GAME_CONFIG.EFFICIENCY_BASE_COST,
+        cost: (s) => Math.floor(s.wireEfficiency * GAME_CONFIG.EFFICIENCY_BASE_COST),
         apply(s) {
             s.wireEfficiency += GAME_CONFIG.EFFICIENCY_INCREMENT;
         },
@@ -50,16 +50,19 @@ export const UPGRADES = {
         flashCards: ['card-money'],
     },
     insurance: {
-        cost: (s) => s.insuranceCost,
+        // Flat price. It used to escalate (level x 1000) against flat damage,
+        // which made it a strictly losing purchase from the second buy on.
+        cost: () => GAME_CONFIG.INSURANCE_BASE_COST,
         apply(s) {
             s.insuranceLevel++;
-            s.insuranceCost = s.insuranceLevel * GAME_CONFIG.INSURANCE_BASE_COST;
+            s.insuranceCost = GAME_CONFIG.INSURANCE_BASE_COST;
             const now = Date.now();
             s.insuranceEndTime = Math.max(s.insuranceEndTime, now) + GAME_CONFIG.INSURANCE_DURATION_MS;
         },
         flashCards: ['card-money'],
         onSuccess() {
-            showNewsTicker('🛡️ تم تمديد/تفعيل تأمين المصنع لمدة 5 دقائق!', '👍', 4000);
+            const pct = Math.round(GAME_CONFIG.INSURANCE_DAMAGE_REDUCTION * 100);
+            showNewsTicker(`🛡️ التأمين نشط 5 دقائق — يقلّل ضرر الحوادث ${pct}%!`, '👍', 4000);
         },
         onFail() {
             playSound('warning');

@@ -1,79 +1,112 @@
-import { GAME_CONFIG } from './config.js';
+import { GAME_CONFIG, DEFAULT_KEY_BINDINGS } from './config.js';
 import { gameState, bestLocalScore } from './state.js';
-import { initAudio, playSound, setSoundsEnabled, areSoundsEnabled } from './audio.js';
+import {
+    initAudio, playSound, setSoundsEnabled, areSoundsEnabled, setVolume,
+} from './audio.js';
 import { initTicker, showNewsTicker } from './effects.js';
 import {
     loadBestScore, loadGameState, startAutoSave,
-    calculateOfflineProgress, resetGameState, resetBestScore,
+    resetGameState, resetBestScore,
     exportSaveString, importSaveString,
 } from './save.js';
+import { calculateOfflineProgress } from './offline.js';
 import {
-    initUI, updateUI, updateAutoSellToggle,
-    toggleModal, openModal, closeModal, setGameplayDisabled,
-    getPriceElement, getMakeBtn, getSellBtn,
+    loadSettings, getSettings, setSetting, setKeyBinding, resetKeyBindings,
+    actionForKey,
+} from './settings.js';
+import {
+    initUI, updateUI, updateAutoSellToggle, renderAchievements, renderSettings,
+    setRebindPrompt, toggleModal, openModal, closeModal, setGameplayDisabled,
+    isGameplayLocked, isModalOpen, getPriceElement, getMakeBtn, getSellBtn,
+    getActionButton, snapMoneyDisplay,
 } from './ui.js';
 import {
     makeClip, sellClips, buyWire, adjustPrice, setPrice,
-    toggleAutoSell,
+    toggleAutoSell, resetSellCooldown,
 } from './production.js';
 import { buyAutoClipper, buyUpgrade } from './upgrades.js';
-import { checkTrophy, resetRecordTracking } from './achievements.js';
+import { checkTrophy, checkAchievements, resetRecordTracking } from './achievements.js';
+import { doPrestige, canPrestige } from './prestige.js';
 import { startGameLoop, resetLoopTimers } from './game-loop.js';
 
-let priceAdjustInterval = null;
-
-function startPriceAdjust(delta) {
-    adjustPrice(delta);
+// Every manual action re-checks achievements so unlocks land on the action
+// that earned them rather than on the next background tick.
+function afterAction() {
+    checkAchievements();
     updateUI();
-    if (priceAdjustInterval) clearInterval(priceAdjustInterval);
-    priceAdjustInterval = setInterval(() => {
+}
+
+// ---- Price buttons -------------------------------------------------------
+// Holding accelerates: the repeat delay decays toward a floor, so moving the
+// price a long way no longer takes a minute and a half of held input.
+
+let priceAdjustTimer = null;
+let priceAdjustDelay = GAME_CONFIG.PRICE_ADJUST_INTERVAL_MS;
+
+function schedulePriceAdjust(delta) {
+    priceAdjustTimer = setTimeout(() => {
         adjustPrice(delta);
         updateUI();
-    }, GAME_CONFIG.PRICE_ADJUST_INTERVAL_MS);
+        priceAdjustDelay = Math.max(
+            GAME_CONFIG.PRICE_ADJUST_MIN_INTERVAL_MS,
+            priceAdjustDelay * GAME_CONFIG.PRICE_ADJUST_ACCELERATION,
+        );
+        schedulePriceAdjust(delta);
+    }, priceAdjustDelay);
+}
+
+function startPriceAdjust(delta) {
+    stopPriceAdjust();
+    adjustPrice(delta);
+    updateUI();
+    priceAdjustDelay = GAME_CONFIG.PRICE_ADJUST_INTERVAL_MS;
+    schedulePriceAdjust(delta);
 }
 
 function stopPriceAdjust() {
-    if (priceAdjustInterval) {
-        clearInterval(priceAdjustInterval);
-        priceAdjustInterval = null;
+    if (priceAdjustTimer) {
+        clearTimeout(priceAdjustTimer);
+        priceAdjustTimer = null;
     }
+    priceAdjustDelay = GAME_CONFIG.PRICE_ADJUST_INTERVAL_MS;
 }
 
 function handlePriceEdit() {
     const priceEl = getPriceElement();
     const newPriceStr = priceEl.textContent.trim().replace(/[^\d.]/g, '');
     const newPrice = parseFloat(newPriceStr);
-    // setPrice clamps to a valid value; on invalid input the state price is
-    // left unchanged. Either way we re-render from the authoritative state.
+    // setPrice clamps into [MIN_PRICE, chokePrice]; on invalid input the state
+    // price is left unchanged. Either way we re-render from the authoritative
+    // state, so the field can never show a price the economy does not honour.
     setPrice(newPrice);
     priceEl.textContent = gameState.price.toFixed(2);
     updateUI();
 }
 
+// ---- Actions -------------------------------------------------------------
+
 const actions = {
-    'make-clip': () => { makeClip(getMakeBtn()); updateUI(); },
-    'sell-clips': () => { sellClips(getSellBtn()); updateUI(); },
-    'buy-wire': () => { buyWire(); updateUI(); },
-    'buy-auto-clipper': () => { buyAutoClipper(); updateUI(); },
-    'increase-marketing': () => { buyUpgrade('marketing'); updateUI(); },
-    'upgrade-warehouse': () => { buyUpgrade('warehouse'); updateUI(); },
-    'buy-wire-efficiency': () => { buyUpgrade('efficiency'); updateUI(); },
-    'buy-expansion': () => { buyUpgrade('expansion'); updateUI(); },
-    'buy-insurance': () => { buyUpgrade('insurance'); updateUI(); },
-    'toggle-auto-sell': () => { toggleAutoSell(); updateAutoSellToggle(); },
+    'make-clip': () => { makeClip(getMakeBtn()); afterAction(); },
+    'sell-clips': () => { sellClips(getSellBtn()); afterAction(); },
+    'buy-wire': () => { buyWire(); afterAction(); },
+    'buy-auto-clipper': () => { buyAutoClipper(); afterAction(); },
+    'increase-marketing': () => { buyUpgrade('marketing'); afterAction(); },
+    'upgrade-warehouse': () => { buyUpgrade('warehouse'); afterAction(); },
+    'buy-wire-efficiency': () => { buyUpgrade('efficiency'); afterAction(); },
+    'buy-expansion': () => { buyUpgrade('expansion'); afterAction(); },
+    'buy-insurance': () => { buyUpgrade('insurance'); afterAction(); },
+    'toggle-auto-sell': () => { toggleAutoSell(); updateAutoSellToggle(); afterAction(); },
     'toggle-guide': () => toggleModal('guideModal'),
-    'new-game': () => {
-        resetGameState();
-        resetRecordTracking();
-        document.body.classList.remove('trophy-bronze', 'trophy-silver', 'trophy-gold');
-        setGameplayDisabled(false);
-        updateAutoSellToggle();
-        checkTrophy(gameState.totalSold);
-        closeModal('gameOverModal');
-        updateUI();
-        startGameLoop();
-        showNewsTicker('لعبة جديدة! بالتوفيق 🍀', '📎', 3500);
-    },
+    'new-game': () => startFreshRun('لعبة جديدة! بالتوفيق 🍀'),
+    'do-prestige': () => doPrestigeAction(),
+    'toggle-achievements': () => { renderAchievements(); toggleModal('achievementsModal'); },
+    'close-achievements': () => closeModal('achievementsModal'),
+    'open-settings': () => { renderSettings(); openModal('settingsModal'); },
+    'close-settings': () => { cancelRebind(); closeModal('settingsModal'); },
+    'toggle-sound': () => doToggleSound(),
+    'toggle-reduce-flash': () => doToggleReduceFlash(),
+    'rebind': (target) => beginRebind(target && target.dataset.bind),
+    'reset-keybinds': () => { resetKeyBindings(); cancelRebind(); renderSettings(); },
     'reset-best-score': () => {
         if (!confirm('هل أنت متأكد من إعادة تعيين أفضل النتائج؟')) return;
         resetBestScore();
@@ -89,8 +122,34 @@ const actions = {
     'do-export-save': () => doExportSave(),
     'do-import-save': () => doImportSave(),
     'do-reset-game': () => doResetGame(),
-    'toggle-sound': () => doToggleSound(),
 };
+
+// Shared by "new game", the game-over restart and a full reset: all three need
+// exactly the same revival sequence.
+function startFreshRun(message, { keepPrestige = true } = {}) {
+    resetGameState({ keepPrestige });
+    resetRecordTracking();
+    resetSellCooldown();
+    document.body.classList.remove('trophy-bronze', 'trophy-silver', 'trophy-gold');
+    setGameplayDisabled(false);
+    updateAutoSellToggle();
+    checkTrophy(gameState.totalSold);
+    snapMoneyDisplay();
+    closeModal('gameOverModal');
+    updateUI();
+    startGameLoop();
+    if (message) showNewsTicker(message, '📎', 3500);
+}
+
+function doPrestigeAction() {
+    if (!canPrestige()) return;
+    if (!confirm('سيتم إعادة تشغيل المصنع من الصفر مقابل نقاط دائمة. هل أنت متأكد؟')) return;
+    if (doPrestige() <= 0) return;
+    checkAchievements();
+    // doPrestige already reset the run state; this brings the UI, the loop and
+    // the record tracking back in line with it.
+    startFreshRun(null);
+}
 
 function exportBestScore() {
     const { totalSold, money, date } = bestLocalScore;
@@ -138,7 +197,10 @@ function doImportSave() {
         showNewsTicker('تم استيراد الحفظ بنجاح!', '✅', 3500);
         playSound('completion');
         checkTrophy(gameState.totalSold);
+        checkAchievements();
         updateAutoSellToggle();
+        resetSellCooldown();
+        snapMoneyDisplay();
         // If we were on the game-over screen, the imported save revives play.
         setGameplayDisabled(false);
         closeModal('gameOverModal');
@@ -152,30 +214,66 @@ function doImportSave() {
 }
 
 function doResetGame() {
-    if (!confirm('تحذير: سيتم حذف كل تقدمك. هل أنت متأكد؟')) return;
-    // Same path as starting fresh from the game-over screen: it also restarts
-    // the loop and unlocks gameplay controls in case we got here after a loss.
-    actions['new-game']();
+    if (!confirm('تحذير: سيتم حذف كل تقدمك، بما في ذلك نقاط إعادة التأسيس. هل أنت متأكد؟')) return;
+    startFreshRun('تمت إعادة ضبط اللعبة.', { keepPrestige: false });
     closeModal('saveModal');
-    showNewsTicker('تمت إعادة ضبط اللعبة.', '🔄', 3500);
     playSound('completion');
 }
 
 function doToggleSound() {
     setSoundsEnabled(!areSoundsEnabled());
-    const btn = document.getElementById('soundToggleBtn');
-    if (btn) {
-        btn.textContent = areSoundsEnabled() ? '🔊 الصوت: مفعّل' : '🔇 الصوت: مكتوم';
-    }
+    renderSettings();
     if (areSoundsEnabled()) playSound('click');
 }
+
+function doToggleReduceFlash() {
+    setSetting('reduceFlash', !getSettings().reduceFlash);
+    renderSettings();
+    // Re-apply the trophy aura (or remove it) immediately.
+    checkTrophy(gameState.totalSold);
+}
+
+// ---- Key rebinding -------------------------------------------------------
+
+let pendingRebind = null;
+
+function beginRebind(action) {
+    if (!action || !(action in DEFAULT_KEY_BINDINGS)) return;
+    pendingRebind = action;
+    setRebindPrompt(action);
+}
+
+function cancelRebind() {
+    pendingRebind = null;
+    setRebindPrompt(null);
+}
+
+// Returns true when the press was consumed as a rebind.
+function handleRebindKey(e) {
+    if (!pendingRebind) return false;
+    e.preventDefault();
+    if (e.key === 'Escape') {
+        cancelRebind();
+        return true;
+    }
+    if (e.key === 'Tab') return false;
+    if (setKeyBinding(pendingRebind, e.key)) {
+        cancelRebind();
+        renderSettings();
+    } else {
+        showNewsTicker('هذا المفتاح مستخدم بالفعل — اختر مفتاحاً آخر.', '⚠️', 2500);
+    }
+    return true;
+}
+
+// ---- Input wiring --------------------------------------------------------
 
 function handleClick(event) {
     const target = event.target.closest('[data-action]');
     if (!target) return;
     const action = target.dataset.action;
     if (actions[action]) {
-        actions[action]();
+        actions[action](target);
     }
 }
 
@@ -184,14 +282,24 @@ function setupPriceButtons() {
     const increaseBtn = document.getElementById('increasePriceBtn');
     const delta = GAME_CONFIG.PRICE_ADJUST_DELTA;
 
-    decreaseBtn.addEventListener('mousedown', () => startPriceAdjust(-delta));
-    decreaseBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPriceAdjust(-delta); });
-    increaseBtn.addEventListener('mousedown', () => startPriceAdjust(delta));
-    increaseBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPriceAdjust(delta); });
+    const press = (button, amount) => {
+        button.addEventListener('mousedown', () => {
+            if (!button.disabled) startPriceAdjust(amount);
+        });
+        button.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!button.disabled) startPriceAdjust(amount);
+        });
+    };
+    press(decreaseBtn, -delta);
+    press(increaseBtn, delta);
 
     document.addEventListener('mouseup', stopPriceAdjust);
     document.addEventListener('touchend', stopPriceAdjust);
     document.addEventListener('touchcancel', stopPriceAdjust);
+    // Alt-Tab away mid-press never delivered a mouseup, so the price kept
+    // running on its own until the player came back.
+    window.addEventListener('blur', stopPriceAdjust);
 }
 
 function setupPriceEdit() {
@@ -205,12 +313,21 @@ function setupPriceEdit() {
     });
 }
 
+function setupVolumeSlider() {
+    const slider = document.getElementById('volumeSlider');
+    if (!slider) return;
+    slider.addEventListener('input', () => {
+        setVolume(Number(slider.value) / 100);
+        renderSettings();
+    });
+}
+
 // Keep Tab inside the topmost open modal (simple focus trap).
 function trapModalTab(e) {
     const modal = document.querySelector('.modal.active');
     if (!modal) return;
     const focusables = modal.querySelectorAll(
-        'button:not(:disabled), textarea, [href], input, [tabindex]:not([tabindex="-1"])',
+        'button:not(:disabled), textarea, input, [href], [tabindex]:not([tabindex="-1"])',
     );
     if (!focusables.length) return;
     const first = focusables[0];
@@ -224,34 +341,47 @@ function trapModalTab(e) {
     }
 }
 
+function closeTopModals() {
+    // The game-over modal is the only path back into the game — it must not be
+    // dismissable into a dead screen.
+    document.querySelectorAll('.modal.active').forEach((m) => {
+        if (m.id !== 'gameOverModal') m.classList.remove('active');
+    });
+}
+
 function setupKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
+        if (handleRebindKey(e)) return;
+
         if (e.key === 'Tab') {
             trapModalTab(e);
+            return;
+        }
+        if (e.key === 'Escape') {
+            closeTopModals();
             return;
         }
         // Never hijack browser/system shortcuts (Ctrl+A must not buy a machine).
         if (e.ctrlKey || e.metaKey || e.altKey) return;
         if (e.target.isContentEditable || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        const key = e.key.toLowerCase();
-        if (key === ' ' || key === 'enter') {
-            if (e.target.tagName !== 'BUTTON') {
-                e.preventDefault();
-                actions['make-clip']();
-            }
-        } else if (key === 's') {
-            actions['sell-clips']();
-        } else if (key === 'b') {
-            actions['buy-wire']();
-        } else if (key === 'a') {
-            actions['buy-auto-clipper']();
-        } else if (key === 'escape') {
-            // The game-over modal is the only path back into the game — it
-            // must not be dismissable into a dead screen.
-            document.querySelectorAll('.modal.active').forEach((m) => {
-                if (m.id !== 'gameOverModal') m.classList.remove('active');
-            });
+        // Shortcuts used to fire straight through an open dialog — a player
+        // reading the guide was silently making and selling clips behind it.
+        if (isModalOpen() || isGameplayLocked()) return;
+
+        const action = actionForKey(e.key);
+        if (!action) return;
+        // Space/Enter on a focused button is the browser's job, not ours.
+        if ((e.key === ' ' || e.key === 'Enter') && e.target.tagName === 'BUTTON') return;
+
+        // Route through the real button so its `disabled` state stays the
+        // single source of truth for what is currently allowed.
+        const button = getActionButton(action);
+        if (!button || button.disabled) {
+            e.preventDefault();
+            return;
         }
+        e.preventDefault();
+        button.click();
     });
 }
 
@@ -282,7 +412,8 @@ function setupVisibilityCatchUp() {
                 ? ` وبيع ${progress.clipsSold.toLocaleString()} مشبك`
                 : '';
             showNewsTicker(`⏰ أثناء غيابك: إنتاج ${progress.clipsProduced.toLocaleString()} مشبك${sold}!`, '🏭', 5000);
-            updateUI();
+            snapMoneyDisplay();
+            afterAction();
         }
     });
 }
@@ -296,6 +427,7 @@ function registerServiceWorker() {
 }
 
 function init() {
+    loadSettings();
     initAudio();
     initTicker();
     initUI();
@@ -311,16 +443,22 @@ function init() {
     document.addEventListener('click', handleClick);
     setupPriceButtons();
     setupPriceEdit();
+    setupVolumeSlider();
     setupKeyboardShortcuts();
     setupVisibilityCatchUp();
 
     updateAutoSellToggle();
     checkTrophy(gameState.totalSold);
+    checkAchievements();
+    renderSettings();
+    snapMoneyDisplay();
     updateUI();
 
-    if (!hadSave) {
-        openModal('guideModal');
-    } else if (offlineProgress && offlineProgress.clipsProduced > 0) {
+    // The guide no longer opens itself on first launch: fifteen bullet points
+    // before the player has seen a button was the worst part of onboarding.
+    // The objective bar teaches one step at a time instead, and the full guide
+    // stays one tap away behind "?".
+    if (offlineProgress && offlineProgress.clipsProduced > 0) {
         showOfflineModal(offlineProgress);
     }
 

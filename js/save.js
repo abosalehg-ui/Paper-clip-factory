@@ -7,6 +7,7 @@ import {
     resetBestLocalScore,
     createDefaultGameState,
 } from './state.js';
+import { markClockAnchor, clearClockAnchor } from './clock.js';
 
 export function loadBestScore() {
     try {
@@ -45,6 +46,9 @@ export function resetBestScore() {
 export function saveGameState() {
     try {
         gameState.lastSaveTime = Date.now();
+        // Pair every wall-clock save stamp with a monotonic anchor, so the
+        // offline calculation can tell real absence from a wound-forward clock.
+        markClockAnchor();
         const payload = JSON.stringify(gameState);
         localStorage.setItem(STORAGE_KEYS.GAME_STATE, payload);
     } catch (e) {
@@ -61,6 +65,9 @@ export function loadGameState() {
         if (raw) {
             const parsed = JSON.parse(raw);
             applySavedState(parsed);
+            // A save loaded from disk has no monotonic anchor from this page
+            // session — the offline calculation must fall back to wall time.
+            clearClockAnchor();
             return true;
         }
     } catch (e) {
@@ -69,11 +76,24 @@ export function loadGameState() {
     return false;
 }
 
-export function resetGameState() {
+export function resetGameState({ keepPrestige = true } = {}) {
     const defaults = createDefaultGameState();
+    // Prestige is permanent progression: a new run keeps the points it earned,
+    // otherwise resetting would delete the reward for resetting.
+    const carried = keepPrestige
+        ? {
+            prestigePoints: gameState.prestigePoints,
+            prestigeResets: gameState.prestigeResets,
+            lifetimeSold: gameState.lifetimeSold,
+            unlockedAchievements: gameState.unlockedAchievements.slice(),
+        }
+        : {};
+
     for (const key of Object.keys(defaults)) {
-        gameState[key] = defaults[key];
+        gameState[key] = Array.isArray(defaults[key]) ? [] : defaults[key];
     }
+    Object.assign(gameState, carried);
+
     try {
         localStorage.removeItem(STORAGE_KEYS.GAME_STATE);
     } catch (e) {
@@ -104,69 +124,13 @@ export function importSaveString(encoded) {
         const parsed = JSON.parse(decoded);
         if (!parsed || typeof parsed !== 'object') return false;
         applySavedState(parsed);
+        clearClockAnchor();
         saveGameState();
         return true;
     } catch (e) {
         console.error('Import failed:', e);
         return false;
     }
-}
-
-export function calculateOfflineProgress() {
-    const now = Date.now();
-    const lastSave = gameState.lastSaveTime || now;
-    let elapsedMs = now - lastSave;
-
-    if (elapsedMs < 5000) {
-        return { elapsedMs: 0, clipsProduced: 0, moneyEarned: 0 };
-    }
-
-    elapsedMs = Math.min(elapsedMs, GAME_CONFIG.OFFLINE_PROGRESS_CAP_MS);
-    const elapsedSec = Math.floor(elapsedMs / 1000);
-
-    const clippers = gameState.autoClippers;
-    if (clippers <= 0) {
-        return { elapsedMs, clipsProduced: 0, moneyEarned: 0 };
-    }
-
-    const availableSpace = Math.max(0, gameState.maxClipsLimit - gameState.clips);
-
-    // Mirror autoProduceTick: one clip per wire per machine-second, with
-    // partial ticks allowed when the wire runs low, capped by warehouse space.
-    const clipsProduced = Math.max(
-        0,
-        Math.min(clippers * elapsedSec, gameState.wire, availableSpace),
-    );
-
-    let moneyEarned = 0;
-    let clipsSold = 0;
-    if (gameState.autoSellEnabled && clipsProduced > 0) {
-        // Mirror autoSellTick, including the marketing-scaled per-tick cap.
-        const sellPerTick = Math.min(
-            Math.max(
-                GAME_CONFIG.AUTO_SELL_MIN_PER_TICK,
-                Math.floor(gameState.demand * GAME_CONFIG.AUTO_SELL_DEMAND_FRACTION),
-            ),
-            GAME_CONFIG.AUTO_SELL_MAX_PER_TICK * gameState.marketingLevel,
-        );
-        const ticks = Math.floor(elapsedMs / GAME_CONFIG.SELL_TICK_MS);
-        clipsSold = Math.min(clipsProduced, sellPerTick * ticks);
-        moneyEarned = clipsSold * gameState.price;
-    }
-
-    gameState.clips += clipsProduced - clipsSold;
-    gameState.totalClips += clipsProduced;
-    gameState.wire -= clipsProduced;
-    gameState.money += moneyEarned;
-    gameState.totalSold += clipsSold;
-    gameState.lastSaveTime = now;
-
-    return {
-        elapsedMs,
-        clipsProduced,
-        clipsSold,
-        moneyEarned,
-    };
 }
 
 export function startAutoSave() {

@@ -1,7 +1,13 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;touch-action:manipulation}
 body{
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    /* Arabic-first stack. The previous list (Segoe UI, Tahoma, Geneva,
+       Verdana) contained no font actually designed for Arabic, so every
+       device fell back to something different. */
+    font-family: "Noto Kufi Arabic", "IBM Plex Sans Arabic", "Dubai",
+        "Segoe UI", Tahoma, system-ui, sans-serif;
+    /* Arabic needs more leading than Latin, not less. */
+    line-height: 1.6;
     background: url('../assets/images/background.webp');
     background-size: cover;
     background-attachment: fixed;
@@ -20,44 +26,47 @@ body{
 .container{
     max-width:1200px;
     margin:0 auto;
-    padding-top: 30px;
+    /* Clears the fixed stats bar. */
+    padding-top: 74px;
 }
 .header{
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    gap: 8px;
     margin:6px 0 10px;
 }
 .title{
-    font-size:1.3rem;
+    font-size:1.15rem;
     color:#7dd3fc;
     font-weight:700;
-    margin-top:0;
-    margin-right: 8px;
+    flex: 1;
+    text-align: center;
 }
-.subtitle{color:#9aa4b2;margin-top:3px;font-size:0.75rem}
+.subtitle{color:#9aa4b2;margin-block-start:3px;font-size:0.8rem}
 
-.guide-btn{
-    position: fixed;
-    top: 8px;
-    right: auto;
-    left: 8px;
-    z-index: 55;
-
+.top-buttons{
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+/* 44x44 is the minimum comfortable touch target; these used to be 30x30. */
+.round-btn{
     background:linear-gradient(135deg,#1e40af,#3b82f6);
     border:none;
-    width:30px;
-    height:30px;
+    width:44px;
+    height:44px;
     border-radius:50%;
     cursor:pointer;
     display:inline-flex;
     align-items:center;
     justify-content:center;
+    font-size:1.1rem;
     box-shadow:0 3px 8px rgba(59,130,246,0.4);
     transition:transform .2s ease;
 }
-.guide-btn:active{transform:scale(0.95)}
-.guide-btn svg{width:18px;height:18px}
+.round-btn:active{transform:scale(0.95)}
+.round-btn svg{width:22px;height:22px}
 
 .emoji-icon{
     font-size: 20px;
@@ -71,65 +80,126 @@ body{
     grid-template-columns:repeat(4,1fr);
     gap:5px;
     position: fixed;
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 16px);
+    inset-block-start: 8px;
+    /* Anchored to both inline edges with auto margins: centres correctly in
+       either writing direction without a transform. */
+    inset-inline: 8px;
+    margin-inline: auto;
     max-width: 1200px;
     z-index: 50;
-    background: #071033e6;
-    padding: 5px 8px;
-    border-radius: 8px;
+    background: #071033f2;
+    padding: 6px;
+    border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
+
+/* Icon and label share a row so the card stays short even with readable type. */
 .stat-card{
-    background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-    padding:2px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    padding:4px 6px;
     border-radius:8px;
-    border:1px solid rgba(255,255,255,0.06);
-    backdrop-filter:blur(4px);
+    border:1px solid rgba(255,255,255,0.08);
     box-shadow:0 3px 12px rgba(2,6,23,0.5);
-    text-align:center;
+    display:grid;
+    grid-template-columns:auto 1fr;
+    grid-template-areas:
+        "icon label"
+        "value value";
+    align-items:center;
+    gap:0 4px;
 }
 .stat-icon{
-    width:12px;
-    height:12px;
-    margin:0 auto 2px;
+    grid-area:icon;
     display:grid;
     place-items:center;
-    border-radius:6px;
-    background:rgba(255,255,255,0.03);
 }
-.stat-icon .emoji-icon-stat{
-    font-size: 10px;
+.stat-icon .emoji-icon-stat{font-size: 13px}
+.stat-label{
+    grid-area:label;
+    color:#b8c2d0;
+    /* Was 0.50rem — 8px, on the four most important numbers in the game. */
+    font-size:0.72rem;
+    text-align:start;
+    line-height:1.2;
 }
-.stat-label{color:#9aa4b2;font-size:0.50rem;margin-bottom:1px}
-.stat-value{font-size:0.70rem;font-weight:700}
+.stat-value{
+    grid-area:value;
+    /* Was 0.70rem (~11px). */
+    font-size:0.95rem;
+    font-weight:700;
+    line-height:1.25;
+    text-align:center;
+}
+.stat-sub{font-size:0.7rem;color:#9aa4b2;font-weight:600}
+
+/* ---- Objective / onboarding bar -------------------------------------- */
+.objective-bar{
+    background:linear-gradient(145deg,#0f1724,#16233a);
+    border:1px solid rgba(125,211,252,0.18);
+    border-radius:10px;
+    padding:8px 10px;
+    margin-bottom:10px;
+}
+.objective-bar[hidden]{display:none}
+.objective-tutorial{
+    border-color:rgba(251,191,36,0.45);
+    background:linear-gradient(145deg,#1b1607,#241c08);
+}
+.objective-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:0.85rem;
+    margin-bottom:6px;
+}
+.objective-icon{font-size:1rem;flex-shrink:0}
+.objective-text{flex:1;color:#e6eef8;font-weight:600}
+.objective-count{
+    color:#9aa4b2;
+    font-size:0.78rem;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+    flex-shrink:0;
+}
+.objective-track{
+    height:6px;
+    background:rgba(255,255,255,0.08);
+    border-radius:99px;
+    overflow:hidden;
+}
+.objective-fill{
+    height:100%;
+    width:0;
+    background:linear-gradient(90deg,#38bdf8,#22c55e);
+    border-radius:99px;
+    transition:width .3s ease;
+}
+.objective-tutorial .objective-fill{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
 
 .main-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .section{
     background:linear-gradient(145deg,#0f1724,#1a1f2e);
-    padding:8px;
+    padding:10px;
     border-radius:10px;
     border:1px solid rgba(125,211,252,0.08);
     box-shadow:0 6px 20px rgba(0,0,0,0.4);
+    margin-bottom:8px;
 }
+.section[hidden]{display:none}
 .section-title{
-    font-size:0.85rem;
+    font-size:0.95rem;
     font-weight:700;
-    margin-bottom:6px;
+    margin-bottom:8px;
     display:flex;
     align-items:center;
     gap:5px;
     justify-content:center;
 }
-.section-title .emoji-icon-section{
-    font-size: 14px;
-}
+.section-title .emoji-icon-section{font-size: 16px}
 
 .icon-btn{
     width:100%;
-    min-height:45px;
+    min-height:48px;
     border:none;
     border-radius:10px;
     cursor:pointer;
@@ -141,15 +211,20 @@ body{
     align-items:center;
     justify-content:center;
     gap:3px;
-    padding:6px;
+    padding:8px;
     box-shadow:0 4px 15px rgba(0,0,0,0.3);
     font-weight:700;
-    font-size:0.75rem;
+    font-size:0.85rem;
+    font-family:inherit;
+    line-height:1.35;
 }
 .icon-btn:active:not(:disabled){transform:scale(0.97)}
-.icon-btn:disabled{opacity:.4;cursor:not-allowed}
+/* 0.4 opacity dropped disabled labels below the contrast floor. */
+.icon-btn:disabled{opacity:.6;filter:grayscale(0.5);cursor:not-allowed}
 .icon-btn svg{width:22px;height:22px;transition:transform .2s}
 .icon-btn:active:not(:disabled) svg{transform:scale(1.1)}
+.icon-btn:focus-visible,.round-btn:focus-visible,.price-btn:focus-visible,
+.toggle-btn:focus-visible{outline:3px solid #fbbf24;outline-offset:2px}
 
 .btn-make{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff}
 .btn-make:before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);opacity:0;transition:opacity .2s}
@@ -161,43 +236,49 @@ body{
 .btn-secondary{background:linear-gradient(135deg,#1e3a8a,#1e40af);color:#fff}
 
 .item-box{
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
-    padding:6px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.008));
+    padding:8px;
     border-radius:8px;
-    margin-bottom:6px;
-    border:1px solid rgba(255,255,255,0.04);
+    margin-bottom:8px;
+    border:1px solid rgba(255,255,255,0.06);
 }
 .item-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:5px;
-    font-size:0.7rem;
+    gap:8px;
+    margin-bottom:6px;
+    font-size:0.8rem;
 }
 .item-info{
-    color:#9aa4b2;
-    font-size:0.65rem;
-    margin-bottom:5px;
+    color:#b8c2d0;
+    font-size:0.75rem;
+    margin-bottom:6px;
     text-align:center;
+}
+.note-line{
+    color:#9aa4b2;
+    font-size:0.72rem;
+    margin-top:6px;
 }
 
 .price-container{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 5px;
+    gap: 6px;
 }
 .price-display{
     flex-grow: 1;
     text-align:center;
-    padding:4px;
+    padding:6px;
     background:rgba(16,185,129,0.1);
     border-radius:8px;
-    border:1px solid rgba(16,185,129,0.2);
+    border:1px solid rgba(16,185,129,0.25);
 }
-.price-label{color:#9aa4b2;font-size:0.65rem;margin-bottom:2px}
+.price-label{color:#b8c2d0;font-size:0.75rem;margin-bottom:2px}
 .price-value{
-    font-size:1.2rem;
+    font-size:1.3rem;
     font-weight:700;
     color:#10b981;
     display: flex;
@@ -205,19 +286,26 @@ body{
     align-items: center;
 }
 #price {
-    min-width: 40px;
+    min-width: 44px;
     padding: 0 4px;
     outline: none;
-    border-bottom: 1px solid transparent;
+    border-bottom: 1px solid rgba(16,185,129,0.4);
     transition: border-bottom-color 0.2s;
 }
-#price:focus {
-    border-bottom-color: #10b981;
+#price:focus {border-bottom-color: #10b981}
+
+.price-hint{
+    margin-top:6px;
+    font-size:0.73rem;
+    color:#b8c2d0;
+    text-align:center;
+    line-height:1.7;
 }
+.price-hint strong{color:#fbbf24}
 
 .price-btn{
-    width: 50px;
-    min-height:50px;
+    width: 52px;
+    min-height:52px;
     border:none;
     border-radius:8px;
     background:linear-gradient(135deg,#0d9488,#0f766e);
@@ -226,61 +314,80 @@ body{
     font-weight:700;
     cursor:pointer;
     display:flex;
-    flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:2px;
     box-shadow:0 3px 10px rgba(13,148,136,0.3);
     transition:transform .2s;
+    flex-shrink:0;
 }
-.price-btn:active{transform:scale(0.95)}
-.price-btn svg{width:20px;height:20px;stroke:#fff}
-.price-btn span{font-size:0.65rem;opacity:0.9; display: none;}
+.price-btn:active:not(:disabled){transform:scale(0.95)}
+.price-btn:disabled{opacity:.5;cursor:not-allowed}
+.price-btn svg{width:22px;height:22px;stroke:#fff}
 
 .toggle-container{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:6px;
-    background:rgba(255,255,255,0.02);
+    gap:8px;
+    padding:8px;
+    background:rgba(255,255,255,0.03);
     border-radius:8px;
     margin-bottom:6px;
-    font-size:0.7rem;
+    font-size:0.82rem;
+}
+.toggle-wrap{display:flex;align-items:center;gap:8px}
+/* State is spelled out as well as coloured — colour alone excluded anyone who
+   cannot separate the green from the grey. */
+.toggle-state{
+    font-size:0.75rem;
+    font-weight:700;
+    color:#9aa4b2;
+    min-width:44px;
+    text-align:center;
 }
 .toggle-btn{
-    width:45px;
-    height:24px;
-    border-radius:12px;
+    width:56px;
+    height:30px;
+    border-radius:15px;
     border:none;
     cursor:pointer;
     position:relative;
     transition:background .3s;
     box-shadow:inset 0 2px 6px rgba(0,0,0,0.3);
+    /* Keeps the tap area at 44px without a 44px-tall track. */
+    padding:0;
+    margin:7px 0;
+    flex-shrink:0;
+}
+.toggle-btn::before{
+    content:'';
+    position:absolute;
+    inset:-7px 0;
 }
 .toggle-on{background:#10b981}
 .toggle-off{background:#475569}
 .toggle-btn:after{
     content:'';
     position:absolute;
-    width:18px;
-    height:18px;
+    width:22px;
+    height:22px;
     border-radius:50%;
     background:#fff;
-    top:3px;
-    transition:right .3s;
+    inset-block-start:4px;
+    transition:inset-inline-end .3s;
     box-shadow:0 2px 4px rgba(0,0,0,0.3);
 }
-.toggle-off:after{right:24px}
-.toggle-on:after{right:3px}
+.toggle-off:after{inset-inline-end:30px}
+.toggle-on:after{inset-inline-end:4px}
 
 .stats-section{
     display:grid;
     grid-template-columns:repeat(2,1fr);
-    gap:6px;
+    gap:8px;
 }
-.stat-item{text-align:center;padding:5px}
-.stat-item-label{color:#9aa4b2;font-size:0.6rem;margin-bottom:2px}
-.stat-item-value{font-size:0.85rem;font-weight:700}
+.stat-item{text-align:center;padding:6px}
+.stat-item-label{color:#b8c2d0;font-size:0.75rem;margin-bottom:2px}
+.stat-item-value{font-size:1rem;font-weight:700}
 
 .pulse{animation:pulse 2s infinite}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
@@ -290,7 +397,11 @@ body{
 @keyframes glow{0%{box-shadow:0 0 0 rgba(125,211,252,0)}50%{box-shadow:0 0 15px rgba(125,211,252,0.4)}100%{box-shadow:0 0 0 rgba(125,211,252,0)}}
 
 .floating-emoji {
-    position: absolute;
+    /* Coordinates come from getBoundingClientRect(), which is viewport-based.
+       As `absolute` inside a relatively positioned body, every particle was
+       offset by the scroll position and vanished off-screen on a scrolled
+       page — which on mobile is most of the time. */
+    position: fixed;
     font-size: 1.5rem;
     opacity: 0;
     pointer-events: none;
@@ -300,18 +411,9 @@ body{
 }
 
 @keyframes floatAndFade {
-    0% {
-        transform: translate(-50%, 0) scale(0.7);
-        opacity: 1;
-    }
-    50% {
-        transform: translate(-50%, -100%) scale(1.1);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(-50%, -200%) scale(0.5);
-        opacity: 0;
-    }
+    0% {transform: translate(-50%, 0) scale(0.7);opacity: 1}
+    50% {transform: translate(-50%, -100%) scale(1.1);opacity: 1}
+    100% {transform: translate(-50%, -200%) scale(0.5);opacity: 0}
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -354,28 +456,92 @@ body{
     text-align:center;
     color:#7dd3fc;
     margin-bottom:12px;
-    font-size:1.3rem;
+    font-size:1.25rem;
+}
+.modal-sub{
+    text-align:center;
+    color:#cbd5e1;
+    margin-bottom:12px;
+    font-size:0.85rem;
 }
 .guide-section{
     background:#061427;
     padding:10px;
     border-radius:10px;
     margin-bottom:10px;
-    border:1px solid rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.05);
 }
 .guide-section h3{
     color:#60a5fa;
-    margin-bottom:6px;
-    font-size:0.9rem;
+    margin-bottom:8px;
+    font-size:0.95rem;
 }
 .guide-section ul,.guide-section p{
     list-style:none;
     padding:0;
     color:#cbd5e1;
-    font-size:0.8rem;
-    line-height:1.5;
+    font-size:0.85rem;
+    line-height:1.8;
 }
-.guide-section ul li{margin-bottom:5px}
+.guide-section ul li{margin-bottom:6px}
+
+/* ---- Settings --------------------------------------------------------- */
+.setting-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+    font-size:0.85rem;
+    color:#cbd5e1;
+    flex-wrap:wrap;
+}
+.setting-btn{
+    width:auto;
+    min-width:110px;
+    min-height:44px;
+    flex-direction:row;
+    font-size:0.8rem;
+    padding:8px 12px;
+}
+.setting-btn.rebinding{
+    background:linear-gradient(135deg,#f59e0b,#d97706);
+    animation:pulse 1.2s infinite;
+}
+.setting-note{
+    color:#9aa4b2;
+    font-size:0.75rem;
+    line-height:1.7;
+    margin-top:4px;
+}
+input[type="range"]{
+    flex:1;
+    min-width:140px;
+    height:32px;
+    accent-color:#38bdf8;
+    cursor:pointer;
+}
+
+/* ---- Achievements ----------------------------------------------------- */
+.achievement-list{display:flex;flex-direction:column;gap:6px}
+.achievement{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 10px;
+    border-radius:8px;
+    background:#061427;
+    border:1px solid rgba(255,255,255,0.05);
+    opacity:0.55;
+}
+.achievement.unlocked{
+    opacity:1;
+    border-color:rgba(251,191,36,0.4);
+    background:linear-gradient(145deg,#12180c,#1a1f0d);
+}
+.achievement-icon{font-size:1.4rem;flex-shrink:0}
+.achievement-title{font-weight:700;font-size:0.85rem;color:#e6eef8}
+.achievement-desc{font-size:0.75rem;color:#9aa4b2;line-height:1.5}
 
 .dev-info{
     text-align:center;
@@ -384,34 +550,31 @@ body{
     background:linear-gradient(90deg,#071433,#0b1b2c);
     border:1px solid rgba(125,211,252,0.06);
     margin-top:10px;
-    font-size:0.8rem;
+    font-size:0.85rem;
 }
 
 #insuranceTimer {
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: bold;
     color: #fca5a5;
-    margin-top: -6px;
     margin-bottom: 6px;
 }
 
-.trophy-bronze {
-    box-shadow: 0 0 30px 10px rgba(176, 141, 87, 0.7), inset 0 0 20px rgba(176, 141, 87, 0.5);
-}
-.trophy-silver {
-    box-shadow: 0 0 40px 15px rgba(192, 192, 192, 0.8), inset 0 0 30px rgba(192, 192, 192, 0.6);
-}
-.trophy-gold {
-    box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.9), inset 0 0 40px rgba(255, 215, 0, 0.7);
-}
+/* The trophy aura is a large permanent glow, which is why the settings screen
+   can switch it off independently of prefers-reduced-motion. */
+.trophy-bronze {box-shadow: 0 0 30px 10px rgba(176, 141, 87, 0.7), inset 0 0 20px rgba(176, 141, 87, 0.5)}
+.trophy-silver {box-shadow: 0 0 40px 15px rgba(192, 192, 192, 0.8), inset 0 0 30px rgba(192, 192, 192, 0.6)}
+.trophy-gold {box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.9), inset 0 0 40px rgba(255, 215, 0, 0.7)}
 
 .trophy-icon {
     position: fixed;
-    top: 8px;
-    right: 8px;
-    width: 30px;
-    height: 30px;
+    /* Moved off the top edge, where it sat on top of the fixed stats bar and
+       covered the demand card. */
+    inset-block-end: 64px;
+    inset-inline-end: 10px;
+    width: 40px;
+    height: 40px;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
@@ -420,50 +583,30 @@ body{
     display: none;
     animation: bounceIn 0.8s ease-out forwards;
     background: transparent;
-
-    background-size: 25px 25px;
+    background-size: 34px 34px;
     background-repeat: no-repeat;
     background-position: center;
 }
 
-#trophyBronzeIcon {
-    background-image: url('../assets/images/trophy-bronze-64.webp');
-}
-
-#trophySilverIcon {
-    background-image: url('../assets/images/trophy-silver-64.webp');
-}
-
-#trophyGoldIcon {
-    background-image: url('../assets/images/trophy-gold-64.webp');
-}
+#trophyBronzeIcon {background-image: url('../assets/images/trophy-bronze-64.webp')}
+#trophySilverIcon {background-image: url('../assets/images/trophy-silver-64.webp')}
+#trophyGoldIcon {background-image: url('../assets/images/trophy-gold-64.webp')}
 
 @keyframes bounceIn {
-    0% {
-        transform: scale(0.3);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.1);
-        opacity: 1;
-    }
-    70% {
-        transform: scale(0.9);
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+    0% {transform: scale(0.3);opacity: 0}
+    50% {transform: scale(1.1);opacity: 1}
+    70% {transform: scale(0.9)}
+    100% {transform: scale(1);opacity: 1}
 }
 
 #newsTicker {
     position: fixed;
-    bottom: 0;
-    left: 0;
+    inset-block-end: 0;
+    inset-inline-start: 0;
     width: 100%;
     background: linear-gradient(90deg, #ef4444, #dc2626);
     color: #fff;
-    padding: 10px 8px;
+    padding: 12px 8px;
     font-weight: 700;
     font-size: 0.9rem;
     text-align: center;
@@ -472,36 +615,28 @@ body{
     display: flex;
     align-items: center;
     justify-content: center;
-
-    transform: translateX(-100%);
-
+    /* Slides in from the inline-start edge, which follows the writing
+       direction instead of always being the physical left. */
+    transform: translateX(100%);
     transition: transform 0.5s ease-out;
-
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
 }
-#newsTicker.show {
-    transform: translateX(0);
-}
+html[dir="ltr"] #newsTicker {transform: translateX(-100%)}
+#newsTicker.show {transform: translateX(0)}
 #newsTicker .emoji {
     font-size: 1.1rem;
-    margin-left: 8px;
+    margin-inline-end: 8px;
 }
 
 #offlineModal .modal-content,
-#gameOverModal .modal-content {
-    text-align: center;
-}
+#gameOverModal .modal-content {text-align: center}
 .offline-stat {
     background:#061427;
-    padding:8px;
+    padding:10px;
     border-radius:8px;
     margin: 6px 0;
     font-size: 0.9rem;
 }
-.offline-stat strong {
-    color: #10b981;
-}
+.offline-stat strong {color: #10b981}
 
 .save-controls {
     display: flex;
@@ -511,7 +646,7 @@ body{
 }
 .save-controls button {
     flex: 1;
-    min-width: 100px;
+    min-width: 120px;
 }
 #saveDataTextarea {
     width: 100%;
@@ -519,45 +654,54 @@ body{
     margin-top: 8px;
     padding: 8px;
     background: #061427;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
     border-radius: 6px;
     color: #cbd5e1;
     font-family: monospace;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     resize: vertical;
     direction: ltr;
 }
 
 .shortcuts-hint {
     text-align: center;
-    color: #9aa4b2;
-    font-size: 0.7rem;
-    margin-top: 8px;
+    color: #b8c2d0;
+    font-size: 0.75rem;
+    margin-top: 10px;
+    line-height: 1.8;
+}
+
+/* Landscape phones: the fixed top bar plus the ticker leave very little
+   height, so the HUD tightens up rather than eating the play area. */
+@media (max-height: 480px) and (orientation: landscape) {
+    .container{padding-top:62px}
+    .stats-grid{padding:3px 6px}
+    .stat-value{font-size:0.85rem}
+    .icon-btn{min-height:42px}
+    .main-grid{flex-direction:row;flex-wrap:wrap}
+    .main-grid .section{flex:1 1 320px}
+}
+
+@media (min-width:600px){
+    .stats-section{grid-template-columns:repeat(4,1fr)}
 }
 
 @media (min-width:768px){
-    .stats-grid{
-        gap:6px;
-        padding: 4px 6px;
-        top: 8px;
-    }
-    .container{
-        padding-top: 50px;
-    }
-    .stat-card{padding:5px}
-    .stat-icon{width:20px;height:20px;margin-bottom:2px}
-    .stat-icon .emoji-icon-stat{font-size: 16px;}
-    .stat-label{font-size:0.6rem;margin-bottom:2px}
-    .stat-value{font-size:1rem}
-    .main-grid{grid-template-columns:repeat(2,1fr);gap:16px}
+    .stats-grid{gap:8px;padding:6px 8px}
+    .container{padding-top: 86px}
+    .stat-card{padding:6px 8px}
+    .stat-icon .emoji-icon-stat{font-size: 18px}
+    .stat-label{font-size:0.8rem}
+    .stat-value{font-size:1.25rem}
+    .main-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
     .section{padding:14px}
-    .title{font-size:2rem}
-    .icon-btn{min-height:70px;font-size:0.9rem}
-    .icon-btn .emoji-icon{font-size: 30px;}
-    .section-title{font-size:1rem}
-    .section-title .emoji-icon-section{font-size: 20px;}
-    .price-btn {
-        width: 60px;
-    }
-    .price-btn svg{width:25px;height:25px;}
+    .title{font-size:1.9rem}
+    .icon-btn{min-height:70px;font-size:0.95rem}
+    .icon-btn .emoji-icon{font-size: 30px}
+    .setting-btn{min-height:44px}
+    .section-title{font-size:1.05rem}
+    .section-title .emoji-icon-section{font-size: 20px}
+    .price-btn{width: 60px}
+    .price-btn svg{width:26px;height:26px}
+    .objective-row{font-size:0.95rem}
 }

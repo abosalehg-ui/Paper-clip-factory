@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 
 import { GAME_CONFIG } from '../js/config.js';
 import { gameState, createDefaultGameState, applySavedState } from '../js/state.js';
+import { maxPrice, effectiveDemandCap, computeWireCost } from '../js/economy.js';
 
 beforeEach(() => {
     Object.assign(gameState, createDefaultGameState());
@@ -57,4 +58,45 @@ test('applySavedState clamps far-future insurance and lastSaveTime', () => {
     applySavedState({ insuranceEndTime: farFuture, lastSaveTime: farFuture });
     assert.ok(gameState.insuranceEndTime <= Date.now() + GAME_CONFIG.MAX_INSURANCE_FUTURE_MS);
     assert.ok(gameState.lastSaveTime <= Date.now());
+});
+
+test('an edited save cannot restore the unbounded-price economy', () => {
+    applySavedState({ price: 999_999, marketingLevel: 1, demand: 1e8 });
+    assert.ok(gameState.price <= maxPrice(gameState.marketingLevel));
+    assert.ok(gameState.demand <= effectiveDemandCap(gameState.marketingLevel, gameState.price));
+});
+
+test('the price ceiling follows the marketing level in the save', () => {
+    applySavedState({ price: 999_999, marketingLevel: 40 });
+    assert.equal(gameState.price, maxPrice(40));
+    assert.ok(maxPrice(40) > maxPrice(1));
+});
+
+test('derived prices are recomputed rather than trusted', () => {
+    applySavedState({ totalClips: GAME_CONFIG.WIRE_COST_SCALE, wireCost: 1 });
+    assert.equal(gameState.wireCost, computeWireCost(GAME_CONFIG.WIRE_COST_SCALE));
+    assert.ok(gameState.wireCost > GAME_CONFIG.INITIAL_WIRE_COST);
+});
+
+test('lifetime sales can never be behind the current run', () => {
+    applySavedState({ totalSold: 500_000, lifetimeSold: 0 });
+    assert.equal(gameState.lifetimeSold, 500_000);
+});
+
+test('achievement lists are sanitised to strings and bounded', () => {
+    applySavedState({ unlockedAchievements: ['first-clip', 42, null, { a: 1 }, 'first-sale'] });
+    assert.deepEqual(gameState.unlockedAchievements, ['first-clip', 'first-sale']);
+
+    applySavedState({ unlockedAchievements: 'not-an-array' });
+    assert.deepEqual(gameState.unlockedAchievements, []);
+
+    applySavedState({ unlockedAchievements: new Array(5000).fill('x') });
+    assert.ok(gameState.unlockedAchievements.length <= 200);
+});
+
+test('prestige fields are validated like every other number', () => {
+    applySavedState({ prestigePoints: -5, prestigeResets: 2.9, lifetimeSold: NaN });
+    assert.equal(gameState.prestigePoints, 0);
+    assert.equal(gameState.prestigeResets, 2);
+    assert.equal(gameState.lifetimeSold, 0);
 });
