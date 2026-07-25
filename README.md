@@ -48,12 +48,16 @@
 |--------|-------|
 | 📎 **صناعة يدوية** | اصنع المشابك بنقرة واحدة |
 | 🤖 **الآلات الأوتوماتيكية** | اشترِ آلات تنتج تلقائياً كل ثانية |
-| 💰 **نظام البيع** | تحكم بالسعر وراقب الطلب |
-| 🔄 **البيع التلقائي** | فعّل البيع بدون تدخل منك |
+| 💰 **منحنى طلب حقيقي** | السعر مقابل الحجم — أهم قرار في اللعبة |
+| 🔄 **البيع التلقائي** | يقارب 85% من كفاءة البيع اليدوي |
 | 📦 **إدارة المخزون** | اشترِ السلك ووسّع المستودع |
-| ⬆️ **الترقيات** | التسويق، الكفاءة، التوسعة |
-| 🛡️ **نظام التأمين** | احمِ مصنعك من السرقة والحرائق |
-| ⚠️ **الأحداث العشوائية** | حوادث وتحديات غير متوقعة |
+| ⬆️ **الترقيات** | التسويق، الكفاءة، التوسعة، التأمين |
+| 🛡️ **نظام التأمين** | يقلّل ضرر الحوادث بنسبة 70% |
+| ⚠️ **الأحداث العشوائية** | الضرر نسبة من ممتلكاتك، فلا يفقد قيمته |
+| ⭐ **إعادة التأسيس (Prestige)** | حوّل جولة منتهية إلى مضاعف إنتاج دائم |
+| 🏅 **شجرة إنجازات** | 14 إنجازاً تمتد لما بعد الجوائز الثلاث |
+| 🎯 **هدف ظاهر دائماً** | تعليم تدريجي ثم شريط تقدّم نحو الهدف التالي |
+| ⚙️ **إعدادات كاملة** | مستوى صوت، تخصيص مفاتيح، تقليل الوهج |
 | 📊 **الإحصائيات** | تتبع الإنتاج والمبيعات |
 | 🏆 **الأرقام القياسية** | سجّل أفضل نتائجك محلياً |
 
@@ -75,6 +79,10 @@
 └─────────────────────────────────────────────────┘
 ```
 
+> 💡 **أهم خطوة:** اضبط السعر. اللعبة تعرض لك السعر الذي يعطي أعلى دخل — الفرق بينه
+> وبين السعر الافتراضي يقارب ثلاثة أضعاف. لن تحتاج للتخمين: الرقم مكتوب تحت خانة السعر.
+> واللعبة تشرح لك خطوة واحدة في كل مرة عبر شريط الهدف أعلى الشاشة.
+
 ## 🏭 أنظمة اللعبة
 
 ### 📎 الإنتاج
@@ -84,30 +92,47 @@
 | 🤖 الآلات | كل آلة تنتج مشبك/ثانية |
 | 🧵 السلك | المادة الخام للإنتاج |
 
-### 💵 المبيعات
+### 💵 المبيعات — منحنى الطلب
+
+الطلب يتبع **منحنى طلب خطياً**: عند السعر صفر يشتري كل السوق، وعند **سعر التوقف** لا يشتري أحد.
+وبما أن الدخل = السعر × الطلب، فالمنحنى قطع مكافئ **ذروته عند نصف سعر التوقف بالضبط** — أي أن
+"ارفع السعر للأقصى" و"اخفضه للأدنى" كلاهما خاسر، والقرار الحقيقي هو إيجاد النقطة الوسطى.
+
 | العنصر | الوصف |
 |--------|-------|
-| 💰 السعر | تحكم بسعر البيع (يؤثر على الطلب) |
-| 📈 الطلب | كلما ارتفع السعر، قل الطلب |
-| 🔄 البيع التلقائي | بيع مستمر بدون تدخل |
+| 💰 السعر | مقيّد بسعر التوقف — لا يمكن تجاوزه |
+| 📈 الطلب | دالة في السعر ومستوى التسويق معاً |
+| 💡 السعر الأمثل | معروض في الواجهة: نصف سعر التوقف |
+| 🔄 البيع التلقائي | يؤدي نفس إيقاع البيع اليدوي بخصم 15% |
+| ⏱️ تهدئة البيع اليدوي | 500 مللي‌ثانية — حتى لا يهزم تكرار الضغط الأتمتة |
 
 ### ⬆️ الترقيات
-| الترقية | التكلفة | التأثير |
-|---------|---------|---------|
-| 📣 التسويق | $100+ | زيادة الطلب + رفع سقف البيع التلقائي |
-| 📦 توسعة المستودع | $100+ | +5,000 مشبك سعة تخزين |
-| ⚙️ كفاءة السلك | $1,000+ | سلك أكثر عند الشراء |
-| 🏗️ توسعة المصنع | $2,000+ | +100 آلة كحد أقصى |
-| 🛡️ التأمين | $1,000+ | حماية من الحوادث 5 دقائق |
+| الترقية | منحنى التكلفة | التأثير |
+|---------|---------------|---------|
+| 📣 التسويق | أسّي (×1.6 لكل مستوى) | يرفع الطلب **وسعر التوقف** معاً |
+| 📦 توسعة المستودع | أسّي (×1.5) | +5,000 مشبك سعة تخزين |
+| ⚙️ كفاءة السلك | خطي | سلك أكثر لكل شراء — وسعر السلك يرتفع مع الإنتاج التراكمي |
+| 🏗️ توسعة المصنع | أسّي (×2) | +100 آلة كحد أقصى |
+| 🛡️ التأمين | **ثابت** $1,000 | يقلّل ضرر الحوادث 70% لمدة 5 دقائق |
 
 ### ⚠️ الأحداث العشوائية
+
+الضرر **نسبة من ممتلكاتك** لا رقم ثابت، فالحوادث تحتفظ بوزنها في اقتصاد متأخر،
+ولا يمكن تجنّبها مجاناً بالبقاء تحت عتبة معيّنة.
+
 | الحدث | التأثير |
 |-------|---------|
-| 🔥 حريق | خسارة بعض المشابك |
-| 🦹 سرقة | خسارة $500 من المال |
-| ⚙️ تلف آلات | خسارة نسبة صغيرة من الآلات |
-| 📉 دعاية سلبية | انخفاض الطلب مؤقتاً |
-| 🛡️ التأمين | يحميك من هذه الأحداث |
+| 🔥 حريق | خسارة 5% من المخزون |
+| 🦹 سرقة | خسارة 5% من المال |
+| ⚙️ تلف آلات | خسارة 3% من الآلات (وسعر الآلة يتراجع معها) |
+| 📉 دعاية سلبية | انخفاض الطلب للنصف |
+| 🛡️ التأمين | يقلّل الضرر 70% — لا يلغي الحدث |
+
+### ⭐ إعادة التأسيس (Prestige)
+
+كل **100,000 مشبك مُباع مدى الحياة** = نقطة واحدة = **+5% إنتاج دائم**.
+إعادة التأسيس تصفّر الجولة لكنها لا تمس المبيعات مدى الحياة ولا النقاط ولا الإنجازات —
+فهي الطريقة التي تخترق بها الجدار الأسّي بدل أن تقف عنده.
 
 ## 🚨 انتهاء اللعبة
 
@@ -166,16 +191,23 @@ Paper-clip-factory/
 ├── js/
 │   ├── main.js             # نقطة الدخول (ES modules)
 │   ├── config.js           # الثوابت
+│   ├── economy.js          # رياضيات الاقتصاد (دوال خالصة، بلا حالة)
 │   ├── state.js            # حالة اللعبة + التحقق من الحفظ
-│   ├── save.js             # حفظ/تحميل/تصدير/تقدم Offline
-│   ├── game-loop.js        # حلقة اللعبة (requestAnimationFrame)
-│   ├── production.js       # صنع وبيع المشابك
+│   ├── save.js             # حفظ/تحميل/تصدير
+│   ├── offline.js          # تقدّم الغياب (يعيد تشغيل تكات اللعب الحقيقية)
+│   ├── clock.js            # مصدر زمن محصّن ضد تقديم الساعة
+│   ├── game-loop.js        # حلقة اللعبة (خطوة ثابتة عبر requestAnimationFrame)
+│   ├── production.js       # صنع وبيع المشابك والتسعير
 │   ├── upgrades.js         # الترقيات (معرّفة كبيانات)
 │   ├── events.js           # الأحداث العشوائية
-│   ├── achievements.js     # الإنجازات والأرقام القياسية
+│   ├── prestige.js         # إعادة التأسيس والمضاعف الدائم
+│   ├── achievements.js     # الجوائز وشجرة الإنجازات والأرقام القياسية
+│   ├── onboarding.js       # التعليم التدريجي وشريط الهدف
+│   ├── settings.js         # التفضيلات (صوت، مستوى، مفاتيح، وهج)
+│   ├── feedback.js         # مفتاح كتم كل التغذية الراجعة (يستخدمه Offline)
 │   ├── format.js           # تنسيق الأرقام المختصر (1.2K, 3.4M)
 │   ├── ui.js               # تحديث الواجهة
-│   ├── effects.js          # الجسيمات والإشعارات
+│   ├── effects.js          # بركة الجسيمات والإشعارات
 │   └── audio.js            # المؤثرات الصوتية
 ├── test/                   # اختبارات Node (node --test)
 ├── tools/
@@ -200,23 +232,28 @@ npm run build-sw   # تحديث قائمة أصول الـ Service Worker بعد
 
 ## 🆕 الميزات التقنية الحديثة
 
-- 💾 **حفظ تلقائي شامل** كل 30 ثانية وعند إغلاق الصفحة
-- ⏰ **التقدم في وضع عدم الاتصال** — يحسب الإنتاج خلال غيابك (حتى 8 ساعات)
-- 📤 **تصدير/استيراد الحفظ** كنص Base64
-- ⌨️ **اختصارات لوحة المفاتيح**: `Space` صنع، `S` بيع، `B` سلك، `A` آلة، `Esc` إغلاق
+- 💾 **حفظ تلقائي شامل** كل 30 ثانية وعند إخفاء الصفحة
+- ⏰ **التقدم في وضع عدم الاتصال** — يعيد تشغيل **تكات اللعب الحقيقية** نفسها (حتى 8 ساعات)، فلا يمكن أن ينحرف عن اللعب الحي
+- 🕒 **زمن محصّن** — تقديم ساعة النظام داخل الجلسة لا يمنح تقدّماً مجانياً
+- 📤 **تصدير/استيراد الحفظ** كنص Base64 مع تحقق كامل من كل حقل
+- ⏱️ **حلقة بخطوة زمنية ثابتة** — الإنتاج مستقل عن معدل الإطارات (كان جهاز 30fps ينتج أقل بنسبة 2%)
+- ⌨️ **اختصارات قابلة لإعادة التعيين** بالكامل من شاشة الإعدادات
 - 📱 **PWA** — يمكن تثبيت اللعبة على الجوال وتعمل بدون إنترنت
-- 🔊 **زر كتم الصوت**
-- ♿ **دعم الوصولية**: ARIA labels، اختصارات، `prefers-reduced-motion`
+- 🔊 **صوت كامل** — كتم + شريط مستوى، والتفضيل يُحفظ بين الجلسات
+- ♿ **دعم الوصولية**: ARIA، مصيدة تركيز، `prefers-reduced-motion`، خيار تقليل الوهج، حالات مكتوبة لا ملوّنة فقط، أهداف لمس 44px
+- ♻️ **بركة جسيمات** بدل إنشاء/حذف عناصر DOM باستمرار
 - 🚀 **حلقة لعبة موحدة** عبر `requestAnimationFrame` بدلاً من `setInterval` متعدد
 
 ## 💡 نصائح للمحترفين
 
+- 💰 **السعر أولاً** ← اضبطه على الرقم المعروض بجانب 💡؛ الفرق بينه وبين السعر الافتراضي يقارب **3 أضعاف الدخل**
 - 🎯 **ابدأ يدوياً** ← اجمع مالاً كافياً للآلة الأولى
 - 🤖 **اشترِ الآلات مبكراً** ← الأتمتة هي مفتاح النجاح
-- 💰 **وازن السعر** ← سعر مرتفع = ربح أكثر لكن طلب أقل
-- 🛡️ **لا تهمل التأمين** ← الحوادث قد تدمر تقدمك
-- 📦 **وسّع المستودع** ← لتخزين إنتاج أكبر
-- 🧵 **راقب السلك** ← نفاذه يعني نهاية اللعبة!
+- 📣 **التسويق عند الحاجة فقط** ← اشترِه حين يصبح الطلب هو ما يحدّ مبيعاتك، لا قبل ذلك
+- 🛡️ **التأمين يستحق حين تثرى** ← الضرر نسبة من ممتلكاتك بينما سعره ثابت
+- 🔄 **فعّل البيع التلقائي** ← يقارب 85% من البيع اليدوي بلا أي جهد
+- 🧵 **راقب السلك** ← سعره يرتفع مع الإنتاج التراكمي، وكفاءة السلك هي ما يوازنه
+- ⭐ **لا تخف من إعادة التأسيس** ← المضاعف دائم والمبيعات مدى الحياة لا تُمسّ
 
 ## 🤝 المساهمة
 
@@ -248,12 +285,16 @@ npm run build-sw   # تحديث قائمة أصول الـ Service Worker بعد
 |---------|-------------|
 | 📎 **Manual Crafting** | Make clips with one click |
 | 🤖 **Automatic Machines** | Buy machines that produce every second |
-| 💰 **Sales System** | Control price and monitor demand |
-| 🔄 **Auto-Sell** | Enable selling without intervention |
+| 💰 **Real Demand Curve** | Margin vs. volume — the central decision |
+| 🔄 **Auto-Sell** | Runs at ~85% of active clicking |
 | 📦 **Inventory Management** | Buy wire and expand warehouse |
-| ⬆️ **Upgrades** | Marketing, efficiency, expansion |
-| 🛡️ **Insurance System** | Protect from theft and fires |
-| ⚠️ **Random Events** | Unexpected accidents and challenges |
+| ⬆️ **Upgrades** | Marketing, efficiency, expansion, insurance |
+| 🛡️ **Insurance System** | Cuts accident damage by 70% |
+| ⚠️ **Random Events** | Damage scales with holdings, so it never goes stale |
+| ⭐ **Prestige** | Turn a finished run into a permanent production multiplier |
+| 🏅 **Achievement Tree** | 14 goals reaching well past the three trophies |
+| 🎯 **Always-Visible Objective** | Progressive tutorial, then a next-goal progress bar |
+| ⚙️ **Full Settings** | Volume, key rebinding, reduced-glare mode |
 | 📊 **Statistics** | Track production and sales |
 | 🏆 **High Scores** | Record your best results locally |
 
@@ -275,6 +316,10 @@ npm run build-sw   # تحديث قائمة أصول الـ Service Worker بعد
 └──────────────────────────────────────────────────────┘
 ```
 
+> 💡 **The step that matters most:** set your price. The game shows you the revenue-maximising
+> price right under the price field — against the default it is worth roughly 3× the income.
+> No guesswork needed, and the objective bar at the top teaches one step at a time.
+
 ## 🏭 Game Systems
 
 ### 📎 Production
@@ -284,28 +329,48 @@ npm run build-sw   # تحديث قائمة أصول الـ Service Worker بعد
 | 🤖 Machines | Each machine produces 1 clip/second |
 | 🧵 Wire | Raw material for production |
 
-### 💵 Sales
+### 💵 Sales — the demand curve
+
+Demand follows a **linear demand curve**: at price zero the whole market buys, at the
+**choke price** nobody does. Since revenue = price × demand, the curve is a parabola whose
+peak sits at **exactly half the choke price** — so "charge as much as possible" and "charge
+as little as possible" both lose, and finding the middle is the actual game.
+
 | Element | Description |
 |---------|-------------|
-| 💰 Price | Control selling price (affects demand) |
-| 📈 Demand | Higher price = lower demand |
-| 🔄 Auto-Sell | Continuous selling without intervention |
+| 💰 Price | Bounded by the choke price; it cannot be exceeded |
+| 📈 Demand | A function of both price and marketing level |
+| 💡 Optimal price | Shown in the UI: half the choke price |
+| 🔄 Auto-Sell | Runs the manual cadence at a 15% discount |
+| ⏱️ Manual sell cooldown | 500ms, so key-repeat cannot beat automation |
 
 ### ⬆️ Upgrades
-| Upgrade | Cost | Effect |
-|---------|------|--------|
-| 📣 Marketing | $100+ | Increases product demand |
-| 📦 Warehouse Expansion | $50 | +5,000 clips storage |
-| ⚙️ Wire Efficiency | $1,000 | More wire per purchase |
-| 🏗️ Factory Expansion | $2,000 | +100 max machines |
-| 🛡️ Insurance | $1,000 | Protection for 5 minutes |
+| Upgrade | Cost curve | Effect |
+|---------|-----------|--------|
+| 📣 Marketing | Exponential (×1.6/level) | Raises demand **and the choke price** |
+| 📦 Warehouse Expansion | Exponential (×1.5) | +5,000 clips storage |
+| ⚙️ Wire Efficiency | Linear | More wire per purchase — wire price rises with lifetime output |
+| 🏗️ Factory Expansion | Exponential (×2) | +100 max machines |
+| 🛡️ Insurance | **Flat** $1,000 | Cuts accident damage by 70% for 5 minutes |
 
 ### ⚠️ Random Events
+
+Damage is a **fraction of what you own**, not a flat number, so events keep their weight in a
+late-game economy and cannot be dodged for free by staying under a threshold.
+
 | Event | Effect |
 |-------|--------|
-| 🔥 Fire | Lose some clips |
-| 🦹 Theft | Lose $500 |
-| 🛡️ Insurance | Protects from these events |
+| 🔥 Fire | Lose 5% of stock |
+| 🦹 Theft | Lose 5% of cash |
+| ⚙️ Machine damage | Lose 3% of machines (machine price de-escalates with them) |
+| 📉 Negative PR | Demand halved |
+| 🛡️ Insurance | Reduces damage by 70% — it does not cancel the event |
+
+### ⭐ Prestige
+
+Every **100,000 lifetime clips sold** = one point = **+5% permanent production**.
+Prestiging resets the run but never touches lifetime sales, points, or achievements — it is how
+you break through the exponential wall instead of stopping at it.
 
 ## 🚨 Game Over
 
@@ -357,33 +422,41 @@ Paper-clip-factory/
 ├── service-worker.js       # Offline caching
 ├── css/styles.css          # All styles
 ├── js/                     # ES module game logic
-│   ├── main.js, config.js, state.js, save.js
-│   ├── game-loop.js, production.js, upgrades.js
-│   ├── events.js, achievements.js
+│   ├── main.js, config.js, economy.js, state.js
+│   ├── save.js, offline.js, clock.js
+│   ├── game-loop.js, production.js, upgrades.js, events.js
+│   ├── prestige.js, achievements.js, onboarding.js
+│   ├── settings.js, feedback.js, format.js
 │   └── ui.js, effects.js, audio.js
+├── test/                   # Node test-runner suites
 ├── assets/                 # Audio + images
 └── README.md
 ```
 
 ## 🆕 Modern Technical Features
 
-- 💾 **Full auto-save** every 30s and on page close
-- ⏰ **Offline progress** — clips and earnings while away (up to 8 hours)
-- 📤 **Export/import save** as Base64 string
-- ⌨️ **Keyboard shortcuts**: `Space` make, `S` sell, `B` wire, `A` machine, `Esc` close
+- 💾 **Full auto-save** every 30s and when the page is hidden
+- ⏰ **Offline progress** — replays the *real* gameplay ticks (up to 8 hours), so it can never drift from live play
+- 🕒 **Hardened clock** — winding the system clock forward mid-session earns nothing
+- 📤 **Export/import save** as Base64, with every field validated on the way in
+- ⏱️ **Fixed-timestep loop** — production is frame-rate independent (a 30fps device used to produce ~2% less)
+- ⌨️ **Fully rebindable shortcuts** from the settings screen
 - 📱 **PWA** — installable on mobile, works offline
-- 🔊 **Sound toggle**
-- ♿ **Accessibility**: ARIA labels, shortcuts, `prefers-reduced-motion`
+- 🔊 **Full audio control** — mute plus a volume slider, both persisted
+- ♿ **Accessibility**: ARIA, focus trap, `prefers-reduced-motion`, reduced-glare option, states spelled out rather than colour-only, 44px touch targets
+- ♻️ **Particle pool** instead of churning DOM nodes
 - 🚀 **Unified game loop** via `requestAnimationFrame` (replacing multiple `setInterval` timers)
 
 ## 💡 Pro Tips
 
+- 💰 **Price first** → set it to the number shown next to 💡; against the default price that is worth roughly **3× the income**
 - 🎯 **Start manually** → Collect enough for your first machine
 - 🤖 **Buy machines early** → Automation is key to success
-- 💰 **Balance price** → High price = more profit but less demand
-- 🛡️ **Don't neglect insurance** → Accidents can ruin your progress
-- 📦 **Expand warehouse** → Store more production
-- 🧵 **Watch your wire** → Running out means game over!
+- 📣 **Buy marketing only when demand is what's limiting you** → not before
+- 🛡️ **Insurance pays off once you're rich** → damage scales with holdings while its price stays flat
+- 🔄 **Turn on auto-sell** → ~85% of manual selling for none of the effort
+- 🧵 **Watch your wire** → its price climbs with lifetime output; wire efficiency is what offsets that
+- ⭐ **Don't fear prestige** → the multiplier is permanent and lifetime sales are never touched
 
 ## 🤝 Contributing
 

@@ -1,3 +1,6 @@
+import { getSettings, setSetting, onSettingsChange } from './settings.js';
+import { isFeedbackSuspended } from './feedback.js';
+
 const soundCache = {};
 
 // Rapid repeats (clicking, auto-sell cash) used to hard-reset the single
@@ -6,7 +9,15 @@ const soundCache = {};
 const POOL_SIZE = 3;
 const soundPools = {};
 
-let soundsEnabled = true;
+function applyVolume() {
+    const { volume } = getSettings();
+    for (const base of Object.values(soundCache)) {
+        if (base) base.volume = volume;
+    }
+    for (const pool of Object.values(soundPools)) {
+        for (const audio of pool) audio.volume = volume;
+    }
+}
 
 export function initAudio() {
     soundCache.click = document.getElementById('clickSound');
@@ -17,10 +28,14 @@ export function initAudio() {
     soundCache.fire = document.getElementById('fireSound');
     soundCache.fail = document.getElementById('failSound');
     soundCache.completion = document.getElementById('completionSound');
+    applyVolume();
+    onSettingsChange(applyVolume);
 }
 
 export function playSound(name) {
-    if (!soundsEnabled) return;
+    if (isFeedbackSuspended()) return;
+    const { soundEnabled, volume } = getSettings();
+    if (!soundEnabled || volume <= 0) return;
     const base = soundCache[name];
     if (!base) return;
     try {
@@ -35,6 +50,7 @@ export function playSound(name) {
                 audio = pool[0];
             }
         }
+        audio.volume = volume;
         audio.currentTime = 0;
         audio.play().catch(() => {});
     } catch {
@@ -43,9 +59,20 @@ export function playSound(name) {
 }
 
 export function setSoundsEnabled(enabled) {
-    soundsEnabled = enabled;
+    setSetting('soundEnabled', !!enabled);
 }
 
 export function areSoundsEnabled() {
-    return soundsEnabled;
+    return getSettings().soundEnabled;
+}
+
+export function setVolume(value) {
+    const clamped = Math.min(1, Math.max(0, Number(value)));
+    if (!Number.isFinite(clamped)) return;
+    setSetting('volume', clamped);
+    applyVolume();
+}
+
+export function getVolume() {
+    return getSettings().volume;
 }
