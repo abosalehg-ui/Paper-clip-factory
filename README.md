@@ -46,10 +46,10 @@
 
 | الميزة | الوصف |
 |--------|-------|
-| 📎 **صناعة يدوية** | اصنع المشابك بنقرة واحدة |
+| 📎 **صناعة يدوية** | اصنع المشابك بنقرة واحدة — بسقف إنتاج ترفعه ترقية الكفاءة |
 | 🤖 **الآلات الأوتوماتيكية** | اشترِ آلات تنتج تلقائياً كل ثانية |
 | 💰 **منحنى طلب حقيقي** | السعر مقابل الحجم — أهم قرار في اللعبة |
-| 🔄 **البيع التلقائي** | يقارب 85% من كفاءة البيع اليدوي |
+| 🔄 **البيع التلقائي** | يبيع بالجملة بـ85% من سعر القائمة — البيع اليدوي بالسعر الكامل |
 | 📦 **إدارة المخزون** | اشترِ السلك ووسّع المستودع |
 | ⬆️ **الترقيات** | التسويق، الكفاءة، التوسعة، التأمين |
 | 🛡️ **نظام التأمين** | يقلّل ضرر الحوادث بنسبة 70% |
@@ -95,15 +95,26 @@
 ### 💵 المبيعات — منحنى الطلب
 
 الطلب يتبع **منحنى طلب خطياً**: عند السعر صفر يشتري كل السوق، وعند **سعر التوقف** لا يشتري أحد.
-وبما أن الدخل = السعر × الطلب، فالمنحنى قطع مكافئ **ذروته عند نصف سعر التوقف بالضبط** — أي أن
-"ارفع السعر للأقصى" و"اخفضه للأدنى" كلاهما خاسر، والقرار الحقيقي هو إيجاد النقطة الوسطى.
+والطلب **مخزون يُستهلك** لا معدّل ثابت: كل بيعة تستنزفه، ثم يتعافى تدريجياً على تكة التعافي —
+فبيع مستودع كامل دفعة واحدة يُجفّف السوق مؤقتاً، وهذا ما يجعل التوقيت قراراً.
+
+الدخل الفعلي ليس `السعر × الطلب` بل:
+
+```
+الدخل/ثانية = السعر × min(إنتاجك/ثانية، ما يستوعبه السوق عند هذا السعر)
+```
+
+وهذا هو الفرق المهم: لو كان إنتاجك **أقل** مما يستوعبه السوق (وهي الحالة الغالبة)، فكل مشبك
+تصنعه سيُباع مهما كان السعر — فالصواب أن **ترفع** السعر حتى يهبط استيعاب السوق ليساوي إنتاجك.
+أما لو فاض إنتاجك عن السوق، فالقرار يعود إلى ذروة القطع المكافئ عند نصف سعر التوقف.
+اللعبة تحسب هذه النقطة **حسب إنتاجك الحالي** وتعرضها، فالرقم يتحرك كلما كبر المصنع.
 
 | العنصر | الوصف |
 |--------|-------|
 | 💰 السعر | مقيّد بسعر التوقف — لا يمكن تجاوزه |
 | 📈 الطلب | دالة في السعر ومستوى التسويق معاً |
-| 💡 السعر الأمثل | معروض في الواجهة: نصف سعر التوقف |
-| 🔄 البيع التلقائي | يؤدي نفس إيقاع البيع اليدوي بخصم 15% |
+| 💡 السعر الأمثل | محسوب حسب إنتاجك الحالي ومعروض في الواجهة — يتغيّر كلما كبر المصنع |
+| 🔄 البيع التلقائي | يبيع بـ85% من سعر القائمة (الخصم على السعر، لأن وتيرة البيع لا تغيّر الحصيلة) |
 | ⏱️ تهدئة البيع اليدوي | 500 مللي‌ثانية — حتى لا يهزم تكرار الضغط الأتمتة |
 
 ### ⬆️ الترقيات
@@ -130,9 +141,13 @@
 
 ### ⭐ إعادة التأسيس (Prestige)
 
-كل **100,000 مشبك مُباع مدى الحياة** = نقطة واحدة = **+5% إنتاج دائم**.
-إعادة التأسيس تصفّر الجولة لكنها لا تمس المبيعات مدى الحياة ولا النقاط ولا الإنجازات —
-فهي الطريقة التي تخترق بها الجدار الأسّي بدل أن تقف عنده.
+كل **100,000 مشبك مُباع مدى الحياة** = نقطة واحدة = **×1.04 إنتاج دائم، تتضاعف**.
+المكافأة **تراكمية** لا جمعية: عشر نقاط = ×1.48، وخمسون نقطة = ×7.1. الصيغة الجمعية القديمة
+(+5% لكل نقطة) كانت تخفت أمام التكاليف الأسّية — النقطة الأولى تعطي +5% والحادية والعشرون +2.5%
+فقط — فتفقد إعادة التأسيس جدواها بعد ~10 لفّات.
+
+إعادة التأسيس تصفّر الجولة لكنها لا تمس المبيعات مدى الحياة ولا النقاط ولا الإنجازات
+**ولا الجوائز** — فهي الطريقة التي تخترق بها الجدار الأسّي بدل أن تقف عنده.
 
 ## 🚨 انتهاء اللعبة
 
@@ -175,6 +190,8 @@ start index.html
 | **JavaScript (ES Modules)** | منطق اللعبة (وحدات معيارية، بدون خطوة بناء) |
 | **LocalStorage** | حفظ الحالة الكاملة والأرقام القياسية |
 | **Service Worker + PWA** | العمل بدون إنترنت والتثبيت على الجوال |
+| **خط مُضمَّن** | Noto Kufi Arabic (متغيّر، 54KB بعد التقليم) — بلا أي أصل خارجي |
+| **CSP صارمة** | `default-src 'self'` — لا سكربتات مضمّنة ولا اتصال خارجي |
 | **GitHub Pages** | الاستضافة |
 
 ## 📁 هيكل المشروع
@@ -214,8 +231,10 @@ Paper-clip-factory/
 │   └── generate-sw-assets.mjs  # توليد قائمة أصول الـ Service Worker
 ├── assets/
 │   ├── audio/              # ملفات MP3
+│   ├── fonts/              # الخط العربي المُضمَّن + رخصة OFL
 │   └── images/             # الخلفية، الكؤوس، أيقونات PWA
 ├── .github/workflows/ci.yml    # فحص + اختبارات + تحقق SW
+├── LICENSE                 # MIT
 └── README.md
 ```
 
@@ -251,7 +270,7 @@ npm run build-sw   # تحديث قائمة أصول الـ Service Worker بعد
 - 🤖 **اشترِ الآلات مبكراً** ← الأتمتة هي مفتاح النجاح
 - 📣 **التسويق عند الحاجة فقط** ← اشترِه حين يصبح الطلب هو ما يحدّ مبيعاتك، لا قبل ذلك
 - 🛡️ **التأمين يستحق حين تثرى** ← الضرر نسبة من ممتلكاتك بينما سعره ثابت
-- 🔄 **فعّل البيع التلقائي** ← يقارب 85% من البيع اليدوي بلا أي جهد
+- 🔄 **فعّل البيع التلقائي** ← 85% من السعر بلا أي جهد؛ والبيع يدوياً يعطيك الـ15% الباقية
 - 🧵 **راقب السلك** ← سعره يرتفع مع الإنتاج التراكمي، وكفاءة السلك هي ما يوازنه
 - ⭐ **لا تخف من إعادة التأسيس** ← المضاعف دائم والمبيعات مدى الحياة لا تُمسّ
 
@@ -283,10 +302,10 @@ npm run build-sw   # تحديث قائمة أصول الـ Service Worker بعد
 
 | Feature | Description |
 |---------|-------------|
-| 📎 **Manual Crafting** | Make clips with one click |
+| 📎 **Manual Crafting** | Make clips with one click, under a ceiling the efficiency upgrade raises |
 | 🤖 **Automatic Machines** | Buy machines that produce every second |
 | 💰 **Real Demand Curve** | Margin vs. volume — the central decision |
-| 🔄 **Auto-Sell** | Runs at ~85% of active clicking |
+| 🔄 **Auto-Sell** | Sells wholesale at 85% of list price; selling by hand gets full price |
 | 📦 **Inventory Management** | Buy wire and expand warehouse |
 | ⬆️ **Upgrades** | Marketing, efficiency, expansion, insurance |
 | 🛡️ **Insurance System** | Cuts accident damage by 70% |
@@ -332,16 +351,28 @@ npm run build-sw   # تحديث قائمة أصول الـ Service Worker بعد
 ### 💵 Sales — the demand curve
 
 Demand follows a **linear demand curve**: at price zero the whole market buys, at the
-**choke price** nobody does. Since revenue = price × demand, the curve is a parabola whose
-peak sits at **exactly half the choke price** — so "charge as much as possible" and "charge
-as little as possible" both lose, and finding the middle is the actual game.
+**choke price** nobody does. Demand is a **stock that gets consumed**, not a fixed rate: every
+sale drains it and it regrows on the restore tick, so dumping a full warehouse at once dries
+the market up for a while. That is what makes timing a decision.
+
+Income is not `price × demand`, it is:
+
+```
+income/second = price × min(your production/second, what the market absorbs at that price)
+```
+
+The distinction matters. If you produce **less** than the market would take — the usual case —
+every clip you make sells whatever you charge, so the right move is to **raise** the price until
+absorption falls to meet production. Only once production floods the market does the parabola's
+peak at half the choke price take over. The game computes that point **from your current
+production** and shows it, so the number moves as the factory grows.
 
 | Element | Description |
 |---------|-------------|
 | 💰 Price | Bounded by the choke price; it cannot be exceeded |
 | 📈 Demand | A function of both price and marketing level |
-| 💡 Optimal price | Shown in the UI: half the choke price |
-| 🔄 Auto-Sell | Runs the manual cadence at a 15% discount |
+| 💡 Optimal price | Computed from your current production and shown in the UI — it moves as you grow |
+| 🔄 Auto-Sell | Sells at 85% of list price (the discount is on the price: sale cadence cannot change throughput) |
 | ⏱️ Manual sell cooldown | 500ms, so key-repeat cannot beat automation |
 
 ### ⬆️ Upgrades
@@ -368,9 +399,13 @@ late-game economy and cannot be dodged for free by staying under a threshold.
 
 ### ⭐ Prestige
 
-Every **100,000 lifetime clips sold** = one point = **+5% permanent production**.
-Prestiging resets the run but never touches lifetime sales, points, or achievements — it is how
-you break through the exponential wall instead of stopping at it.
+Every **100,000 lifetime clips sold** = one point = **×1.04 permanent production, compounding**.
+The bonus **compounds** rather than adding up: ten points is ×1.48, fifty is ×7.1. The old
+additive form (+5% per point) decayed against exponential costs — the first point was worth +5%
+but the twenty-first only +2.5% — so resetting stopped paying after about ten runs.
+
+Prestiging resets the run but never touches lifetime sales, points, achievements **or trophies**
+— it is how you break through the exponential wall instead of stopping at it.
 
 ## 🚨 Game Over
 
@@ -411,6 +446,8 @@ start index.html
 | **JavaScript (ES Modules)** | Modular game logic (no build step) |
 | **LocalStorage** | Full game state + high scores |
 | **Service Worker + PWA** | Offline play & mobile installation |
+| **Bundled font** | Noto Kufi Arabic (variable, 54KB subset) — no third-party origin |
+| **Strict CSP** | `default-src 'self'` — no inline scripts, no outbound connections |
 | **GitHub Pages** | Hosting |
 
 ## 📁 Project Structure
@@ -449,12 +486,12 @@ Paper-clip-factory/
 
 ## 💡 Pro Tips
 
-- 💰 **Price first** → set it to the number shown next to 💡; against the default price that is worth roughly **3× the income**
+- 💰 **Price first** → set it to the number shown next to 💡, and re-check it as the factory grows — the hint tracks your production, and it moves
 - 🎯 **Start manually** → Collect enough for your first machine
 - 🤖 **Buy machines early** → Automation is key to success
 - 📣 **Buy marketing only when demand is what's limiting you** → not before
 - 🛡️ **Insurance pays off once you're rich** → damage scales with holdings while its price stays flat
-- 🔄 **Turn on auto-sell** → ~85% of manual selling for none of the effort
+- 🔄 **Turn on auto-sell** → 85% of the price for none of the effort; sell by hand for the other 15%
 - 🧵 **Watch your wire** → its price climbs with lifetime output; wire efficiency is what offsets that
 - ⭐ **Don't fear prestige** → the multiplier is permanent and lifetime sales are never touched
 
@@ -472,9 +509,14 @@ Contributions are welcome! Feel free to:
 
 ## 📄 License | الترخيص
 
-This project is free to use for personal and educational purposes.
+Released under the **MIT License** — see [`LICENSE`](LICENSE).
 
-هذا المشروع متاح للاستخدام الحر والتعليمي.
+The bundled typeface (Noto Kufi Arabic, in `assets/fonts/`) is distributed under the
+**SIL Open Font License 1.1**; its full text is in [`assets/fonts/LICENSE.txt`](assets/fonts/LICENSE.txt).
+
+هذا المشروع تحت **رخصة MIT** — انظر [`LICENSE`](LICENSE).
+والخط المُضمَّن (Noto Kufi Arabic في `assets/fonts/`) تحت **رخصة SIL Open Font 1.1**،
+ونصّها الكامل في [`assets/fonts/LICENSE.txt`](assets/fonts/LICENSE.txt).
 
 ## 👨‍💻 Developer | المطور
 

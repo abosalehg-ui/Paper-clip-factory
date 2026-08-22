@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- No inline scripts, no inline style attributes and no third-party
+         origins, so the policy can stay strict. `connect-src 'self'` also
+         guarantees the game never phones home. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'self'; object-src 'none'" />
     <meta name="theme-color" content="#0b1736" />
     <meta name="description" content="لعبة مصنع مشابك الورق - لعبة إدارة وأتمتة بطابع تكتيكي" />
     <title>مصنع مشابك الورق</title>
@@ -105,7 +109,7 @@
 
         <div class="main-grid">
             <div class="section">
-                <div class="section-title" style="color:#7dd3fc">
+                <div class="section-title tone-sky">
                     <span class="emoji-icon-section">🏭</span>
                     مصنع مشابك الورق
                 </div>
@@ -118,7 +122,7 @@
                 <div class="item-box">
                     <div class="item-header">
                         <span>آلات صنع تلقائي</span>
-                        <span style="color:#60a5fa;font-weight:700" id="autoClippers">0</span>
+                        <span class="tone-blue strong" id="autoClippers">0</span>
                     </div>
                     <button id="autoClipperBtn" class="icon-btn btn-secondary" data-action="buy-auto-clipper" aria-label="شراء آلة صنع تلقائي">
                         <span class="emoji-icon" aria-hidden="true">🤖</span>
@@ -129,7 +133,7 @@
                 <div class="item-box">
                     <div class="item-header">
                         <span>شراء سلك (1000 وحدة)</span>
-                        <span style="color:#f59e0b;font-weight:700">×<span id="wireEfficiencyInline">1.0</span></span>
+                        <span class="tone-orange strong">×<span id="wireEfficiencyInline">1.0</span></span>
                     </div>
                     <button id="wireBtn" class="icon-btn btn-buy" data-action="buy-wire" aria-label="شراء سلك">
                         <span class="emoji-icon" aria-hidden="true">📦</span>
@@ -139,7 +143,7 @@
             </div>
 
             <div class="section">
-                <div class="section-title" style="color:#86efac">
+                <div class="section-title tone-mint">
                     <span class="emoji-icon-section">🛒</span>
                     المبيعات
                 </div>
@@ -155,7 +159,9 @@
                         <div class="price-label">السعر</div>
                         <div class="price-value">
                             $
-                            <span id="price" contenteditable="true" role="textbox" aria-label="سعر المشبك">0.25</span>
+                            <input id="price" class="price-input" type="text" inputmode="decimal"
+                                   autocomplete="off" spellcheck="false"
+                                   value="0.25" aria-label="سعر المشبك" />
                         </div>
                     </div>
 
@@ -169,12 +175,12 @@
                 <!-- Pricing is now a real trade-off, so the player is told the
                      shape of the curve instead of having to reverse-engineer it. -->
                 <div class="price-hint">
-                    <span>💡 أعلى دخل تقريباً عند <strong>$<span id="priceOptimal">0.50</span></strong></span>
+                    <span>💡 أعلى دخل <strong>لإنتاجك الحالي</strong> عند <strong>$<span id="priceOptimal">0.50</span></strong></span>
                     <span>· الطلب ينعدم عند <strong>$<span id="priceChoke">1.00</span></strong></span>
-                    <span>· الدخل المتوقع: <strong>$<span id="priceRevenue">0.00</span></strong>/بيعة</span>
+                    <span>· البيعة القادمة: <strong>$<span id="priceRevenue">0.00</span></strong></span>
                 </div>
 
-                <button id="sellBtn" class="icon-btn btn-sell" data-action="sell-clips" style="margin-top:6px" aria-label="بيع المشابك">
+                <button id="sellBtn" class="icon-btn btn-sell mt-6" data-action="sell-clips" aria-label="بيع المشابك">
                     <span class="emoji-icon" aria-hidden="true">💰</span>
                     <span>بيع المشابك (متوفر: <span id="availableClips">0</span>)</span>
                 </button>
@@ -191,7 +197,7 @@
         </div>
 
         <div class="section">
-            <div class="section-title" style="color:#fbbf24">
+            <div class="section-title tone-amber">
                 <span class="emoji-icon-section">✨</span>
                 الترقيات
             </div>
@@ -199,7 +205,7 @@
             <div class="item-box">
                 <div class="item-header">
                     <span>ترقية التسويق — ترفع الطلب والسعر المحتمل</span>
-                    <span style="color:#a78bfa;font-weight:700">المستوى <span id="marketingLevel">1</span></span>
+                    <span class="tone-violet strong">المستوى <span id="marketingLevel">1</span></span>
                 </div>
                 <button id="marketingBtn" class="icon-btn btn-marketing" data-action="increase-marketing">
                     <span class="emoji-icon" aria-hidden="true">📣</span>
@@ -210,7 +216,7 @@
             <div class="item-box">
                 <div class="item-header">
                     <span>توسعة المستودع لـ 5,000 مشبك إضافية</span>
-                    <span style="color:#f59e0b;font-weight:700">الحد الأقصى: <span id="clipsLimitCurrent">5,000</span></span>
+                    <span class="tone-orange strong">الحد الأقصى: <span id="clipsLimitCurrent">5,000</span></span>
                 </div>
                 <button id="warehouseBtn" class="icon-btn btn-upgrade" data-action="upgrade-warehouse">
                     <span class="emoji-icon" aria-hidden="true">📦</span>
@@ -221,7 +227,7 @@
             <div class="item-box">
                 <div class="item-header">
                     <span>زيادة كفاءة السلك — سلك أكثر لكل عملية شراء</span>
-                    <span style="color:#fbbf24;font-weight:700">×<span id="wireEfficiency">1.0</span></span>
+                    <span class="tone-amber strong">×<span id="wireEfficiency">1.0</span></span>
                 </div>
                 <button id="efficiencyBtn" class="icon-btn btn-upgrade" data-action="buy-wire-efficiency">
                     <span class="emoji-icon" aria-hidden="true">⚙️</span>
@@ -232,7 +238,7 @@
             <div class="item-box">
                 <div class="item-header">
                     <span>توسعة المصنع لـ 100 آلة جديدة</span>
-                    <span style="color:#7dd3fc;font-weight:700">الحد الأقصى: <span id="maxClippers">100</span></span>
+                    <span class="tone-sky strong">الحد الأقصى: <span id="maxClippers">100</span></span>
                 </div>
                 <button id="expansionBtn" class="icon-btn btn-secondary" data-action="buy-expansion">
                     <span class="emoji-icon" aria-hidden="true">🏗️</span>
@@ -243,7 +249,7 @@
             <div class="item-box">
                 <div class="item-header">
                     <span>تأمين المصنع — يقلّل ضرر الحوادث 5 دقائق</span>
-                    <span style="color:#8b5cf6;font-weight:700">مرات الشراء: <span id="insuranceLevel">0</span></span>
+                    <span class="tone-purple strong">مرات الشراء: <span id="insuranceLevel">0</span></span>
                 </div>
                 <div id="insuranceTimer"></div>
                 <button id="insuranceBtn" class="icon-btn btn-upgrade" data-action="buy-insurance">
@@ -256,14 +262,14 @@
         <!-- Meta-progression: converts a finished run into a permanent bonus,
              so hitting the exponential wall is no longer the end of the game. -->
         <div class="section" id="prestigeSection">
-            <div class="section-title" style="color:#f0abfc">
+            <div class="section-title tone-orchid">
                 <span class="emoji-icon-section">⭐</span>
                 إعادة التأسيس
             </div>
             <div class="item-box">
                 <div class="item-header">
                     <span>مضاعف الإنتاج الدائم</span>
-                    <span style="color:#f0abfc;font-weight:700">×<span id="prestigeMultiplier">1.00</span></span>
+                    <span class="tone-orchid strong">×<span id="prestigeMultiplier">1.00</span></span>
                 </div>
                 <div class="item-info">
                     النقاط: <strong id="prestigePoints">0</strong>
@@ -281,7 +287,7 @@
         </div>
 
         <div class="section">
-            <div class="section-title" style="color:#cbd5e1">
+            <div class="section-title tone-slate">
                 <span class="emoji-icon-section">📊</span>
                 الإحصائيات
             </div>
@@ -305,18 +311,18 @@
             </div>
         </div>
 
-        <div class="section" id="localLeaderboardSection" style="margin-top:12px;">
-            <div class="section-title" style="color:#ffd166">
+        <div class="section mt-12" id="localLeaderboardSection">
+            <div class="section-title tone-gold">
                 <span class="emoji-icon-section">🏅</span>
                 أفضل النتائج المحلية
             </div>
 
-            <div class="item-box" style="text-align:center;">
-                <div style="font-weight:700; font-size:1rem; color:#fff; margin-bottom:6px;">🥇 أفضل نتيجة</div>
-                <div id="bestInfo" style="color:#cbd5e1; font-size:0.95rem;">
+            <div class="item-box text-center">
+                <div class="strong text-base tone-white mb-6">🥇 أفضل نتيجة</div>
+                <div id="bestInfo" class="tone-slate text-sm">
                     <div>المبيعات: <span id="bestTotalSold">0</span> مشبك</div>
-                    <div style="margin-top:6px;">المال: $<span id="bestMoney">0.00</span></div>
-                    <div style="margin-top:6px; color:#9aa4b2; font-size:0.8rem;">التاريخ: <span id="bestDate">—</span></div>
+                    <div class="mt-6">المال: $<span id="bestMoney">0.00</span></div>
+                    <div class="mt-6 tone-muted text-xs">التاريخ: <span id="bestDate">—</span></div>
                 </div>
                 <div class="note-line">هذه النتيجة محلية على هذا الجهاز فقط — لا توجد لوحة نتائج مشتركة.</div>
 
@@ -345,7 +351,7 @@
     <div id="gameOverModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="gameOverModalTitle">
         <div class="modal-content">
             <h2 class="modal-title" id="gameOverModalTitle">🛑 انتهت اللعبة!</h2>
-            <p style="text-align:center;color:#cbd5e1;margin-bottom:12px;">
+            <p class="text-center tone-slate mb-12">
                 نفد السلك والمال معاً — لكن كل نهاية هي بداية جديدة!
             </p>
             <div class="offline-stat">
@@ -357,7 +363,7 @@
             <div class="offline-stat">
                 🏅 أفضل نتيجة محلية: <strong><span id="gameOverBest">0</span></strong> مشبك
             </div>
-            <button class="icon-btn btn-make" data-action="new-game" style="width:100%; margin-top:12px;">
+            <button class="icon-btn btn-make w-full mt-12" data-action="new-game">
                 <span>🔄 لعبة جديدة</span>
             </button>
         </div>
@@ -370,7 +376,7 @@
                 مفتوح: <strong id="achievementsCount">0</strong> من <strong id="achievementsTotal">0</strong>
             </p>
             <div id="achievementsList" class="achievement-list"></div>
-            <button class="icon-btn btn-make" data-action="close-achievements" style="width:100%;margin-top:12px;">
+            <button class="icon-btn btn-make w-full mt-12" data-action="close-achievements">
                 إغلاق
             </button>
         </div>
@@ -427,12 +433,12 @@
                     <button class="icon-btn btn-secondary setting-btn" data-action="rebind" data-bind="machine" id="keybindMachine">A</button>
                 </div>
                 <p class="setting-note" id="rebindNote">اضغط على أي مفتاح لتغييره، ثم اضغط المفتاح الجديد.</p>
-                <button class="icon-btn btn-secondary" data-action="reset-keybinds" style="width:100%;margin-top:8px;">
+                <button class="icon-btn btn-secondary w-full mt-8" data-action="reset-keybinds">
                     استعادة المفاتيح الافتراضية
                 </button>
             </div>
 
-            <button class="icon-btn btn-make" data-action="close-settings" style="width:100%;margin-top:12px;">
+            <button class="icon-btn btn-make w-full mt-12" data-action="close-settings">
                 إغلاق
             </button>
         </div>
@@ -457,7 +463,7 @@
             </div>
 
             <div class="save-controls">
-                <button class="icon-btn btn-buy" data-action="do-reset-game" style="background:linear-gradient(135deg,#ef4444,#dc2626)">
+                <button class="icon-btn btn-buy btn-danger" data-action="do-reset-game">
                     🗑️ إعادة ضبط اللعبة
                 </button>
                 <button class="icon-btn btn-secondary" data-action="close-save-modal">
@@ -470,7 +476,7 @@
     <div id="offlineModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="offlineModalTitle">
         <div class="modal-content">
             <h2 class="modal-title" id="offlineModalTitle">⏰ تقدم خلال غيابك</h2>
-            <p style="text-align:center;color:#cbd5e1;margin-bottom:12px;">
+            <p class="text-center tone-slate mb-12">
                 كنت بعيداً لمدة <strong id="offlineTimeAway">—</strong>
             </p>
             <div class="offline-stat">
@@ -479,7 +485,7 @@
             <div class="offline-stat">
                 💰 تم بيع <strong id="offlineClipsSold">0</strong> مشبك بقيمة <strong id="offlineMoneyEarned">$0.00</strong>
             </div>
-            <button class="icon-btn btn-make" data-action="close-offline-modal" style="width:100%; margin-top:12px;">
+            <button class="icon-btn btn-make w-full mt-12" data-action="close-offline-modal">
                 <span>ممتاز! 🎉</span>
             </button>
         </div>
@@ -502,7 +508,9 @@
                 <h3>💰 السعر والطلب — أهم قرار في اللعبة</h3>
                 <ul>
                     <li>• كلما رفعت السعر، قلّ عدد المشترين. وعند «سعر التوقف» لا يشتري أحد.</li>
-                    <li>• أعلى دخل يكون عند منتصف سعر التوقف تقريباً — واللعبة تعرض لك هذا الرقم.</li>
+                    <li>• الطلب <strong>مخزون يُستهلك</strong>: البيع يستنزفه، ثم يتعافى تدريجياً. فبيع مستودع كامل دفعة واحدة يُجفّف السوق مؤقتاً.</li>
+                    <li>• أعلى دخل يكون حيث يلتقي ما يستوعبه السوق بما ينتجه مصنعك — واللعبة تحسبه لك <strong>حسب إنتاجك الحالي</strong>، فالرقم يتغيّر كلما كبر المصنع.</li>
+                    <li>• لو كان إنتاجك أقل مما يستوعبه السوق، فارفع السعر: كل مشبك تصنعه سيُباع على أي حال.</li>
                     <li>• ترقية التسويق ترفع الطلب <strong>وسعر التوقف معاً</strong>، أي تسمح لك بالبيع أغلى.</li>
                 </ul>
             </div>
@@ -511,7 +519,7 @@
                 <h3>⚡ الأتمتة</h3>
                 <ul>
                     <li>• الآلة تنتج مشابك كل ثانية.</li>
-                    <li>• البيع التلقائي يقارب 85% من كفاءة البيع اليدوي — فعّله واسترخِ.</li>
+                    <li>• البيع التلقائي يبيع بالجملة: <strong>85% من سعر القائمة</strong> — فعّله واسترخِ، أو بِع يدوياً بالسعر الكامل.</li>
                     <li>• اللعبة تحفظ تقدمك تلقائياً وتحسب إنتاجك أثناء غيابك (حتى 8 ساعات).</li>
                 </ul>
             </div>
@@ -519,7 +527,7 @@
             <div class="guide-section">
                 <h3>🚀 الترقيات والحوادث</h3>
                 <ul>
-                    <li>• كفاءة السلك: سلك أكثر لكل شراء — وسعر السلك يرتفع مع الإنتاج التراكمي.</li>
+                    <li>• كفاءة السلك: سلك أكثر لكل شراء، <strong>وسقف أعلى للصنع اليدوي</strong> — وسعر السلك يرتفع مع الإنتاج التراكمي.</li>
                     <li>• التأمين يقلّل ضرر الحوادث (لا يمنعها) لمدة 5 دقائق بسعر ثابت.</li>
                     <li>• الحوادث تصيب نسبة من ممتلكاتك، فالثراء لا يعني الأمان.</li>
                 </ul>
@@ -540,12 +548,12 @@
             </div>
 
             <div class="dev-info">
-                <div style="font-weight:700;color:#e6eef8">المطور — ABDULKARIM ALOBUD</div>
-                <div style="margin-top:6px"><a href="mailto:abo.saleh.g@gmail.com" style="color:#60a5fa;text-decoration:none">abo.saleh.g@gmail.com</a></div>
+                <div class="tone-fg strong">المطور — ABDULKARIM ALOBUD</div>
+                <div class="mt-6"><a href="mailto:abo.saleh.g@gmail.com" class="link-plain">abo.saleh.g@gmail.com</a></div>
             </div>
 
-            <div style="margin-top:16px">
-                <button class="icon-btn btn-make" data-action="toggle-guide" style="width:100%">
+            <div class="mt-16">
+                <button class="icon-btn btn-make w-full" data-action="toggle-guide">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true">
                         <path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>

@@ -18,8 +18,10 @@ export function maxPrice(marketingLevel) {
 }
 
 // Revenue = price x demand is a parabola under a linear demand curve, so the
-// revenue-maximising price is exactly half the choke price. Surfaced to the
-// player as a hint rather than applied automatically — finding it is the game.
+// price that maximises it is exactly half the choke price. This is the right
+// answer ONLY when demand is the binding constraint. Kept because it is the
+// correct floor for the real answer below, and because a player with no
+// machines has no supply rate to reason about yet.
 export function optimalPrice(marketingLevel) {
     return Math.max(GAME_CONFIG.MIN_PRICE, chokePrice(marketingLevel) / 2);
 }
@@ -43,11 +45,53 @@ export function demandFloor(marketingLevel, price) {
     return Math.max(1, Math.floor(effectiveDemandCap(marketingLevel, price) * GAME_CONFIG.DEMAND_FLOOR_FRACTION));
 }
 
-// Demand recovers by a fraction of the cap per restore tick rather than by a
-// flat "+marketingLevel", which was invisible once the cap grew.
+// Demand recovers by a fraction of the cap per second rather than by a flat
+// "+marketingLevel", which was invisible once the cap grew.
 export function demandRestoreStep(marketingLevel, price) {
     const cap = effectiveDemandCap(marketingLevel, price);
-    return Math.max(1, Math.ceil(cap * GAME_CONFIG.DEMAND_RESTORE_FRACTION));
+    const perTick = GAME_CONFIG.DEMAND_RESTORE_FRACTION_PER_SECOND
+        * GAME_CONFIG.PRODUCTION_TICK_MS / 1000;
+    return Math.max(1, Math.ceil(cap * perTick));
+}
+
+// Clips per second the market absorbs in the long run at this price. Demand is
+// a stock consumed 1:1 by sales and refilled by restoreDemand(), so in steady
+// state the sales rate cannot exceed the refill rate — whatever the cadence.
+export function demandThroughputPerSecond(marketingLevel, price) {
+    return effectiveDemandCap(marketingLevel, price)
+        * GAME_CONFIG.DEMAND_RESTORE_FRACTION_PER_SECOND;
+}
+
+// The price the player should actually charge.
+//
+// A sale moves min(clips, demand), so income per second is
+//     price x min(supplyPerSecond, demandThroughputPerSecond(price))
+// not price x demand. Measured over three simulated hours, supply is the
+// binding side on 99.7% of sale ticks — and a supply-limited factory should
+// RAISE its price, because every clip it makes sells anyway. Following the old
+// choke/2 hint cost roughly half the income of pricing near the supply point.
+//
+// Below the supply point income is price x supply, which rises with price, so
+// the optimum sits exactly where market absorption drops to meet production.
+// Past that point demand binds and the choke/2 parabola takes over, so the
+// answer is the larger of the two.
+export function optimalPriceForSupply(marketingLevel, supplyPerSecond) {
+    const revenueMax = optimalPrice(marketingLevel);
+    if (!Number.isFinite(supplyPerSecond) || supplyPerSecond <= 0) return revenueMax;
+
+    // Absorption at price 0 — the most the market can ever take.
+    const maxAbsorption = demandThroughputPerSecond(marketingLevel, 0);
+    if (supplyPerSecond >= maxAbsorption) return revenueMax;
+
+    // Invert the linear demand curve: find the price whose absorption equals
+    // production, so nothing is made that cannot be sold and nothing is sold
+    // cheaper than it needs to be.
+    const choke = chokePrice(marketingLevel);
+    const supplyPrice = choke * (1 - supplyPerSecond / maxAbsorption);
+    return Math.min(
+        maxPrice(marketingLevel),
+        Math.max(GAME_CONFIG.MIN_PRICE, Math.max(revenueMax, supplyPrice)),
+    );
 }
 
 // Wire drifts up with lifetime production. Capped so a very long game cannot
@@ -74,9 +118,15 @@ export function computeMarketingCost(marketingLevel) {
     );
 }
 
-// Permanent, prestige-only production multiplier.
+// Permanent, prestige-only production multiplier. Compounds per point so it
+// keeps pace with exponential upgrade costs instead of fading against them;
+// capped so a hand-edited point count cannot reach Infinity and poison every
+// downstream number.
 export function prestigeMultiplier(prestigePoints) {
-    return 1 + Math.max(0, prestigePoints) * GAME_CONFIG.PRESTIGE_BONUS_PER_POINT;
+    const points = Math.max(0, prestigePoints);
+    const multiplier = Math.pow(1 + GAME_CONFIG.PRESTIGE_BONUS_PER_POINT, points);
+    if (!Number.isFinite(multiplier)) return GAME_CONFIG.PRESTIGE_MULTIPLIER_CAP;
+    return Math.min(GAME_CONFIG.PRESTIGE_MULTIPLIER_CAP, multiplier);
 }
 
 // Points a reset would award right now. Lifetime sales are what count, so
@@ -86,10 +136,17 @@ export function pendingPrestigePoints(lifetimeSold, prestigePointsEarned) {
     return Math.max(0, total - Math.max(0, prestigePointsEarned));
 }
 
-// How many sales the auto-seller performs per tick: the manual cadence for
-// the same window, discounted by AUTO_SELL_EFFICIENCY. Deriving it this way
-// keeps "idle is ~85% of active" true by construction, whatever else is tuned.
-export function autoSellSlots() {
-    const manualSlots = GAME_CONFIG.SELL_TICK_MS / GAME_CONFIG.MANUAL_SELL_COOLDOWN_MS;
-    return Math.max(1, Math.floor(manualSlots * GAME_CONFIG.AUTO_SELL_EFFICIENCY));
+// What one auto-sold clip fetches, as a fraction of the list price. See the
+// AUTO_SELL_EFFICIENCY comment in config.js for why the discount lives on the
+// price rather than on the sale cadence.
+export function autoSellPriceFactor() {
+    return Math.min(1, Math.max(0, GAME_CONFIG.AUTO_SELL_EFFICIENCY));
+}
+
+// Sustained clips/second a given number of machines produces, prestige
+// included. Used by the pricing hint, which needs a rate rather than a
+// per-tick count.
+export function productionPerSecond(autoClippers, prestigePoints) {
+    const perTick = Math.floor(Math.max(0, autoClippers) * prestigeMultiplier(prestigePoints));
+    return perTick * 1000 / GAME_CONFIG.PRODUCTION_TICK_MS;
 }

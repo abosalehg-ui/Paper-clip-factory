@@ -1,9 +1,8 @@
 import { GAME_CONFIG } from './config.js';
 import { gameState } from './state.js';
 import {
-    autoProduceTick,
+    productionTick,
     autoSellTick,
-    restoreDemand,
     isGameOver,
 } from './production.js';
 import { triggerRandomChallenge } from './events.js';
@@ -69,14 +68,13 @@ function tick(currentTime) {
     lastFrameTime = currentTime;
 
     lastProductionTime = runFixedSteps(
-        lastProductionTime, GAME_CONFIG.PRODUCTION_TICK_MS, currentTime, autoProduceTick,
+        lastProductionTime, GAME_CONFIG.PRODUCTION_TICK_MS, currentTime, productionTick,
     );
     lastSellTime = runFixedSteps(
         lastSellTime, GAME_CONFIG.SELL_TICK_MS, currentTime, autoSellTick,
     );
     lastEventTime = runFixedSteps(
         lastEventTime, GAME_CONFIG.EVENT_CHECK_INTERVAL_MS, currentTime, () => {
-            restoreDemand();
             triggerRandomChallenge();
             // Catches the achievements that automation earns while the player
             // is not clicking anything.

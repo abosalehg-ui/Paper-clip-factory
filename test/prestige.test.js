@@ -60,7 +60,7 @@ test('the multiplier reflects banked points', () => {
     assert.equal(currentMultiplier(), 1);
     gameState.lifetimeSold = REQ * 4;
     doPrestige();
-    assert.equal(currentMultiplier(), 1 + 4 * GAME_CONFIG.PRESTIGE_BONUS_PER_POINT);
+    assert.equal(currentMultiplier(), (1 + GAME_CONFIG.PRESTIGE_BONUS_PER_POINT) ** 4);
 });
 
 test('the next-point target counts down toward the following threshold', () => {

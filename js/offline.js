@@ -1,6 +1,6 @@
 import { GAME_CONFIG } from './config.js';
 import { gameState } from './state.js';
-import { autoProduceTick, autoSellTick, restoreDemand } from './production.js';
+import { productionTick, autoSellTick } from './production.js';
 import { withoutFeedback } from './feedback.js';
 import { trustedElapsedMs } from './clock.js';
 
@@ -38,18 +38,17 @@ export function calculateOfflineProgress() {
     withoutFeedback(() => {
         let t = 0;
         let nextSell = GAME_CONFIG.SELL_TICK_MS;
-        let nextRestore = GAME_CONFIG.EVENT_CHECK_INTERVAL_MS;
 
         while (t + GAME_CONFIG.PRODUCTION_TICK_MS <= elapsedMs) {
             t += GAME_CONFIG.PRODUCTION_TICK_MS;
-            autoProduceTick();
+            // Production and demand recovery share the one-second tick, so
+            // replaying it here stays identical to the live loop by
+            // construction — which is the whole point of reusing the real
+            // functions rather than mirroring them.
+            productionTick();
             while (t >= nextSell) {
                 autoSellTick();
                 nextSell += GAME_CONFIG.SELL_TICK_MS;
-            }
-            while (t >= nextRestore) {
-                restoreDemand();
-                nextRestore += GAME_CONFIG.EVENT_CHECK_INTERVAL_MS;
             }
         }
     });
