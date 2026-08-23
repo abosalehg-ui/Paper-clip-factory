@@ -63,19 +63,58 @@ export const GAME_CONFIG = {
     PRICE_CHOKE_GROWTH: 0.15,       // added choke price per marketing level
     PRICE_DEMAND_STEP: 5,           // demand nudge per +/- price button press
 
-    // Demand dynamics, expressed as fractions of the effective cap so they
-    // stay meaningful at every scale instead of going irrelevant late-game.
-    DEMAND_DECAY_FRACTION: 0.1,     // demand lost per clip sold
-    DEMAND_FLOOR_FRACTION: 0.1,     // demand never drops below this x cap
-    DEMAND_RESTORE_FRACTION: 0.15,  // demand regained per restore tick
+    // Demand dynamics. Demand is a STOCK, not a rate: it is the number of
+    // clips the market will absorb right now. Selling consumes it 1:1 and it
+    // regenerates toward the cap on the restore tick, so the sustainable
+    // sales rate IS the regeneration rate.
+    //
+    // The previous model decayed demand by 10% of the amount sold but floored
+    // it at 10% of the cap. The floor dominated: every sale was guaranteed
+    // 10% of the cap no matter what, so demand sat at its ceiling 66% of the
+    // time and constrained a sale in 0.3% of ticks (measured over three
+    // simulated hours). The whole decay/restore layer was inert.
+    //
+    // RESTORE is set so the long-run throughput matches the old effective
+    // rate exactly (0.45 of the cap every 3s == 0.15 cap/second), which keeps
+    // the progression curve intact while making the dynamics visible: dump a
+    // full warehouse and the market needs time to come back.
+    // Expressed per SECOND and applied on the production tick. It used to be
+    // per-restore-tick and piggybacked on EVENT_CHECK_INTERVAL_MS — the random
+    // event cadence, which has nothing to do with the market — so demand
+    // refilled in 3-second lumps that the 2-second sell tick swallowed whole,
+    // leaving the on-screen demand reading ~1 almost permanently. Accruing
+    // every second makes the same long-run rate legible as a gauge.
+    DEMAND_DECAY_FRACTION: 1,             // sold clips consume demand 1:1
+    DEMAND_FLOOR_FRACTION: 0,             // no free drip; demandFloor() keeps >= 1
+    DEMAND_RESTORE_FRACTION_PER_SECOND: 0.15,
 
     // ---- Selling --------------------------------------------------------
     // A manual sale has a cooldown so hammering the key cannot beat the
-    // automation. The auto-seller emulates the same cadence at a slight
-    // discount, so idling is *almost* as good as clicking — the correct
-    // shape for an idle game.
+    // automation.
+    //
+    // AUTO_SELL_EFFICIENCY is a PRICE discount, not a cadence discount. A sale
+    // clears min(clips, demand) outright, so under a regenerating demand stock
+    // the long-run throughput equals the regeneration rate no matter how often
+    // anyone sells — cadence and per-sale share both cancel out. The old
+    // "emulate the manual cadence at 85%" slot maths could therefore never
+    // express "idling is 85% of clicking"; it also floored 4 x 0.85 to 3
+    // slots, i.e. 75%, while the README promised 85%. Selling wholesale at 85%
+    // of list price says exactly what it means and is what the player sees.
     MANUAL_SELL_COOLDOWN_MS: 500,
     AUTO_SELL_EFFICIENCY: 0.85,
+
+    // ---- Manual production rate ------------------------------------------
+    // Selling was rate-limited but making was not, so key auto-repeat (~30/s)
+    // handed the player the output of 30 machines from the first second —
+    // machines the simulated economy does not reach until minute four. A token
+    // bucket caps sustained manual output while still allowing a short burst,
+    // and the wire-efficiency upgrade raises the ceiling, which turns the
+    // exploit into a progression track.
+    // 8/s is above a fast human tapping rate, so real presses never feel
+    // swallowed, and far below the ~30/s a held key delivers.
+    MANUAL_MAKE_BASE_RATE: 8,            // clips/second at wireEfficiency 1
+    MANUAL_MAKE_RATE_PER_EFFICIENCY: 3,  // extra clips/second per +1 efficiency
+    MANUAL_MAKE_BURST_SECONDS: 1.5,      // bucket depth, in seconds of output
 
     // ---- Upgrade cost curves -------------------------------------------
     // Marketing used to be linear (100 x level) while machines were
@@ -111,8 +150,14 @@ export const GAME_CONFIG = {
     MIN_EVENT_DEMAND: 50,
 
     // ---- Prestige --------------------------------------------------------
+    // The bonus compounds: (1 + BONUS)^points. It used to be additive
+    // (1 + 0.05 x points), which decayed against exponential machine costs —
+    // the first point was +5% but the twenty-first was +2.5%, so resetting
+    // stopped being worth it after roughly ten runs. Compounding at a lower
+    // per-point rate is gentler early and still meaningful at point fifty.
     PRESTIGE_REQUIREMENT: 100000,   // lifetime clips sold per prestige point
-    PRESTIGE_BONUS_PER_POINT: 0.05, // +5% production per point, permanent
+    PRESTIGE_BONUS_PER_POINT: 0.04, // x1.04 production per point, permanent
+    PRESTIGE_MULTIPLIER_CAP: 1e9,   // keeps a hand-edited save from reaching Infinity
 
     // ---- Save hardening --------------------------------------------------
     // Any imported insuranceEndTime further out than this is clamped

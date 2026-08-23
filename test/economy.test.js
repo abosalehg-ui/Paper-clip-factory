@@ -6,7 +6,8 @@ import {
     chokePrice, maxPrice, optimalPrice, baseDemandCap, effectiveDemandCap,
     demandFloor, demandRestoreStep, computeWireCost, computeAutoClipperCost,
     computeMarketingCost, prestigeMultiplier, pendingPrestigePoints,
-    autoSellSlots,
+    autoSellPriceFactor, demandThroughputPerSecond, optimalPriceForSupply,
+    productionPerSecond,
 } from '../js/economy.js';
 
 // ---- The demand curve ----------------------------------------------------
@@ -61,11 +62,15 @@ test('marketing widens both the volume and the price ceiling', () => {
     assert.ok(baseDemandCap(5) > baseDemandCap(1));
 });
 
-test('demand floor and restore step scale with the cap', () => {
-    const smallFloor = demandFloor(1, 0.25);
-    const bigFloor = demandFloor(50, 0.25);
-    assert.ok(bigFloor > smallFloor, 'a flat floor goes irrelevant late-game');
-    assert.ok(demandFloor(1, 0.25) >= 1);
+test('demand is a stock: no guaranteed drip, and it refills relative to the cap', () => {
+    // The floor used to guarantee 10% of the cap on every single sale, which
+    // dominated the decay entirely — demand sat at its ceiling 66% of the time
+    // and bound a sale in 0.3% of ticks. Selling now consumes demand and only
+    // regeneration brings it back, which is what makes dumping a full
+    // warehouse a decision instead of a free action.
+    assert.ok(demandFloor(1, 0.25) >= 1, 'never zero, so the game cannot deadlock');
+    assert.ok(demandFloor(50, 0.25) < effectiveDemandCap(50, 0.25) * 0.05,
+        'no meaningful free demand at any scale');
     assert.ok(demandRestoreStep(50, 0.25) > demandRestoreStep(1, 0.25));
     assert.ok(demandRestoreStep(1, 0.25) >= 1);
 });
@@ -131,9 +136,27 @@ test('automating production is the cheaper first move', () => {
 // ---- Prestige ------------------------------------------------------------
 
 test('prestige multiplier grows with banked points', () => {
+    const step = 1 + GAME_CONFIG.PRESTIGE_BONUS_PER_POINT;
     assert.equal(prestigeMultiplier(0), 1);
-    assert.equal(prestigeMultiplier(2), 1 + 2 * GAME_CONFIG.PRESTIGE_BONUS_PER_POINT);
+    assert.equal(prestigeMultiplier(2), step ** 2);
     assert.equal(prestigeMultiplier(-3), 1);
+});
+
+test('the prestige bonus compounds instead of fading against exponential costs', () => {
+    // The additive version handed out a smaller and smaller *relative* gain as
+    // points accumulated, which is why resetting stopped paying after ~10 runs.
+    const gainAt = (n) => prestigeMultiplier(n + 1) / prestigeMultiplier(n);
+    assert.ok(Math.abs(gainAt(0) - gainAt(40)) < 1e-9,
+        'the twenty-first point must be worth as much, proportionally, as the first');
+    assert.ok(prestigeMultiplier(50) > prestigeMultiplier(25));
+});
+
+test('the prestige multiplier stays finite for an absurd point count', () => {
+    // Save rules allow prestigePoints up to 1e6; 1.04 ** 1e6 overflows to
+    // Infinity, which would poison every number downstream of production.
+    const huge = prestigeMultiplier(1e6);
+    assert.ok(Number.isFinite(huge));
+    assert.equal(huge, GAME_CONFIG.PRESTIGE_MULTIPLIER_CAP);
 });
 
 test('prestige points come from lifetime sales and cannot be claimed twice', () => {
@@ -147,12 +170,86 @@ test('prestige points come from lifetime sales and cannot be claimed twice', () 
 
 // ---- Automation ----------------------------------------------------------
 
-test('the auto-seller runs the manual cadence at the configured discount', () => {
-    const manualSlotsPerWindow = GAME_CONFIG.SELL_TICK_MS / GAME_CONFIG.MANUAL_SELL_COOLDOWN_MS;
+test('auto-sold clips fetch exactly the configured share of the list price', () => {
+    // The discount is a price, not a cadence: a sale clears min(clips, demand)
+    // outright, so no arrangement of sale timings could ever have expressed
+    // "idling is 85% of clicking".
+    assert.equal(autoSellPriceFactor(), GAME_CONFIG.AUTO_SELL_EFFICIENCY);
+    assert.ok(autoSellPriceFactor() < 1, 'idling must not beat clicking');
+    assert.ok(autoSellPriceFactor() > 0);
+});
+
+// ---- Supply-aware pricing ------------------------------------------------
+// The old hint maximised price x demand, which is the right answer only when
+// demand is the binding constraint. Over three simulated hours, supply bound
+// 99.7% of sale ticks — and following the hint cost roughly half the income of
+// pricing near the point where absorption meets production.
+
+test('market absorption is the demand regeneration rate and falls as price rises', () => {
+    const level = 4;
+    const cheap = demandThroughputPerSecond(level, 0.1);
+    const dear = demandThroughputPerSecond(level, chokePrice(level) * 0.9);
+    assert.ok(cheap > dear);
+    assert.ok(dear >= 0);
+
     assert.equal(
-        autoSellSlots(),
-        Math.floor(manualSlotsPerWindow * GAME_CONFIG.AUTO_SELL_EFFICIENCY),
+        demandThroughputPerSecond(level, 0),
+        baseDemandCap(level) * GAME_CONFIG.DEMAND_RESTORE_FRACTION_PER_SECOND,
     );
-    assert.ok(autoSellSlots() >= 1);
-    assert.ok(autoSellSlots() < manualSlotsPerWindow, 'idling must not beat clicking');
+});
+
+test('a supply-limited factory is told to charge more than half the choke price', () => {
+    const level = 10;
+    const choke = chokePrice(level);
+    const absorptionAtZero = demandThroughputPerSecond(level, 0);
+    // Production well below what the market could take: the classic case.
+    const hint = optimalPriceForSupply(level, absorptionAtZero * 0.2);
+    assert.ok(hint > optimalPrice(level),
+        'every clip sells anyway, so the price should rise to meet production');
+    assert.ok(hint < choke, 'never at or past the choke price — nobody buys there');
+});
+
+test('the hinted price is where market absorption meets production', () => {
+    const level = 7;
+    const supply = demandThroughputPerSecond(level, 0) * 0.35;
+    const hint = optimalPriceForSupply(level, supply);
+    assert.ok(Math.abs(demandThroughputPerSecond(level, hint) - supply) < 1e-6);
+});
+
+test('the hint falls back to the revenue-maximising price when demand binds', () => {
+    const level = 6;
+    const flooded = demandThroughputPerSecond(level, 0) * 5;
+    assert.equal(optimalPriceForSupply(level, flooded), optimalPrice(level));
+    // No machines yet: there is no supply rate to reason about.
+    assert.equal(optimalPriceForSupply(level, 0), optimalPrice(level));
+    assert.equal(optimalPriceForSupply(level, NaN), optimalPrice(level));
+});
+
+test('the hint always stays inside the price bounds the game accepts', () => {
+    for (let level = 1; level <= 60; level += 7) {
+        for (const share of [0, 0.01, 0.2, 0.5, 0.9, 1, 3]) {
+            const supply = demandThroughputPerSecond(level, 0) * share;
+            const hint = optimalPriceForSupply(level, supply);
+            assert.ok(hint >= GAME_CONFIG.MIN_PRICE, `level ${level} share ${share}`);
+            assert.ok(hint <= maxPrice(level), `level ${level} share ${share}`);
+        }
+    }
+});
+
+test('production per second scales with machines and prestige', () => {
+    assert.equal(productionPerSecond(0, 0), 0);
+    assert.equal(productionPerSecond(10, 0), 10 * 1000 / GAME_CONFIG.PRODUCTION_TICK_MS);
+    assert.ok(productionPerSecond(10, 5) > productionPerSecond(10, 0));
+});
+
+
+test('demand recovery is independent of the random-event cadence', () => {
+    // restoreDemand() used to ride EVENT_CHECK_INTERVAL_MS, so retuning how
+    // often accidents are rolled would silently retune the whole economy.
+    const level = 8;
+    const perSecond = demandThroughputPerSecond(level, 0.4);
+    const ticksPerSecond = 1000 / GAME_CONFIG.PRODUCTION_TICK_MS;
+    const perTick = demandRestoreStep(level, 0.4);
+    // Ceil()-ing to whole clips is the only slack between the two.
+    assert.ok(Math.abs(perTick * ticksPerSecond - perSecond) <= ticksPerSecond);
 });

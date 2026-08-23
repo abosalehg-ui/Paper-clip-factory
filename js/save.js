@@ -86,6 +86,16 @@ export function resetGameState({ keepPrestige = true } = {}) {
             prestigeResets: gameState.prestigeResets,
             lifetimeSold: gameState.lifetimeSold,
             unlockedAchievements: gameState.unlockedAchievements.slice(),
+            // Trophies are lifetime awards, like achievements. Resetting them
+            // meant every prestige replayed the same three fanfares — a
+            // celebration the fifth time round reads as noise, and the goal
+            // bar visibly walked backwards to "bronze" right after an upgrade.
+            trophyBronze: gameState.trophyBronze,
+            trophySilver: gameState.trophySilver,
+            trophyGold: gameState.trophyGold,
+            // The tutorial is learned once, not once per run.
+            onboardingStep: gameState.onboardingStep,
+            priceExplored: gameState.priceExplored,
         }
         : {};
 

@@ -4,6 +4,22 @@
 //
 // Import this module FIRST in a test file, before any `../js/*` imports, so
 // the globals exist by the time those modules are evaluated.
+//
+// `getElementById` resolves against the ids that actually exist in
+// index.html. It used to hand back a live element for ANY id, which meant a
+// typo'd or deleted id sailed through the whole suite and only broke in the
+// browser — the stub hid exactly the class of bug it was standing in for.
+// Unknown ids now return null, like a real document.
+
+import { readFileSync } from 'node:fs';
+
+const HTML_PATH = new URL('../../index.html', import.meta.url);
+
+// Ids declared in the markup. Parsed rather than hard-coded so the stub can
+// never drift from the page it is imitating.
+export const DOCUMENT_IDS = new Set(
+    [...readFileSync(HTML_PATH, 'utf8').matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]),
+);
 
 function makeElement() {
     return {
@@ -39,9 +55,20 @@ function makeElement() {
     };
 }
 
+// Stable identity per id: modules cache the elements they look up, and
+// `document.activeElement !== els.price` comparisons need the same object
+// back on every call.
+const elementsById = new Map();
+
+function elementById(id) {
+    if (!DOCUMENT_IDS.has(id)) return null;
+    if (!elementsById.has(id)) elementsById.set(id, makeElement());
+    return elementsById.get(id);
+}
+
 if (!globalThis.window) {
     globalThis.window = {
-        matchMedia: () => ({ matches: false }),
+        matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} }),
         addEventListener() {},
         removeEventListener() {},
     };
@@ -49,7 +76,7 @@ if (!globalThis.window) {
 
 if (!globalThis.document) {
     globalThis.document = {
-        getElementById: () => makeElement(),
+        getElementById: elementById,
         createElement: () => makeElement(),
         querySelector: () => null,
         querySelectorAll: () => [],

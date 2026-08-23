@@ -19,7 +19,9 @@ function getTrophyElements() {
     return trophyElements;
 }
 
-export function checkTrophy(newTotalSold) {
+// `lifetimeSold` is the yardstick, not the current run's `totalSold`: a
+// trophy is a lifetime award and must survive a prestige reset.
+export function checkTrophy(lifetimeSold) {
     const body = document.body;
     const trophies = getTrophyElements();
     // The trophy aura is a large permanent glow; light-sensitive players can
@@ -32,29 +34,29 @@ export function checkTrophy(newTotalSold) {
     trophies.gold.style.display = 'none';
     body.classList.remove('trophy-bronze', 'trophy-silver', 'trophy-gold');
 
-    if (!gameState.trophyBronze && newTotalSold >= GAME_CONFIG.TROPHY_BRONZE_THRESHOLD) {
+    if (!gameState.trophyBronze && lifetimeSold >= GAME_CONFIG.TROPHY_BRONZE_THRESHOLD) {
         gameState.trophyBronze = true;
         playSound('trophy');
         showNewsTicker('🏆 إنجاز جديد: البرونزي (1,000 مشبك مُباع)!', '🌟');
     }
-    if (gameState.trophyBronze && newTotalSold < GAME_CONFIG.TROPHY_SILVER_THRESHOLD) {
+    if (gameState.trophyBronze && lifetimeSold < GAME_CONFIG.TROPHY_SILVER_THRESHOLD) {
         if (!reduceFlash) body.classList.add('trophy-bronze');
         trophies.bronze.style.display = 'flex';
     }
 
-    if (!gameState.trophySilver && newTotalSold >= GAME_CONFIG.TROPHY_SILVER_THRESHOLD) {
+    if (!gameState.trophySilver && lifetimeSold >= GAME_CONFIG.TROPHY_SILVER_THRESHOLD) {
         gameState.trophySilver = true;
         body.classList.remove('trophy-bronze');
         trophies.bronze.style.display = 'none';
         playSound('trophy');
         showNewsTicker('🏆 إنجاز جديد: الفضي (10,000 مشبك مُباع)!', '✨');
     }
-    if (gameState.trophySilver && newTotalSold < GAME_CONFIG.TROPHY_GOLD_THRESHOLD) {
+    if (gameState.trophySilver && lifetimeSold < GAME_CONFIG.TROPHY_GOLD_THRESHOLD) {
         if (!reduceFlash) body.classList.add('trophy-silver');
         trophies.silver.style.display = 'flex';
     }
 
-    if (!gameState.trophyGold && newTotalSold >= GAME_CONFIG.TROPHY_GOLD_THRESHOLD) {
+    if (!gameState.trophyGold && lifetimeSold >= GAME_CONFIG.TROPHY_GOLD_THRESHOLD) {
         gameState.trophyGold = true;
         body.classList.remove('trophy-silver');
         trophies.silver.style.display = 'none';

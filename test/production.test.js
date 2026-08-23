@@ -5,17 +5,17 @@ import assert from 'node:assert/strict';
 import { GAME_CONFIG } from '../js/config.js';
 import { gameState, createDefaultGameState } from '../js/state.js';
 import {
-    chokePrice, effectiveDemandCap, demandFloor, autoSellSlots, maxPrice,
+    chokePrice, effectiveDemandCap, demandFloor, autoSellPriceFactor, maxPrice,
 } from '../js/economy.js';
 import {
     makeClip, sellClips, buyWire, setPrice, adjustPrice,
     autoProduceTick, autoSellTick, restoreDemand, isGameOver,
-    resetSellCooldown, canSellNow, productionPerTick,
+    resetInputCooldowns, canSellNow, productionPerTick, manualMakeRate,
 } from '../js/production.js';
 
 beforeEach(() => {
     Object.assign(gameState, createDefaultGameState());
-    resetSellCooldown();
+    resetInputCooldowns();
 });
 
 // ---- Production ----------------------------------------------------------
@@ -68,13 +68,15 @@ test('autoProduceTick reports a zero rate when nothing can be produced', () => {
 test('prestige points multiply production permanently', () => {
     gameState.autoClippers = 100;
     assert.equal(productionPerTick(), 100);
-    gameState.prestigePoints = 4; // +5% each
-    assert.equal(productionPerTick(), 120);
+    gameState.prestigePoints = 4; // x1.04 each, compounding
+    const expected = Math.floor(100 * (1 + GAME_CONFIG.PRESTIGE_BONUS_PER_POINT) ** 4);
+    assert.equal(productionPerTick(), expected);
+    assert.ok(expected > 100);
 
     gameState.wire = 1000;
     gameState.clips = 0;
     autoProduceTick();
-    assert.equal(gameState.clips, 120);
+    assert.equal(gameState.clips, expected);
 });
 
 // ---- Pricing: the exploit that broke the economy -------------------------
@@ -121,7 +123,7 @@ test('adjustPrice stops at the ceiling and at the floor', () => {
 
 // ---- Selling -------------------------------------------------------------
 
-test('sellClips sells up to demand and reduces demand', () => {
+test('sellClips sells up to demand and consumes it', () => {
     gameState.clips = 100;
     gameState.demand = 50;
     gameState.price = 0.25;
@@ -129,8 +131,13 @@ test('sellClips sells up to demand and reduces demand', () => {
     assert.equal(gameState.clips, 50);
     assert.equal(gameState.totalSold, 50);
     assert.equal(gameState.money, 12.5);
+    // Demand is a stock now: what was sold is gone until restoreDemand() runs.
     const floorValue = demandFloor(gameState.marketingLevel, gameState.price);
-    assert.equal(gameState.demand, Math.max(floorValue, 50 - Math.floor(50 * 0.1)));
+    assert.equal(
+        gameState.demand,
+        Math.max(floorValue, 50 - Math.floor(50 * GAME_CONFIG.DEMAND_DECAY_FRACTION)),
+    );
+    assert.ok(gameState.demand <= 1, 'a sale that big empties the market');
 });
 
 test('selling advances lifetime sales as well as the run total', () => {
@@ -159,65 +166,85 @@ test('the manual sell cooldown stops key-repeat from beating automation', () => 
     for (let i = 0; i < 50; i++) assert.equal(sellClips(null), false);
     assert.equal(gameState.totalSold, afterFirst, 'no extra sales inside the cooldown');
 
-    resetSellCooldown();
+    resetInputCooldowns();
     assert.equal(sellClips(null), true);
     assert.ok(gameState.totalSold > afterFirst);
 });
 
-test('auto-sell performs the discounted manual cadence per tick', () => {
-    const setup = () => {
-        Object.assign(gameState, createDefaultGameState());
-        gameState.autoSellEnabled = true;
-        gameState.clips = 100_000;
-        gameState.demand = 100;
-        gameState.price = 0.25;
-        resetSellCooldown();
-    };
+test('one sale clears the whole available amount, so repeating it is inert', () => {
+    // This is why the auto-seller's old "slots" loop could never express a
+    // cadence discount: the first sale already took everything.
+    Object.assign(gameState, createDefaultGameState());
+    gameState.clips = 100_000;
+    gameState.demand = 100;
+    gameState.price = 0.25;
+    resetInputCooldowns();
 
-    // What the same number of manual sales would achieve.
-    setup();
-    let manualSold = 0;
-    for (let i = 0; i < autoSellSlots(); i++) {
-        resetSellCooldown();
-        const before = gameState.totalSold;
-        sellClips(null);
-        manualSold += gameState.totalSold - before;
-    }
-
-    setup();
-    assert.equal(autoSellTick(), true);
-    assert.equal(gameState.totalSold, manualSold,
-        'one auto tick equals autoSellSlots() manual sales');
+    sellClips(null);
+    assert.equal(gameState.totalSold, 100, 'the sale took min(clips, demand) outright');
+    resetInputCooldowns();
+    sellClips(null);
+    // demandFloor() never returns 0, so the market cannot deadlock — but what
+    // is left is a single clip, not another hundred.
+    assert.equal(gameState.totalSold, 101, 'nothing meaningful left until demand regenerates');
 });
 
-test('idling stays close to, but below, active play', () => {
-    // The old auto-seller was capped at a flat rate while the manual button
-    // had no cooldown at all, so clicking beat idling roughly fivefold.
+test('idling earns exactly the configured share of active play', () => {
+    // The discount rides on the PRICE. Throughput is set by demand
+    // regeneration, so it is identical either way — the difference the player
+    // feels has to show up in the money, and it does, exactly.
     const setup = () => {
         Object.assign(gameState, createDefaultGameState());
         gameState.clips = 1_000_000;
         gameState.demand = 100;
         gameState.price = 0.25;
         gameState.autoSellEnabled = true;
-        resetSellCooldown();
+        resetInputCooldowns();
     };
 
-    const WINDOWS = 20;
     setup();
-    for (let i = 0; i < WINDOWS; i++) autoSellTick();
+    autoSellTick();
+    const idleMoney = gameState.money;
     const idleSold = gameState.totalSold;
 
     setup();
-    const manualSlots = GAME_CONFIG.SELL_TICK_MS / GAME_CONFIG.MANUAL_SELL_COOLDOWN_MS;
-    for (let i = 0; i < WINDOWS * manualSlots; i++) {
-        resetSellCooldown();
-        sellClips(null);
-    }
-    const activeSold = gameState.totalSold;
+    sellClips(null);
+    const activeMoney = gameState.money;
 
-    const ratio = idleSold / activeSold;
-    assert.ok(ratio < 1, 'active play must still be worth something');
-    assert.ok(ratio > 0.6, `idling fell too far behind active play (ratio ${ratio.toFixed(2)})`);
+    assert.equal(idleSold, 100, 'the same clips move either way');
+    assert.ok(Math.abs(idleMoney / activeMoney - GAME_CONFIG.AUTO_SELL_EFFICIENCY) < 1e-9,
+        `idling paid ${(idleMoney / activeMoney).toFixed(4)} of active play`);
+    assert.ok(idleMoney < activeMoney, 'active play must still be worth something');
+    assert.equal(autoSellPriceFactor(), GAME_CONFIG.AUTO_SELL_EFFICIENCY);
+});
+
+// ---- Manual production rate ---------------------------------------------
+
+test('manual clip-making is rate limited but allows a short burst', () => {
+    Object.assign(gameState, createDefaultGameState());
+    resetInputCooldowns();
+    gameState.wire = 1_000_000;
+
+    const depth = manualMakeRate() * GAME_CONFIG.MANUAL_MAKE_BURST_SECONDS;
+    let made = 0;
+    // Key auto-repeat fires far faster than any bucket refill.
+    for (let i = 0; i < 500; i++) if (makeClip(null)) made++;
+
+    assert.ok(made <= depth + 1, `burst of ${made} exceeded the bucket depth ${depth}`);
+    assert.ok(made >= 1, 'the very first press must never be swallowed');
+    assert.ok(made < 500, 'holding the key must not outrun the factory');
+});
+
+test('the wire-efficiency upgrade raises the manual production ceiling', () => {
+    Object.assign(gameState, createDefaultGameState());
+    const base = manualMakeRate();
+    assert.equal(base, GAME_CONFIG.MANUAL_MAKE_BASE_RATE);
+    gameState.wireEfficiency = 3;
+    assert.equal(
+        manualMakeRate(),
+        GAME_CONFIG.MANUAL_MAKE_BASE_RATE + 2 * GAME_CONFIG.MANUAL_MAKE_RATE_PER_EFFICIENCY,
+    );
+    assert.ok(manualMakeRate() > base);
 });
 
 test('auto-sell does nothing when disabled or out of stock', () => {

@@ -2,7 +2,7 @@ import { GAME_CONFIG } from './config.js';
 import { gameState } from './state.js';
 import {
     effectiveDemandCap, demandFloor, demandRestoreStep, maxPrice,
-    computeWireCost, prestigeMultiplier, autoSellSlots,
+    computeWireCost, prestigeMultiplier, autoSellPriceFactor,
 } from './economy.js';
 import { playSound } from './audio.js';
 import { createFloatingEmoji, flash } from './effects.js';
@@ -21,8 +21,46 @@ function clampDemand() {
     gameState.demand = Math.max(1, Math.min(cap, gameState.demand));
 }
 
-export function makeClip(buttonEl) {
+// ---- Manual production rate limit ---------------------------------------
+// A token bucket rather than a flat cooldown, so short bursts of tapping feel
+// unrestricted while sustained key auto-repeat cannot outrun the factory.
+
+let makeTokens = 0;
+let lastMakeRefill = 0;
+
+// Sustained manual clips/second. The wire-efficiency upgrade raises it, which
+// gives that upgrade a second job and turns "hold the key down" from an
+// exploit into something the player buys.
+export function manualMakeRate() {
+    const bonus = Math.max(0, gameState.wireEfficiency - 1)
+        * GAME_CONFIG.MANUAL_MAKE_RATE_PER_EFFICIENCY;
+    return GAME_CONFIG.MANUAL_MAKE_BASE_RATE + bonus;
+}
+
+function refillMakeTokens(now) {
+    const rate = manualMakeRate();
+    const depth = rate * GAME_CONFIG.MANUAL_MAKE_BURST_SECONDS;
+    if (!lastMakeRefill) {
+        // First press of the session (or after a reset): start with a full
+        // bucket so the very first tap is never swallowed.
+        makeTokens = depth;
+    } else {
+        makeTokens = Math.min(depth, makeTokens + (now - lastMakeRefill) / 1000 * rate);
+    }
+    lastMakeRefill = now;
+}
+
+export function canMakeNow(now = Date.now()) {
+    refillMakeTokens(now);
+    return makeTokens >= 1;
+}
+
+// `now` is injectable so the rate limit can be exercised over simulated time
+// instead of wall-clock time, the same way events.js takes an rng.
+export function makeClip(buttonEl, now = Date.now()) {
     if (gameState.wire < 1 || gameState.clips >= gameState.maxClipsLimit) return false;
+    if (!canMakeNow(now)) return false;
+    makeTokens -= 1;
 
     gameState.clips++;
     gameState.totalClips++;
@@ -43,16 +81,23 @@ export function makeClip(buttonEl) {
 
 let lastManualSellTime = 0;
 
-export function resetSellCooldown() {
+// Clears every input rate limiter. Called by "new game", prestige, the
+// game-over restart and a save import, so a fresh run never starts throttled
+// by the previous one.
+export function resetInputCooldowns() {
     lastManualSellTime = 0;
+    makeTokens = 0;
+    lastMakeRefill = 0;
 }
 
-function performSale() {
+// `priceFactor` is the share of the list price this channel fetches: 1 for a
+// manual sale, AUTO_SELL_EFFICIENCY for the auto-seller.
+function performSale(priceFactor = 1) {
     const sellAmount = Math.min(gameState.clips, gameState.demand);
     if (sellAmount <= 0) return 0;
 
     gameState.clips -= sellAmount;
-    gameState.money += sellAmount * gameState.price;
+    gameState.money += sellAmount * gameState.price * priceFactor;
     gameState.totalSold += sellAmount;
     gameState.lifetimeSold += sellAmount;
     gameState.demand = Math.max(
@@ -62,21 +107,21 @@ function performSale() {
     return sellAmount;
 }
 
-export function canSellNow() {
-    return Date.now() - lastManualSellTime >= GAME_CONFIG.MANUAL_SELL_COOLDOWN_MS;
+export function canSellNow(now = Date.now()) {
+    return now - lastManualSellTime >= GAME_CONFIG.MANUAL_SELL_COOLDOWN_MS;
 }
 
-export function sellClips(buttonEl) {
+export function sellClips(buttonEl, now = Date.now()) {
     if (gameState.clips <= 0) return false;
     // The cooldown is what stops key-repeat from beating the automation.
-    if (!canSellNow()) return false;
-    lastManualSellTime = Date.now();
+    if (!canSellNow(now)) return false;
+    lastManualSellTime = now;
 
     const sellAmount = performSale();
     if (sellAmount > 0) {
         if (buttonEl) createFloatingEmoji(buttonEl, '💵', Math.min(sellAmount, 8));
         playSound('cash');
-        checkTrophy(gameState.totalSold);
+        checkTrophy(gameState.lifetimeSold);
         checkLocalRecord();
     }
 
@@ -88,19 +133,16 @@ export function sellClips(buttonEl) {
 export function autoSellTick() {
     if (!gameState.autoSellEnabled || gameState.clips <= 0) return false;
 
-    // Emulate the manual cadence for this window at a slight discount, so
-    // idling stays worth roughly AUTO_SELL_EFFICIENCY of active play.
-    let sold = 0;
-    const slots = autoSellSlots();
-    for (let i = 0; i < slots; i++) {
-        const amount = performSale();
-        if (amount <= 0) break;
-        sold += amount;
-    }
+    // One sale clears min(clips, demand) outright, so repeating it within the
+    // same tick can only ever return 0 — the old slot loop was inert. The
+    // "idling is worth ~85% of clicking" trade-off is carried by the price
+    // instead, where it survives the fact that throughput is set by demand
+    // regeneration rather than by how often anyone presses the button.
+    const sold = performSale(autoSellPriceFactor());
     if (sold <= 0) return false;
 
     playSound('cash');
-    checkTrophy(gameState.totalSold);
+    checkTrophy(gameState.lifetimeSold);
     checkLocalRecord();
     flash('card-money');
     flash('card-clips');
@@ -123,6 +165,7 @@ export function buyWire() {
 // so allowing more would only fake a big number on screen.
 
 export function adjustPrice(delta) {
+    gameState.priceExplored = true;
     const ceiling = maxPrice(gameState.marketingLevel);
     const next = Math.round((gameState.price + delta) * 100) / 100;
     gameState.price = Math.min(ceiling, Math.max(GAME_CONFIG.MIN_PRICE, next));
@@ -142,6 +185,7 @@ export function adjustPrice(delta) {
 
 export function setPrice(newPrice) {
     if (!Number.isFinite(newPrice) || newPrice <= 0) return false;
+    gameState.priceExplored = true;
     const ceiling = maxPrice(gameState.marketingLevel);
     gameState.price = Math.min(
         ceiling,
@@ -184,6 +228,15 @@ export function autoProduceTick() {
     flash('card-clips');
     flash('card-wire');
     return true;
+}
+
+// One second of world time: the factory produces, and the market recovers a
+// little of the demand that has been sold off. Keeping them on the same tick
+// is what makes the demand readout move smoothly instead of in lumps.
+export function productionTick() {
+    const produced = autoProduceTick();
+    restoreDemand();
+    return produced;
 }
 
 export function restoreDemand() {

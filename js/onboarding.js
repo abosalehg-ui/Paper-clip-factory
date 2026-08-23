@@ -36,11 +36,25 @@ export const ONBOARDING_STEPS = [
     },
     {
         id: 'autosell',
-        hint: 'أخيراً: فعّل «البيع التلقائي» ودع المصنع يعمل وحده.',
+        hint: 'فعّل «البيع التلقائي» ودع المصنع يعمل وحده.',
         highlight: 'autoSellBtn',
         target: 1,
         progress: (s) => (s.autoSellEnabled ? 1 : 0),
         done: (s) => s.autoSellEnabled,
+    },
+    {
+        // The tutorial used to teach the four buttons and skip the one real
+        // decision in the game. Price sets how much the market absorbs, so a
+        // player who never touches it never meets the mechanic the whole
+        // economy is built around.
+        id: 'price',
+        hint: 'أخيراً: جرّب تغيير السعر — ارفعه وشوف كيف ينزل سقف الطلب.',
+        highlight: 'increasePriceBtn',
+        target: 1,
+        progress: (s) => (s.priceExplored ? 1 : 0),
+        // A save from before this step existed, or any run already well past
+        // the tutorial, skips it instead of being walked back through it.
+        done: (s) => s.priceExplored || s.totalSold >= 500,
     },
 ];
 
@@ -72,9 +86,11 @@ const GOALS = [
 ];
 
 export function getNextGoal() {
+    // Measured on lifetime sales so the objective keeps moving forward across
+    // a prestige reset instead of snapping back to the bronze trophy.
     for (const goal of GOALS) {
-        if (gameState.totalSold < goal.target) {
-            return { label: goal.label, current: gameState.totalSold, target: goal.target };
+        if (gameState.lifetimeSold < goal.target) {
+            return { label: goal.label, current: gameState.lifetimeSold, target: goal.target };
         }
     }
     // Past the trophies the objective becomes the next prestige point.

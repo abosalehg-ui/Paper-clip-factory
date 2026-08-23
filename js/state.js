@@ -40,6 +40,10 @@ export function createDefaultGameState() {
 
         unlockedAchievements: [],
         onboardingStep: 0,
+        // Set the first time the player moves the price. The pricing step of
+        // the tutorial waits on it, because price is the one decision the
+        // tutorial used to skip entirely.
+        priceExplored: false,
 
         lastSaveTime: Date.now(),
         // Monotonic play time, advanced from performance.now() deltas. Used to
@@ -97,6 +101,13 @@ const SAVE_FIELD_RULES = {
 export function applySavedState(saved) {
     if (!saved || typeof saved !== 'object') return;
     const defaults = createDefaultGameState();
+    // Start from a clean slate. `gameState` is a module singleton that lives
+    // for the whole session, and the loop below skips fields the save does not
+    // carry — so importing over a run in progress used to KEEP that run's
+    // money, marketing level and prestige points while claiming to replace
+    // them. It would also have silently grandfathered every old save the day a
+    // new field was added.
+    Object.assign(gameState, defaults);
     for (const key of Object.keys(defaults)) {
         const value = saved[key];
         const rules = SAVE_FIELD_RULES[key];

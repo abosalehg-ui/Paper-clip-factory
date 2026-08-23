@@ -22,7 +22,7 @@ import {
 } from './ui.js';
 import {
     makeClip, sellClips, buyWire, adjustPrice, setPrice,
-    toggleAutoSell, resetSellCooldown,
+    toggleAutoSell, resetInputCooldowns,
 } from './production.js';
 import { buyAutoClipper, buyUpgrade } from './upgrades.js';
 import { checkTrophy, checkAchievements, resetRecordTracking } from './achievements.js';
@@ -73,13 +73,13 @@ function stopPriceAdjust() {
 
 function handlePriceEdit() {
     const priceEl = getPriceElement();
-    const newPriceStr = priceEl.textContent.trim().replace(/[^\d.]/g, '');
+    const newPriceStr = priceEl.value.trim().replace(/[^\d.]/g, '');
     const newPrice = parseFloat(newPriceStr);
     // setPrice clamps into [MIN_PRICE, chokePrice]; on invalid input the state
     // price is left unchanged. Either way we re-render from the authoritative
     // state, so the field can never show a price the economy does not honour.
     setPrice(newPrice);
-    priceEl.textContent = gameState.price.toFixed(2);
+    priceEl.value = gameState.price.toFixed(2);
     updateUI();
 }
 
@@ -129,11 +129,11 @@ const actions = {
 function startFreshRun(message, { keepPrestige = true } = {}) {
     resetGameState({ keepPrestige });
     resetRecordTracking();
-    resetSellCooldown();
+    resetInputCooldowns();
     document.body.classList.remove('trophy-bronze', 'trophy-silver', 'trophy-gold');
     setGameplayDisabled(false);
     updateAutoSellToggle();
-    checkTrophy(gameState.totalSold);
+    checkTrophy(gameState.lifetimeSold);
     snapMoneyDisplay();
     closeModal('gameOverModal');
     updateUI();
@@ -196,10 +196,10 @@ function doImportSave() {
     if (importSaveString(textarea.value)) {
         showNewsTicker('تم استيراد الحفظ بنجاح!', '✅', 3500);
         playSound('completion');
-        checkTrophy(gameState.totalSold);
+        checkTrophy(gameState.lifetimeSold);
         checkAchievements();
         updateAutoSellToggle();
-        resetSellCooldown();
+        resetInputCooldowns();
         snapMoneyDisplay();
         // If we were on the game-over screen, the imported save revives play.
         setGameplayDisabled(false);
@@ -230,7 +230,7 @@ function doToggleReduceFlash() {
     setSetting('reduceFlash', !getSettings().reduceFlash);
     renderSettings();
     // Re-apply the trophy aura (or remove it) immediately.
-    checkTrophy(gameState.totalSold);
+    checkTrophy(gameState.lifetimeSold);
 }
 
 // ---- Key rebinding -------------------------------------------------------
@@ -418,12 +418,32 @@ function setupVisibilityCatchUp() {
     });
 }
 
+// A new worker no longer activates behind the player's back (that could mix
+// two builds inside one page), so the page has to tell them it is ready and
+// hand over only on reload.
+function announceUpdate(worker) {
+    if (!worker) return;
+    showNewsTicker('تحديث جديد جاهز — أعد تحميل الصفحة لتطبيقه.', '🔄', 8000);
+    worker.postMessage({ type: 'SKIP_WAITING' });
+}
+
 function registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./service-worker.js').catch(() => {});
-        });
-    }
+    if (!('serviceWorker' in navigator)) return;
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').then((registration) => {
+            // Only tell the player about an update when a worker is already in
+            // control; on a first visit the "waiting" worker IS the first one.
+            if (!navigator.serviceWorker.controller) return;
+            if (registration.waiting) announceUpdate(registration.waiting);
+            registration.addEventListener('updatefound', () => {
+                const installing = registration.installing;
+                if (!installing) return;
+                installing.addEventListener('statechange', () => {
+                    if (installing.state === 'installed') announceUpdate(registration.waiting);
+                });
+            });
+        }).catch(() => {});
+    });
 }
 
 function init() {
@@ -448,7 +468,7 @@ function init() {
     setupVisibilityCatchUp();
 
     updateAutoSellToggle();
-    checkTrophy(gameState.totalSold);
+    checkTrophy(gameState.lifetimeSold);
     checkAchievements();
     renderSettings();
     snapMoneyDisplay();

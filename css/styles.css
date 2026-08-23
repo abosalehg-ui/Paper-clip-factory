@@ -1,27 +1,61 @@
+/* ---- Bundled Arabic typeface --------------------------------------------
+   The stack below named families the page never shipped, so on any device
+   without them installed the "Arabic-first" intent quietly fell back to
+   whatever the OS had. Self-hosted here instead: one variable woff2 (54KB)
+   subset to the characters this game actually renders — Arabic, Latin, Arabic
+   and Latin digits, currency and punctuation — covering every weight from a
+   single file. No third-party origin is contacted, which is also what lets the
+   Content-Security-Policy in index.html stay at `font-src 'self'`.
+
+   Noto Kufi Arabic — SIL Open Font License 1.1, see assets/fonts/LICENSE.txt */
+@font-face{
+    font-family:'Noto Kufi Arabic';
+    font-style:normal;
+    font-weight:100 900;
+    font-display:swap;
+    src:url('../assets/fonts/noto-kufi-arabic-subset.woff2') format('woff2-variations'),
+        url('../assets/fonts/noto-kufi-arabic-subset.woff2') format('woff2');
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;touch-action:manipulation}
+html{background-color:#0b1736}
 body{
     /* Arabic-first stack. The previous list (Segoe UI, Tahoma, Geneva,
        Verdana) contained no font actually designed for Arabic, so every
-       device fell back to something different. */
+       device fell back to something different.
+       The first two families are bundled below as @font-face, so this is a
+       promise the page can keep rather than a wish about what the OS has. */
     font-family: "Noto Kufi Arabic", "IBM Plex Sans Arabic", "Dubai",
         "Segoe UI", Tahoma, system-ui, sans-serif;
     /* Arabic needs more leading than Latin, not less. */
     line-height: 1.6;
-    background: url('../assets/images/background.webp');
-    background-size: cover;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-color: #0b1736;
-    background-blend-mode: overlay;
     color:#e6eef8;
     padding:8px;
+    /* dvh first where it is understood: on mobile browsers with a collapsing
+       toolbar, 100vh is taller than the visible viewport and the page jumps
+       as the bar hides. */
     min-height:100vh;
+    min-height:100dvh;
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
     transition: box-shadow 1s ease-in-out;
     position: relative;
+}
+/* The backdrop lives on a fixed pseudo-element instead of
+   `background-attachment: fixed`, which iOS Safari does not honour reliably
+   and which forces a repaint of the whole backdrop on every scroll frame. */
+body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    background-color:#0b1736;
+    background-image:url('../assets/images/background.webp');
+    background-size:cover;
+    background-repeat:no-repeat;
+    background-position:center center;
+    background-blend-mode:overlay;
 }
 .container{
     max-width:1200px;
@@ -285,14 +319,26 @@ body{
     justify-content: center;
     align-items: center;
 }
-#price {
+/* A real input rather than a contenteditable span: it opens the numeric
+   keypad on mobile (inputmode="decimal"), cannot receive pasted markup, and is
+   announced correctly by screen readers. Styled to look exactly as before. */
+.price-input {
     min-width: 44px;
+    width: 4.5ch;
     padding: 0 4px;
     outline: none;
+    border: none;
     border-bottom: 1px solid rgba(16,185,129,0.4);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: center;
     transition: border-bottom-color 0.2s;
 }
-#price:focus {border-bottom-color: #10b981}
+.price-input:focus {border-bottom-color: #10b981}
+/* Chrome shows spinners for inputmode=decimal in some locales. */
+.price-input::-webkit-outer-spin-button,
+.price-input::-webkit-inner-spin-button {-webkit-appearance:none;margin:0}
 
 .price-hint{
     margin-top:6px;
@@ -705,3 +751,38 @@ html[dir="ltr"] #newsTicker {transform: translateX(-100%)}
     .price-btn svg{width:26px;height:26px}
     .objective-row{font-size:0.95rem}
 }
+
+
+/* ---- Utilities -----------------------------------------------------------
+   These replace the 33 inline `style="..."` attributes the markup used to
+   carry. Inline style attributes require `style-src 'unsafe-inline'`, which
+   would have gutted the Content-Security-Policy in index.html; as classes the
+   policy can stay at `style-src 'self'`. Element .style writes from ui.js are
+   CSSOM, which CSP does not restrict. */
+.strong{font-weight:700}
+.w-full{width:100%}
+.text-center{text-align:center}
+.text-xs{font-size:0.8rem}
+.text-sm{font-size:0.95rem}
+.text-base{font-size:1rem}
+.mt-6{margin-top:6px}
+.mt-8{margin-top:8px}
+.mt-12{margin-top:12px}
+.mt-16{margin-top:16px}
+.mb-6{margin-bottom:6px}
+.mb-12{margin-bottom:12px}
+.tone-white{color:#fff}
+.tone-fg{color:#e6eef8}
+.tone-slate{color:#cbd5e1}
+.tone-muted{color:#9aa4b2}
+.tone-sky{color:#7dd3fc}
+.tone-mint{color:#86efac}
+.tone-amber{color:#fbbf24}
+.tone-gold{color:#ffd166}
+.tone-orange{color:#f59e0b}
+.tone-blue{color:#60a5fa}
+.tone-violet{color:#a78bfa}
+.tone-purple{color:#8b5cf6}
+.tone-orchid{color:#f0abfc}
+.link-plain{color:#60a5fa;text-decoration:none}
+.btn-danger{background:linear-gradient(135deg,#ef4444,#dc2626)}

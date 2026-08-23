@@ -4,7 +4,8 @@ import { getUpgradeCost } from './upgrades.js';
 import { formatNumber, formatMoney } from './format.js';
 import { reduceMotion } from './effects.js';
 import {
-    effectiveDemandCap, optimalPrice, chokePrice, maxPrice,
+    effectiveDemandCap, optimalPriceForSupply, chokePrice, maxPrice,
+    productionPerSecond,
 } from './economy.js';
 import { ACHIEVEMENTS, isAchievementUnlocked } from './achievements.js';
 import { updateOnboarding, getNextGoal } from './onboarding.js';
@@ -39,6 +40,14 @@ function setDisabled(el, disabled, reason = '') {
         if (title) el.setAttribute('title', title);
         else el.removeAttribute('title');
     }
+}
+
+// `<input>` carries its text in .value, and writing it while the player is
+// typing would fight them — callers guard on document.activeElement.
+function setValue(el, value) {
+    if (!el) return;
+    const str = String(value);
+    if (el.value !== str) el.value = str;
 }
 
 function setHidden(el, hidden) {
@@ -162,14 +171,21 @@ export function updateUI() {
     setText(els.demandCap, formatNumber(demandCap));
 
     if (document.activeElement !== els.price) {
-        setText(els.price, gameState.price.toFixed(2));
+        setValue(els.price, gameState.price.toFixed(2));
     }
 
-    // Pricing guidance: the demand curve is a real trade-off now, so its shape
-    // is surfaced instead of left to be reverse-engineered.
-    setText(els.priceOptimal, optimalPrice(gameState.marketingLevel).toFixed(2));
+    // Pricing guidance. The hint is supply-aware: a factory that cannot make
+    // as many clips as the market would take should charge more, because every
+    // clip it does make sells regardless. A fixed "half the choke price" told
+    // the player to leave roughly half their income on the table.
+    const supply = productionPerSecond(gameState.autoClippers, gameState.prestigePoints);
+    setText(els.priceOptimal, optimalPriceForSupply(gameState.marketingLevel, supply).toFixed(2));
     setText(els.priceChoke, chokePrice(gameState.marketingLevel).toFixed(2));
-    setText(els.priceRevenue, formatMoney(gameState.price * demandCap));
+    // What the next sale actually pays. This used to show price x demand CAP,
+    // which ignored both the current demand stock and the clips on hand — the
+    // two things that actually bound a sale.
+    setText(els.priceRevenue,
+        formatMoney(gameState.price * Math.min(gameState.clips, gameState.demand)));
 
     setText(els.autoClippers, formatNumber(gameState.autoClippers));
     setText(els.autoClipperCost, formatMoney(gameState.autoClipperCost));
