@@ -123,6 +123,7 @@
 | 📣 التسويق | أسّي (×1.6 لكل مستوى) | يرفع الطلب **وسعر التوقف** معاً |
 | 📦 توسعة المستودع | أسّي (×1.5) | +5,000 مشبك سعة تخزين |
 | ⚙️ كفاءة السلك | خطي | سلك أكثر لكل شراء — وسعر السلك يرتفع مع الإنتاج التراكمي |
+| 🧵 مشتري السلك التلقائي | **مرة واحدة** $500 | يشتري السلك قبل نفاده، ويعمل أثناء الغياب أيضاً |
 | 🏗️ توسعة المصنع | أسّي (×2) | +100 آلة كحد أقصى |
 | 🛡️ التأمين | **ثابت** $1,000 | يقلّل ضرر الحوادث 70% لمدة 5 دقائق |
 
@@ -158,7 +159,7 @@
 
 عندها تظهر شاشة النتيجة النهائية ويمكنك بدء **لعبة جديدة** مباشرة.
 
-> 💡 **نصيحة:** حافظ دائماً على رصيد كافٍ لشراء السلك!
+> 💡 **نصيحة:** اشترِ مشتري السلك التلقائي مبكراً، وحافظ على رصيد يكفيه!
 
 ## 🚀 التشغيل
 
@@ -206,7 +207,9 @@ Paper-clip-factory/
 ├── css/
 │   └── styles.css          # كل التنسيقات
 ├── js/
-│   ├── main.js             # نقطة الدخول (ES modules)
+│   ├── main.js             # نقطة الدخول: خريطة الأفعال ودورة الجولة والإقلاع
+│   ├── input.js            # الإدخال: أزرار السعر، الاختصارات، إعادة تعيين المفاتيح
+│   ├── save-ui.js          # إدارة الحفظ (تصدير/استيراد) ونافذة تقدّم الغياب
 │   ├── config.js           # الثوابت
 │   ├── economy.js          # رياضيات الاقتصاد (دوال خالصة، بلا حالة)
 │   ├── state.js            # حالة اللعبة + التحقق من الحفظ
@@ -222,7 +225,7 @@ Paper-clip-factory/
 │   ├── onboarding.js       # التعليم التدريجي وشريط الهدف
 │   ├── settings.js         # التفضيلات (صوت، مستوى، مفاتيح، وهج)
 │   ├── feedback.js         # مفتاح كتم كل التغذية الراجعة (يستخدمه Offline)
-│   ├── format.js           # تنسيق الأرقام المختصر (1.2K, 3.4M)
+│   ├── format.js           # تنسيق الأرقام (1.2K, 3.4M) بأرقام لاتينية ثابتة
 │   ├── ui.js               # تحديث الواجهة
 │   ├── effects.js          # بركة الجسيمات والإشعارات
 │   └── audio.js            # المؤثرات الصوتية
@@ -381,6 +384,7 @@ production** and shows it, so the number moves as the factory grows.
 | 📣 Marketing | Exponential (×1.6/level) | Raises demand **and the choke price** |
 | 📦 Warehouse Expansion | Exponential (×1.5) | +5,000 clips storage |
 | ⚙️ Wire Efficiency | Linear | More wire per purchase — wire price rises with lifetime output |
+| 🧵 Wire Buyer | **One-time** $500 | Restocks wire before it runs out — keeps working while you are away |
 | 🏗️ Factory Expansion | Exponential (×2) | +100 max machines |
 | 🛡️ Insurance | **Flat** $1,000 | Cuts accident damage by 70% for 5 minutes |
 
@@ -414,7 +418,7 @@ The game ends when:
 - ❌ Not enough money to buy wire
 - ❌ No clips to sell
 
-> 💡 **Tip:** Always maintain enough balance to buy wire!
+> 💡 **Tip:** Get the wire buyer early, and keep enough cash for it to spend!
 
 ## 🚀 Getting Started
 
@@ -459,7 +463,7 @@ Paper-clip-factory/
 ├── service-worker.js       # Offline caching
 ├── css/styles.css          # All styles
 ├── js/                     # ES module game logic
-│   ├── main.js, config.js, economy.js, state.js
+│   ├── main.js, input.js, save-ui.js, config.js, economy.js, state.js
 │   ├── save.js, offline.js, clock.js
 │   ├── game-loop.js, production.js, upgrades.js, events.js
 │   ├── prestige.js, achievements.js, onboarding.js

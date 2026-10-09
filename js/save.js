@@ -6,6 +6,7 @@ import {
     applyBestScore,
     resetBestLocalScore,
     createDefaultGameState,
+    serializeState,
 } from './state.js';
 import { markClockAnchor, clearClockAnchor } from './clock.js';
 
@@ -49,8 +50,7 @@ export function saveGameState() {
         // Pair every wall-clock save stamp with a monotonic anchor, so the
         // offline calculation can tell real absence from a wound-forward clock.
         markClockAnchor();
-        const payload = JSON.stringify(gameState);
-        localStorage.setItem(STORAGE_KEYS.GAME_STATE, payload);
+        localStorage.setItem(STORAGE_KEYS.GAME_STATE, serializeState());
     } catch (e) {
         console.error('Error saving game state:', e);
     }
@@ -59,21 +59,39 @@ export function saveGameState() {
     saveBestScore();
 }
 
+// Returns 'loaded', 'empty' (first launch) or 'corrupt'.
+//
+// A save that cannot be read used to be logged and forgotten: the game started
+// fresh and the next auto-save overwrote the broken payload 30 seconds later,
+// destroying the last chance of recovering it. It is now parked under its own
+// key first, and the caller tells the player.
 export function loadGameState() {
+    let raw;
     try {
-        const raw = localStorage.getItem(STORAGE_KEYS.GAME_STATE);
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            applySavedState(parsed);
+        raw = localStorage.getItem(STORAGE_KEYS.GAME_STATE);
+    } catch (e) {
+        console.error('Error reading game state:', e);
+        return 'empty';
+    }
+    if (!raw) return 'empty';
+
+    try {
+        if (applySavedState(JSON.parse(raw))) {
             // A save loaded from disk has no monotonic anchor from this page
             // session — the offline calculation must fall back to wall time.
             clearClockAnchor();
-            return true;
+            return 'loaded';
         }
     } catch (e) {
         console.error('Error loading game state:', e);
     }
-    return false;
+
+    try {
+        localStorage.setItem(STORAGE_KEYS.GAME_STATE_CORRUPT, raw);
+    } catch (e) {
+        console.error('Could not back up the unreadable save:', e);
+    }
+    return 'corrupt';
 }
 
 export function resetGameState({ keepPrestige = true } = {}) {
@@ -114,7 +132,7 @@ export function resetGameState({ keepPrestige = true } = {}) {
 // Base64 of the UTF-8 payload. Byte-compatible with the previous
 // escape/unescape implementation, so old exported saves keep importing.
 export function exportSaveString() {
-    const payload = JSON.stringify(gameState);
+    const payload = serializeState();
     try {
         const bytes = new TextEncoder().encode(payload);
         let binary = '';
@@ -131,9 +149,7 @@ export function importSaveString(encoded) {
         const binary = atob(encoded.trim());
         const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
         const decoded = new TextDecoder().decode(bytes);
-        const parsed = JSON.parse(decoded);
-        if (!parsed || typeof parsed !== 'object') return false;
-        applySavedState(parsed);
+        if (!applySavedState(JSON.parse(decoded))) return false;
         clearClockAnchor();
         saveGameState();
         return true;

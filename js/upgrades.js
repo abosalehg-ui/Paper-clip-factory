@@ -49,6 +49,19 @@ export const UPGRADES = {
         },
         flashCards: ['card-money'],
     },
+    wireBuyer: {
+        // One-time purchase. Restocking wire was the last chore the factory
+        // could not automate; see WIRE_BUYER_COST in config.js.
+        cost: () => GAME_CONFIG.WIRE_BUYER_COST,
+        available: (s) => !s.wireBuyerOwned,
+        apply(s) {
+            s.wireBuyerOwned = true;
+        },
+        flashCards: ['card-wire', 'card-money'],
+        onSuccess() {
+            showNewsTicker('🧵 مشتري السلك يعمل — سيشتري السلك تلقائياً عند الحاجة.', '🤖', 4000);
+        },
+    },
     insurance: {
         // Flat price. It used to escalate (level x 1000) against flat damage,
         // which made it a strictly losing purchase from the second buy on.
@@ -78,6 +91,7 @@ export function getUpgradeCost(id) {
 export function buyUpgrade(id) {
     const upgrade = UPGRADES[id];
     if (!upgrade) return false;
+    if (upgrade.available && !upgrade.available(gameState)) return false;
     const cost = upgrade.cost(gameState);
     if (gameState.money < cost) {
         if (upgrade.onFail) upgrade.onFail();

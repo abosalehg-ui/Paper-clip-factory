@@ -1,6 +1,9 @@
 export const STORAGE_KEYS = {
     BEST_SCORE: 'bestLocalScore',
     GAME_STATE: 'paperclipFactorySave',
+    // Where an unreadable save is parked instead of being overwritten by the
+    // next auto-save, so it can still be recovered by hand.
+    GAME_STATE_CORRUPT: 'paperclipFactorySave:corrupt',
     SETTINGS: 'paperclipFactorySettings',
 };
 
@@ -10,8 +13,23 @@ export const GAME_CONFIG = {
     INITIAL_PRICE: 0.25,
     INITIAL_DEMAND: 50,
     INITIAL_AUTO_CLIPPER_COST: 5,
-    AUTO_CLIPPER_COST_MULTIPLIER: 1.15,
+    // 1.15 put the 100th machine at ~$5.9M: a simulated optimal run sat at
+    // ~75 machines after six hours, so the 100-machine cap was never reached
+    // and the expansion upgrade could not do anything. At 1.08 the cap lands
+    // after roughly 75 minutes and the first expansion around the two-hour
+    // mark, with marketing (demand) still the binding constraint beyond it.
+    AUTO_CLIPPER_COST_MULTIPLIER: 1.08,
     WIRE_PURCHASE_AMOUNT: 1000,
+
+    // ---- Wire buyer -----------------------------------------------------
+    // Without it wire was the one thing the factory could not do for itself:
+    // a purchase lasts ~16s at 60 machines, so "idle" play meant pressing the
+    // wire button every few seconds, and eight hours away produced about two
+    // minutes of output. The buyer runs on the production tick, so the
+    // offline replay (which re-runs that tick) uses it too.
+    WIRE_BUYER_COST: 500,
+    // Restock when the spool would not cover this many production ticks.
+    WIRE_BUYER_BUFFER_TICKS: 3,
 
     INITIAL_MAX_CLIPS: 5000,
     INITIAL_WAREHOUSE_COST: 100,
@@ -61,7 +79,6 @@ export const GAME_CONFIG = {
     // which is what makes it worth buying.
     PRICE_CHOKE_BASE: 1.0,          // choke price at marketing level 1
     PRICE_CHOKE_GROWTH: 0.15,       // added choke price per marketing level
-    PRICE_DEMAND_STEP: 5,           // demand nudge per +/- price button press
 
     // Demand dynamics. Demand is a STOCK, not a rate: it is the number of
     // clips the market will absorb right now. Selling consumes it 1:1 and it
@@ -160,6 +177,9 @@ export const GAME_CONFIG = {
     PRESTIGE_MULTIPLIER_CAP: 1e9,   // keeps a hand-edited save from reaching Infinity
 
     // ---- Save hardening --------------------------------------------------
+    // Bumped whenever the meaning of a saved field changes; migrateSave() in
+    // state.js upgrades older payloads step by step.
+    SAVE_VERSION: 1,
     // Any imported insuranceEndTime further out than this is clamped
     // (protects against clock-skewed or hand-edited saves).
     MAX_INSURANCE_FUTURE_MS: 24 * 60 * 60 * 1000,

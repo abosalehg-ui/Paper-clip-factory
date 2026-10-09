@@ -140,6 +140,17 @@
                         <span>$<span id="wireCost">20.00</span></span>
                     </button>
                 </div>
+
+                <div class="item-box">
+                    <div class="item-header">
+                        <span>مشتري السلك التلقائي</span>
+                        <span class="tone-mint strong" id="wireBuyerState">غير مملوك</span>
+                    </div>
+                    <button id="wireBuyerBtn" class="icon-btn btn-upgrade" data-action="buy-wire-buyer" aria-label="شراء مشتري السلك التلقائي">
+                        <span class="emoji-icon" aria-hidden="true">🧵</span>
+                        <span id="wireBuyerBtnText">$500.00</span>
+                    </button>
+                </div>
             </div>
 
             <div class="section">
@@ -277,7 +288,7 @@
                     · إجمالي المبيعات مدى الحياة: <strong id="lifetimeSold">0</strong>
                 </div>
                 <div class="item-info" id="prestigeHint">
-                    كل 100,000 مشبك مُباع (مدى الحياة) = نقطة واحدة = +5% إنتاج دائم.
+                    كل 100,000 مشبك مُباع (مدى الحياة) = نقطة واحدة = ×1.04 إنتاج دائم (يتضاعف مع كل نقطة).
                 </div>
                 <button id="prestigeBtn" class="icon-btn btn-marketing" data-action="do-prestige">
                     <span class="emoji-icon" aria-hidden="true">⭐</span>
@@ -520,6 +531,7 @@
                 <ul>
                     <li>• الآلة تنتج مشابك كل ثانية.</li>
                     <li>• البيع التلقائي يبيع بالجملة: <strong>85% من سعر القائمة</strong> — فعّله واسترخِ، أو بِع يدوياً بالسعر الكامل.</li>
+                    <li>• مشتري السلك التلقائي يشتري السلك قبل نفاده ما دام معك مال — ويعمل أثناء غيابك أيضاً.</li>
                     <li>• اللعبة تحفظ تقدمك تلقائياً وتحسب إنتاجك أثناء غيابك (حتى 8 ساعات).</li>
                 </ul>
             </div>
@@ -537,7 +549,7 @@
                 <h3>⭐ إعادة التأسيس</h3>
                 <ul>
                     <li>• كل 100,000 مشبك مُباع (مدى الحياة) تمنحك نقطة.</li>
-                    <li>• كل نقطة = +5% إنتاج دائم لا يضيع أبداً.</li>
+                    <li>• كل نقطة تضرب إنتاجك في 1.04 بشكل دائم ومركّب، ولا تضيع أبداً.</li>
                 </ul>
             </div>
 

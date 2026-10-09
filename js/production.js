@@ -149,14 +149,33 @@ export function autoSellTick() {
     return true;
 }
 
-export function buyWire() {
+// The purchase itself, shared by the button and the wire buyer. No feedback
+// here: the buyer restocks every few seconds and must not chime each time.
+function purchaseWire() {
     refreshWireCost();
     if (gameState.money < gameState.wireCost) return false;
     gameState.money -= gameState.wireCost;
     gameState.wire += GAME_CONFIG.WIRE_PURCHASE_AMOUNT * gameState.wireEfficiency;
+    return true;
+}
+
+export function buyWire() {
+    if (!purchaseWire()) return false;
     playSound('buy');
     flash('card-wire');
     flash('card-money');
+    return true;
+}
+
+// Restocks when the spool would not cover the next few production ticks. One
+// purchase per tick is enough: a purchase lasts well over one tick at any
+// realistic machine count, and the buffer absorbs the rest.
+export function autoBuyWireTick() {
+    if (!gameState.wireBuyerOwned) return false;
+    const needed = Math.max(1, productionPerTick() * GAME_CONFIG.WIRE_BUYER_BUFFER_TICKS);
+    if (gameState.wire >= needed) return false;
+    if (!purchaseWire()) return false;
+    flash('card-wire');
     return true;
 }
 
@@ -170,15 +189,10 @@ export function adjustPrice(delta) {
     const next = Math.round((gameState.price + delta) * 100) / 100;
     gameState.price = Math.min(ceiling, Math.max(GAME_CONFIG.MIN_PRICE, next));
 
-    // A nudge in demand on top of the curve, so the buttons feel responsive
-    // before the next restore tick lands.
-    const cap = effectiveDemandCap(gameState.marketingLevel, gameState.price);
-    if (delta > 0) {
-        gameState.demand = Math.max(1, gameState.demand - GAME_CONFIG.PRICE_DEMAND_STEP);
-    } else {
-        gameState.demand = gameState.demand + GAME_CONFIG.PRICE_DEMAND_STEP;
-    }
-    gameState.demand = Math.max(1, Math.min(cap, gameState.demand));
+    // The demand curve alone decides demand. A +5 "nudge" used to be added on
+    // every price cut, with no matching charge when the price was typed back
+    // up — so "press minus, retype the old price" pumped free demand.
+    clampDemand();
     flash('card-demand');
     return gameState.price;
 }
@@ -234,6 +248,7 @@ export function autoProduceTick() {
 // little of the demand that has been sold off. Keeping them on the same tick
 // is what makes the demand readout move smoothly instead of in lumps.
 export function productionTick() {
+    autoBuyWireTick();
     const produced = autoProduceTick();
     restoreDemand();
     return produced;
