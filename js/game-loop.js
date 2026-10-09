@@ -10,6 +10,7 @@ import { checkAchievements } from './achievements.js';
 import { playSound } from './audio.js';
 import { showNewsTicker } from './effects.js';
 import { updateUI, showGameOverModal } from './ui.js';
+import { formatInteger } from './format.js';
 
 // Upper bound on how many logical ticks a single frame may catch up. Protects
 // against a long freeze turning into a burst of hundreds of ticks; anything
@@ -46,7 +47,7 @@ function handleGameOver() {
     if (gameOverShown) return;
     gameOverShown = true;
     running = false;
-    const msg = `انتهت اللعبة! 🛑 النقاط النهائية: $${gameState.money.toFixed(2)} (تم بيع: ${gameState.totalSold.toLocaleString()})`;
+    const msg = `انتهت اللعبة! 🛑 النقاط النهائية: $${gameState.money.toFixed(2)} (تم بيع: ${formatInteger(gameState.totalSold)})`;
     showNewsTicker(msg, '🔴', 10000);
     playSound('fail');
     showGameOverModal();

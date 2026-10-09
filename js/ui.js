@@ -1,7 +1,7 @@
 import { GAME_CONFIG, DEFAULT_KEY_BINDINGS } from './config.js';
 import { gameState, bestLocalScore } from './state.js';
 import { getUpgradeCost } from './upgrades.js';
-import { formatNumber, formatMoney } from './format.js';
+import { formatNumber, formatMoney, formatDate } from './format.js';
 import { reduceMotion } from './effects.js';
 import {
     effectiveDemandCap, optimalPriceForSupply, chokePrice, maxPrice,
@@ -88,6 +88,7 @@ export function initUI() {
         'soundToggleBtn', 'volumeSlider', 'volumeValue', 'reduceFlashBtn',
         'keybindMake', 'keybindSell', 'keybindWire', 'keybindMachine',
         'shortcutsHint', 'guideShortcuts', 'rebindNote',
+        'wireBuyerBtn', 'wireBuyerBtnText', 'wireBuyerState',
     ];
     for (const id of ids) {
         els[id] = document.getElementById(id);
@@ -231,6 +232,17 @@ export function updateUI() {
     setDisabled(els.warehouseBtn, gameState.money < gameState.warehouseCost, REASON_NO_MONEY);
     setDisabled(els.insuranceBtn, gameState.money < insuranceCost, REASON_NO_MONEY);
 
+    if (gameState.wireBuyerOwned) {
+        setText(els.wireBuyerState, 'يعمل ✓');
+        setText(els.wireBuyerBtnText, 'تم الشراء');
+        setDisabled(els.wireBuyerBtn, true, 'مملوك بالفعل');
+    } else {
+        const wireBuyerCost = getUpgradeCost('wireBuyer');
+        setText(els.wireBuyerState, 'غير مملوك');
+        setText(els.wireBuyerBtnText, `$${formatMoney(wireBuyerCost)}`);
+        setDisabled(els.wireBuyerBtn, gameState.money < wireBuyerCost, REASON_NO_MONEY);
+    }
+
     // Price buttons stop at the edges of the demand curve.
     setDisabled(els.increasePriceBtn,
         gameState.price >= maxPrice(gameState.marketingLevel),
@@ -240,7 +252,7 @@ export function updateUI() {
     setText(els.bestTotalSold, formatNumber(bestLocalScore.totalSold));
     setText(els.bestMoney, formatMoney(bestLocalScore.money || 0));
     setText(els.bestDate, bestLocalScore.date
-        ? new Date(bestLocalScore.date).toLocaleString()
+        ? formatDate(bestLocalScore.date)
         : '—');
 
     // Prestige
@@ -379,6 +391,7 @@ const GAMEPLAY_BUTTONS = [
     'makeBtn', 'sellBtn', 'autoClipperBtn', 'wireBtn', 'efficiencyBtn',
     'marketingBtn', 'expansionBtn', 'warehouseBtn', 'insuranceBtn',
     'autoSellBtn', 'decreasePriceBtn', 'increasePriceBtn', 'prestigeBtn',
+    'wireBuyerBtn',
 ];
 
 let gameplayLocked = false;

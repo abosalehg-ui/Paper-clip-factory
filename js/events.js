@@ -4,6 +4,7 @@ import { effectiveDemandCap, computeAutoClipperCost } from './economy.js';
 import { playSound } from './audio.js';
 import { flash, showNewsTicker } from './effects.js';
 import { isInsuranceActive } from './upgrades.js';
+import { formatInteger } from './format.js';
 
 // Insurance no longer cancels events outright — one purchase used to switch
 // the entire challenge system off forever. It now blunts the damage instead,
@@ -39,7 +40,7 @@ const EVENT_TYPES = {
             );
             const loss = Math.min(s.clips, Math.floor(applyInsurance(raw)));
             s.clips = Math.max(0, s.clips - loss);
-            showNewsTicker(`🔥 حادث: حريق! تلف ${loss.toLocaleString()} مشبك ورقي.`, '🚒', 4500);
+            showNewsTicker(`🔥 حادث: حريق! تلف ${formatInteger(loss)} مشبك ورقي.`, '🚒', 4500);
             playSound('fire');
             flash('card-clips');
         },

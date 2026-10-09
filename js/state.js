@@ -1,5 +1,7 @@
 import { GAME_CONFIG } from './config.js';
-import { effectiveDemandCap, maxPrice, computeWireCost } from './economy.js';
+import {
+    effectiveDemandCap, maxPrice, computeWireCost, computeAutoClipperCost,
+} from './economy.js';
 
 export function createDefaultGameState() {
     return {
@@ -15,6 +17,8 @@ export function createDefaultGameState() {
         wireEfficiency: 1,
         marketingLevel: 1,
         autoSellEnabled: false,
+        // One-time purchase per run: restocks wire on the production tick.
+        wireBuyerOwned: false,
         totalClips: 0,
         totalSold: 0,
 
@@ -98,8 +102,38 @@ const SAVE_FIELD_RULES = {
     playTimeMs: { min: 0, max: BIG },
 };
 
+// Each step upgrades a payload from version N to N + 1. Saves written before
+// versioning existed carry no `saveVersion` and are treated as version 0.
+const MIGRATIONS = {
+    // v0 -> v1: the machine cost curve was rebalanced (x1.15 -> x1.08). The
+    // stored price was computed on the old curve; drop it so the count-derived
+    // price below takes over.
+    0(saved) {
+        delete saved.autoClipperCost;
+    },
+};
+
+export function migrateSave(saved) {
+    const migrated = { ...saved };
+    let version = Number.isInteger(saved.saveVersion) && saved.saveVersion >= 0
+        ? saved.saveVersion
+        : 0;
+    while (version < GAME_CONFIG.SAVE_VERSION) {
+        if (MIGRATIONS[version]) MIGRATIONS[version](migrated);
+        version++;
+    }
+    migrated.saveVersion = version;
+    return migrated;
+}
+
+// The payload written to storage and to an exported save string.
+export function serializeState() {
+    return JSON.stringify({ ...gameState, saveVersion: GAME_CONFIG.SAVE_VERSION });
+}
+
 export function applySavedState(saved) {
-    if (!saved || typeof saved !== 'object') return;
+    if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return false;
+    saved = migrateSave(saved);
     const defaults = createDefaultGameState();
     // Start from a clean slate. `gameState` is a module singleton that lives
     // for the whole session, and the loop below skips fields the save does not
@@ -144,8 +178,10 @@ export function applySavedState(saved) {
     );
     // Derived prices are recomputed rather than trusted.
     gameState.wireCost = computeWireCost(gameState.totalClips);
+    gameState.autoClipperCost = computeAutoClipperCost(gameState.autoClippers);
     // Lifetime sales can never be behind the current run.
     gameState.lifetimeSold = Math.max(gameState.lifetimeSold, gameState.totalSold);
+    return true;
 }
 
 export function applyBestScore(saved) {
