@@ -14,7 +14,7 @@
     <!-- Without this the browser requests /favicon.ico on every load and logs
          a 404 in the console. -->
     <link rel="icon" href="assets/images/icon-192.png" type="image/png" />
-    <link rel="apple-touch-icon" href="assets/images/icon-192.png" />
+    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png" />
     <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -61,21 +61,27 @@
             </div>
         </div>
 
+        <!-- Grows with the automated fleet; see FACTORY_STAGES in js/art.js. -->
+        <figure class="factory-stage" id="factoryStage">
+            <img id="factoryStageImg" src="assets/images/art/factory-stage-1.webp" width="1120" height="480" alt="المصنع: ورشة يدوية" decoding="async" />
+            <figcaption class="factory-stage-label"><span id="factoryStageLabel">ورشة يدوية</span> · <span id="factoryStageNum">1</span>/4</figcaption>
+        </figure>
+
         <div class="stats-grid">
             <div class="stat-card" id="card-clips">
-                <div class="stat-icon"><span class="emoji-icon-stat">📎</span></div>
+                <div class="stat-icon"><span class="emoji-icon-stat" data-art="make">📎</span></div>
                 <div class="stat-label">المشابك</div>
                 <div class="stat-value" id="clips">0</div>
             </div>
 
             <div class="stat-card" id="card-money">
-                <div class="stat-icon"><span class="emoji-icon-stat">💵</span></div>
+                <div class="stat-icon"><span class="emoji-icon-stat" data-art="sell">💵</span></div>
                 <div class="stat-label">المال</div>
                 <div class="stat-value">$<span id="money">0.00</span></div>
             </div>
 
             <div class="stat-card" id="card-wire">
-                <div class="stat-icon"><span class="emoji-icon-stat">🧵</span></div>
+                <div class="stat-icon"><span class="emoji-icon-stat" data-art="wire">🧵</span></div>
                 <div class="stat-label">السلك</div>
                 <div class="stat-value" id="wire">1000</div>
             </div>
@@ -115,7 +121,7 @@
                 </div>
 
                 <button id="makeBtn" class="icon-btn btn-make" data-action="make-clip" aria-label="صنع مشبك">
-                    <span class="emoji-icon" aria-hidden="true">📎</span>
+                    <span class="emoji-icon" data-art="make" aria-hidden="true">📎</span>
                     <span id="makeBtnText">صنع مشبك</span>
                 </button>
 
@@ -125,7 +131,7 @@
                         <span class="tone-blue strong" id="autoClippers">0</span>
                     </div>
                     <button id="autoClipperBtn" class="icon-btn btn-secondary" data-action="buy-auto-clipper" aria-label="شراء آلة صنع تلقائي">
-                        <span class="emoji-icon" aria-hidden="true">🤖</span>
+                        <span class="emoji-icon" data-art="machine" aria-hidden="true">🤖</span>
                         <span>شراء آلة $<span id="autoClipperCost">5.00</span></span>
                     </button>
                 </div>
@@ -136,7 +142,7 @@
                         <span class="tone-orange strong">×<span id="wireEfficiencyInline">1.0</span></span>
                     </div>
                     <button id="wireBtn" class="icon-btn btn-buy" data-action="buy-wire" aria-label="شراء سلك">
-                        <span class="emoji-icon" aria-hidden="true">📦</span>
+                        <span class="emoji-icon" data-art="wire" aria-hidden="true">📦</span>
                         <span>$<span id="wireCost">20.00</span></span>
                     </button>
                 </div>
@@ -147,7 +153,7 @@
                         <span class="tone-mint strong" id="wireBuyerState">غير مملوك</span>
                     </div>
                     <button id="wireBuyerBtn" class="icon-btn btn-upgrade" data-action="buy-wire-buyer" aria-label="شراء مشتري السلك التلقائي">
-                        <span class="emoji-icon" aria-hidden="true">🧵</span>
+                        <span class="emoji-icon" data-art="wire-buyer" aria-hidden="true">🧵</span>
                         <span id="wireBuyerBtnText">$500.00</span>
                     </button>
                 </div>
@@ -192,7 +198,7 @@
                 </div>
 
                 <button id="sellBtn" class="icon-btn btn-sell mt-6" data-action="sell-clips" aria-label="بيع المشابك">
-                    <span class="emoji-icon" aria-hidden="true">💰</span>
+                    <span class="emoji-icon" data-art="sell" aria-hidden="true">💰</span>
                     <span>بيع المشابك (متوفر: <span id="availableClips">0</span>)</span>
                 </button>
 
@@ -219,7 +225,7 @@
                     <span class="tone-violet strong">المستوى <span id="marketingLevel">1</span></span>
                 </div>
                 <button id="marketingBtn" class="icon-btn btn-marketing" data-action="increase-marketing">
-                    <span class="emoji-icon" aria-hidden="true">📣</span>
+                    <span class="emoji-icon" data-art="marketing" aria-hidden="true">📣</span>
                     <span> $<span id="marketingCost">100.00</span></span>
                 </button>
             </div>
@@ -230,7 +236,7 @@
                     <span class="tone-orange strong">الحد الأقصى: <span id="clipsLimitCurrent">5,000</span></span>
                 </div>
                 <button id="warehouseBtn" class="icon-btn btn-upgrade" data-action="upgrade-warehouse">
-                    <span class="emoji-icon" aria-hidden="true">📦</span>
+                    <span class="emoji-icon" data-art="warehouse" aria-hidden="true">📦</span>
                     <span> $<span id="warehouseCost">100.00</span></span>
                 </button>
             </div>
@@ -241,7 +247,7 @@
                     <span class="tone-amber strong">×<span id="wireEfficiency">1.0</span></span>
                 </div>
                 <button id="efficiencyBtn" class="icon-btn btn-upgrade" data-action="buy-wire-efficiency">
-                    <span class="emoji-icon" aria-hidden="true">⚙️</span>
+                    <span class="emoji-icon" data-art="efficiency" aria-hidden="true">⚙️</span>
                     <span> $<span id="efficiencyCost">1000.00</span></span>
                 </button>
             </div>
@@ -252,7 +258,7 @@
                     <span class="tone-sky strong">الحد الأقصى: <span id="maxClippers">100</span></span>
                 </div>
                 <button id="expansionBtn" class="icon-btn btn-secondary" data-action="buy-expansion">
-                    <span class="emoji-icon" aria-hidden="true">🏗️</span>
+                    <span class="emoji-icon" data-art="expansion" aria-hidden="true">🏗️</span>
                     <span> $<span id="expansionCost">2000.00</span></span>
                 </button>
             </div>
@@ -264,7 +270,7 @@
                 </div>
                 <div id="insuranceTimer"></div>
                 <button id="insuranceBtn" class="icon-btn btn-upgrade" data-action="buy-insurance">
-                    <span class="emoji-icon" aria-hidden="true">🛡️</span>
+                    <span class="emoji-icon" data-art="insurance" aria-hidden="true">🛡️</span>
                     <span> $<span id="insuranceCost">1000.00</span></span>
                 </button>
             </div>
@@ -277,6 +283,7 @@
                 <span class="emoji-icon-section">⭐</span>
                 إعادة التأسيس
             </div>
+            <img class="section-scene" src="assets/images/art/scene-prestige.webp" width="800" height="450" alt="" decoding="async" />
             <div class="item-box">
                 <div class="item-header">
                     <span>مضاعف الإنتاج الدائم</span>
@@ -291,7 +298,7 @@
                     كل 100,000 مشبك مُباع (مدى الحياة) = نقطة واحدة = ×1.04 إنتاج دائم (يتضاعف مع كل نقطة).
                 </div>
                 <button id="prestigeBtn" class="icon-btn btn-marketing" data-action="do-prestige">
-                    <span class="emoji-icon" aria-hidden="true">⭐</span>
+                    <span class="emoji-icon" data-art="prestige" aria-hidden="true">⭐</span>
                     <span>إعادة التأسيس (+<span id="prestigePending">0</span> نقطة)</span>
                 </button>
             </div>
@@ -362,6 +369,7 @@
     <div id="gameOverModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="gameOverModalTitle">
         <div class="modal-content">
             <h2 class="modal-title" id="gameOverModalTitle">🛑 انتهت اللعبة!</h2>
+            <img class="modal-scene" src="assets/images/art/scene-game-over.webp" width="800" height="450" alt="" decoding="async" />
             <p class="text-center tone-slate mb-12">
                 نفد السلك والمال معاً — لكن كل نهاية هي بداية جديدة!
             </p>

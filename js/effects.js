@@ -1,4 +1,5 @@
 import { isFeedbackSuspended } from './feedback.js';
+import { applyArt } from './art.js';
 
 export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -93,7 +94,8 @@ export function initTicker() {
     tickerMessageEl = document.getElementById('tickerMessage');
 }
 
-export function showNewsTicker(message, emoji, duration = 3000) {
+// `art` is an optional picture URL shown in place of the emoji once loaded.
+export function showNewsTicker(message, emoji, duration = 3000, art = null) {
     if (isFeedbackSuspended()) return;
     if (!tickerEl) return;
     if (tickerTimeout) {
@@ -101,6 +103,7 @@ export function showNewsTicker(message, emoji, duration = 3000) {
         tickerTimeout = null;
     }
     tickerEmojiEl.textContent = emoji;
+    applyArt(tickerEmojiEl, art);
     tickerMessageEl.textContent = message;
     tickerEl.classList.add('show');
     tickerTimeout = setTimeout(() => {
