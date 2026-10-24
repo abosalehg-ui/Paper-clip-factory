@@ -11,6 +11,7 @@ import { ACHIEVEMENTS, isAchievementUnlocked } from './achievements.js';
 import { updateOnboarding, getNextGoal } from './onboarding.js';
 import { pendingPoints, canPrestige, currentMultiplier } from './prestige.js';
 import { getSettings, describeKey } from './settings.js';
+import { FACTORY_STAGES, factoryStage, factoryStageUrl } from './art.js';
 
 const els = {};
 
@@ -89,6 +90,7 @@ export function initUI() {
         'keybindMake', 'keybindSell', 'keybindWire', 'keybindMachine',
         'shortcutsHint', 'guideShortcuts', 'rebindNote',
         'wireBuyerBtn', 'wireBuyerBtnText', 'wireBuyerState',
+        'factoryStage', 'factoryStageImg', 'factoryStageLabel', 'factoryStageNum',
     ];
     for (const id of ids) {
         els[id] = document.getElementById(id);
@@ -157,6 +159,26 @@ function renderObjectives() {
 
 // ---- Main render ---------------------------------------------------------
 
+// Swaps the banner picture only when the stage actually changes; the src
+// write is what triggers a fetch and decode.
+function renderFactoryStage() {
+    if (!els.factoryStageImg) return;
+    const stage = factoryStage(gameState.autoClippers);
+    if (els.factoryStageImg._stage === stage) return;
+    const grew = els.factoryStageImg._stage !== undefined && stage > els.factoryStageImg._stage;
+    els.factoryStageImg._stage = stage;
+    const label = FACTORY_STAGES[stage - 1].label;
+    els.factoryStageImg.src = factoryStageUrl(stage);
+    els.factoryStageImg.alt = `المصنع: ${label}`;
+    setText(els.factoryStageLabel, label);
+    setText(els.factoryStageNum, stage);
+    if (grew && !reduceMotion && els.factoryStage) {
+        els.factoryStage.classList.remove('stage-up');
+        void els.factoryStage.offsetWidth;
+        els.factoryStage.classList.add('stage-up');
+    }
+}
+
 export function updateUI() {
     if (!els.clips) return;
 
@@ -189,6 +211,7 @@ export function updateUI() {
         formatMoney(gameState.price * Math.min(gameState.clips, gameState.demand)));
 
     setText(els.autoClippers, formatNumber(gameState.autoClippers));
+    renderFactoryStage();
     setText(els.autoClipperCost, formatMoney(gameState.autoClipperCost));
     setText(els.wireCost, formatMoney(gameState.wireCost));
     setText(els.wireEfficiency, gameState.wireEfficiency.toFixed(1));

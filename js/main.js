@@ -7,6 +7,7 @@ import {
     initAudio, playSound, setSoundsEnabled, areSoundsEnabled,
 } from './audio.js';
 import { initTicker, showNewsTicker } from './effects.js';
+import { initArt } from './art.js';
 import { loadBestScore, loadGameState, startAutoSave, resetGameState } from './save.js';
 import { calculateOfflineProgress } from './offline.js';
 import {
@@ -165,6 +166,7 @@ function init() {
     initAudio();
     initTicker();
     initUI();
+    initArt();
 
     loadBestScore();
     const saveStatus = loadGameState();

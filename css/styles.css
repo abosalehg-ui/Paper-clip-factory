@@ -51,11 +51,22 @@ body::before{
     inset:0;
     z-index:-1;
     background-color:#0b1736;
-    background-image:url('../assets/images/background.webp');
+    /* The scrim keeps panel text readable over the machinery at the edges. */
+    background-image:
+        linear-gradient(rgba(11,23,54,0.45), rgba(11,23,54,0.6)),
+        url('../assets/images/art/bg-wide.webp');
     background-size:cover;
     background-repeat:no-repeat;
     background-position:center center;
-    background-blend-mode:overlay;
+}
+/* Portrait screens get the tall cut, whose machines hug the top and bottom
+   edges instead of being cropped away. */
+@media (orientation: portrait){
+    body::before{
+        background-image:
+            linear-gradient(rgba(11,23,54,0.45), rgba(11,23,54,0.6)),
+            url('../assets/images/art/bg-tall.webp');
+    }
 }
 .container{
     max-width:1200px;
@@ -108,6 +119,58 @@ body::before{
     transition: transform .2s;
 }
 .icon-btn:active:not(:disabled) .emoji-icon{transform:scale(1.1)}
+
+/* Illustrated icons (js/art.js) are sized in em so they follow the emoji's
+   font-size at every breakpoint. The pale halo lifts the navy machinery off
+   the navy buttons. */
+.has-art{display:inline-grid;place-items:center}
+.art-icon{display:block;width:1.6em;height:1.6em;object-fit:contain;filter:drop-shadow(0 0 3px rgba(125,211,252,0.45)) drop-shadow(0 2px 3px rgba(0,0,0,0.35))}
+.stat-icon .art-icon{width:1.5em;height:1.5em}
+
+/* ---- Factory banner ---------------------------------------------------- */
+.factory-stage{
+    position:relative;
+    margin:0 0 10px;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid rgba(59,130,246,0.25);
+    /* Matches the navy the renders are lit against, so the picture's edge
+       disappears into the frame. */
+    background:#011131;
+    box-shadow:0 6px 18px rgba(0,0,0,0.35), inset 0 0 30px rgba(59,130,246,0.12);
+    text-align:center;
+}
+.factory-stage img{
+    display:block;
+    width:100%;
+    max-width:480px;
+    height:auto;
+    margin:0 auto;
+    /* The renders sit on the same navy as the frame; fading the edges hides
+       the seam where the picture ends. */
+    -webkit-mask-image:radial-gradient(ellipse 70% 75% at center, #000 60%, transparent 100%);
+    mask-image:radial-gradient(ellipse 70% 75% at center, #000 60%, transparent 100%);
+}
+.factory-stage-label{
+    position:absolute;
+    inset-block-end:6px;
+    inset-inline:0;
+    font-size:0.8rem;
+    font-weight:700;
+    color:#7dd3fc;
+    text-shadow:0 1px 4px rgba(0,0,0,0.8);
+}
+.factory-stage.stage-up img{animation:stage-up 0.9s ease-out}
+.factory-stage.stage-up{animation:stage-glow 1.4s ease-out}
+@keyframes stage-up{
+    from{opacity:0;transform:scale(0.92)}
+    to{opacity:1;transform:scale(1)}
+}
+@keyframes stage-glow{
+    0%{box-shadow:0 0 0 rgba(56,189,248,0), inset 0 0 30px rgba(59,130,246,0.12)}
+    35%{box-shadow:0 0 28px rgba(56,189,248,0.6), inset 0 0 40px rgba(56,189,248,0.35)}
+    100%{box-shadow:0 6px 18px rgba(0,0,0,0.35), inset 0 0 30px rgba(59,130,246,0.12)}
+}
 
 .stats-grid{
     display:grid;
@@ -466,7 +529,9 @@ body::before{
     .floating-emoji,
     .pulse,
     .float,
-    .glow-update {
+    .glow-update,
+    .factory-stage,
+    .factory-stage img {
         animation: none !important;
     }
     *,
