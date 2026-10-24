@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Lets the site be redeployed from the Actions tab without a new commit.
+  workflow_dispatch:
 
 jobs:
   test:
@@ -22,3 +24,34 @@ jobs:
         run: npm test
       - name: Verify service worker asset list is up to date
         run: npm run build-sw:check
+
+  # Publishes the game to GitHub Pages once main is green. The repository's
+  # Pages source must be set to "GitHub Actions" (Settings -> Pages); without
+  # this job nothing ever deploys, and the live site stays on its last build.
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      # Only the files the game ships; tests, tooling and node_modules stay out.
+      - name: Stage site
+        run: |
+          mkdir _site
+          cp -r index.html manifest.json service-worker.js css js assets _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
