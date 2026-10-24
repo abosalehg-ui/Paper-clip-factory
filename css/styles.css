@@ -651,6 +651,7 @@ input[type="range"]{
     background:linear-gradient(145deg,#12180c,#1a1f0d);
 }
 .achievement-icon{font-size:1.4rem;flex-shrink:0}
+.achievement-icon .art-icon{width:1.8em;height:1.8em}
 .achievement-title{font-weight:700;font-size:0.85rem;color:#e6eef8}
 .achievement-desc{font-size:0.75rem;color:#9aa4b2;line-height:1.5}
 
@@ -684,8 +685,8 @@ input[type="range"]{
        covered the demand card. */
     inset-block-end: 64px;
     inset-inline-end: 10px;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
@@ -694,14 +695,14 @@ input[type="range"]{
     display: none;
     animation: bounceIn 0.8s ease-out forwards;
     background: transparent;
-    background-size: 34px 34px;
+    background-size: 42px 42px;
     background-repeat: no-repeat;
     background-position: center;
 }
 
-#trophyBronzeIcon {background-image: url('../assets/images/trophy-bronze-64.webp')}
-#trophySilverIcon {background-image: url('../assets/images/trophy-silver-64.webp')}
-#trophyGoldIcon {background-image: url('../assets/images/trophy-gold-64.webp')}
+#trophyBronzeIcon {background-image: url('../assets/images/art/trophy-bronze.webp')}
+#trophySilverIcon {background-image: url('../assets/images/art/trophy-silver.webp')}
+#trophyGoldIcon {background-image: url('../assets/images/art/trophy-gold.webp')}
 
 @keyframes bounceIn {
     0% {transform: scale(0.3);opacity: 0}
@@ -737,6 +738,20 @@ html[dir="ltr"] #newsTicker {transform: translateX(-100%)}
     font-size: 1.1rem;
     margin-inline-end: 8px;
 }
+#newsTicker .art-icon{width:1.8em;height:1.8em;margin-block:-6px}
+
+/* Illustrations above the game-over summary and in the prestige panel. */
+.modal-scene,
+.section-scene{
+    display:block;
+    width:100%;
+    height:auto;
+    border-radius:10px;
+    -webkit-mask-image:radial-gradient(ellipse 75% 80% at center, #000 60%, transparent 100%);
+    mask-image:radial-gradient(ellipse 75% 80% at center, #000 60%, transparent 100%);
+}
+.modal-scene{max-width:360px;margin:0 auto 8px}
+.section-scene{max-width:420px;margin:0 auto 6px}
 
 #offlineModal .modal-content,
 #gameOverModal .modal-content {text-align: center}

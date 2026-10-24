@@ -11,7 +11,9 @@ import { ACHIEVEMENTS, isAchievementUnlocked } from './achievements.js';
 import { updateOnboarding, getNextGoal } from './onboarding.js';
 import { pendingPoints, canPrestige, currentMultiplier } from './prestige.js';
 import { getSettings, describeKey } from './settings.js';
-import { FACTORY_STAGES, factoryStage, factoryStageUrl } from './art.js';
+import {
+    FACTORY_STAGES, factoryStage, factoryStageUrl, applyArt, badgeUrl,
+} from './art.js';
 
 const els = {};
 
@@ -322,6 +324,7 @@ export function renderAchievements() {
         icon.className = 'achievement-icon';
         icon.setAttribute('aria-hidden', 'true');
         icon.textContent = unlocked ? achievement.icon : '🔒';
+        applyArt(icon, badgeUrl(unlocked ? achievement.id : 'locked'));
 
         const body = document.createElement('div');
         const title = document.createElement('div');

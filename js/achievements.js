@@ -5,6 +5,7 @@ import { showNewsTicker, flash } from './effects.js';
 import { isFeedbackSuspended } from './feedback.js';
 import { getSettings } from './settings.js';
 import { saveBestScore } from './save.js';
+import { badgeUrl, trophyUrl } from './art.js';
 
 let trophyElements = null;
 
@@ -49,7 +50,7 @@ export function checkTrophy(lifetimeSold) {
         gameState[trophy.key] = true;
         awarded = true;
         playSound('trophy');
-        showNewsTicker(trophy.message, trophy.emoji);
+        showNewsTicker(trophy.message, trophy.emoji, 3000, trophyUrl(trophy.tier));
     }
     // During an offline replay the caller redraws once afterwards.
     if (awarded && !isFeedbackSuspended()) renderTrophies();
@@ -113,7 +114,7 @@ export function checkAchievements() {
     if (unlocked.length && !isFeedbackSuspended()) {
         const first = unlocked[0];
         const extra = unlocked.length > 1 ? ` (+${unlocked.length - 1})` : '';
-        showNewsTicker(`${first.icon} إنجاز: ${first.title}${extra}`, '🏅', 3500);
+        showNewsTicker(`${first.icon} إنجاز: ${first.title}${extra}`, '🏅', 3500, badgeUrl(first.id));
         playSound('completion');
     }
     return unlocked;

@@ -5,6 +5,7 @@ import { playSound } from './audio.js';
 import { flash, showNewsTicker } from './effects.js';
 import { isInsuranceActive } from './upgrades.js';
 import { formatInteger } from './format.js';
+import { eventUrl } from './art.js';
 
 // Insurance no longer cancels events outright — one purchase used to switch
 // the entire challenge system off forever. It now blunts the damage instead,
@@ -26,7 +27,7 @@ const EVENT_TYPES = {
             );
             const loss = Math.min(s.money, applyInsurance(raw));
             s.money = Math.max(0, s.money - loss);
-            showNewsTicker(`⚠️ حادث: سرقة! سُرق $${loss.toFixed(2)} من أموالك.`, '🚨', 4500);
+            showNewsTicker(`⚠️ حادث: سرقة! سُرق $${loss.toFixed(2)} من أموالك.`, '🚨', 4500, eventUrl('theft'));
             playSound('warning');
             flash('card-money');
         },
@@ -40,7 +41,7 @@ const EVENT_TYPES = {
             );
             const loss = Math.min(s.clips, Math.floor(applyInsurance(raw)));
             s.clips = Math.max(0, s.clips - loss);
-            showNewsTicker(`🔥 حادث: حريق! تلف ${formatInteger(loss)} مشبك ورقي.`, '🚒', 4500);
+            showNewsTicker(`🔥 حادث: حريق! تلف ${formatInteger(loss)} مشبك ورقي.`, '🚒', 4500, eventUrl('fire'));
             playSound('fire');
             flash('card-clips');
         },
@@ -54,7 +55,7 @@ const EVENT_TYPES = {
             const loss = Math.min(s.autoClippers, Math.max(1, Math.floor(applyInsurance(raw))));
             s.autoClippers = Math.max(0, s.autoClippers - loss);
             s.autoClipperCost = computeAutoClipperCost(s.autoClippers);
-            showNewsTicker(`⚙️ حادث: تلف آلات! تعطلت ${loss} آلة صنع تلقائي.`, '💥', 4500);
+            showNewsTicker(`⚙️ حادث: تلف آلات! تعطلت ${loss} آلة صنع تلقائي.`, '💥', 4500, eventUrl('breakdown'));
             playSound('fire');
         },
     },
@@ -65,7 +66,7 @@ const EVENT_TYPES = {
             const drop = applyInsurance(oldDemand * (1 - GAME_CONFIG.NEGATIVE_PR_DEMAND_FACTOR));
             const cap = effectiveDemandCap(s.marketingLevel, s.price);
             s.demand = Math.max(1, Math.min(cap, Math.floor(oldDemand - drop)));
-            showNewsTicker(`📉 تحدي: دعاية سلبية! انخفض الطلب من ${oldDemand} إلى ${s.demand}.`, '📢', 4500);
+            showNewsTicker(`📉 تحدي: دعاية سلبية! انخفض الطلب من ${oldDemand} إلى ${s.demand}.`, '📢', 4500, eventUrl('bad-press'));
             playSound('warning');
             flash('card-demand');
         },

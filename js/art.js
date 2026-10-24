@@ -34,18 +34,42 @@ export function factoryStageUrl(stage) {
     return `${ART_DIR}/factory-stage-${stage}.webp`;
 }
 
+export function badgeUrl(id) {
+    return `${ART_DIR}/badge-${id}.webp`;
+}
+
+export function trophyUrl(tier) {
+    return `${ART_DIR}/trophy-${tier}.webp`;
+}
+
+export function eventUrl(name) {
+    return `${ART_DIR}/event-${name}.webp`;
+}
+
+// Puts the picture at `url` in place of `el`'s emoji once it loads. Elements
+// that are reused (the news ticker) can be re-targeted before an earlier
+// load finishes, so a load only lands if it is still the one asked for.
+// Pass a null url to drop any pending swap and keep the current text.
+export function applyArt(el, url) {
+    if (!el) return;
+    el._artUrl = url;
+    el.classList?.remove('has-art');
+    if (!url || typeof Image === 'undefined') return;
+    const img = new Image();
+    img.alt = '';
+    img.decoding = 'async';
+    img.className = 'art-icon';
+    img.addEventListener('load', () => {
+        if (el._artUrl !== url) return;
+        el.textContent = '';
+        el.append(img);
+        el.classList.add('has-art');
+    }, { once: true });
+    img.src = url;
+}
+
 export function initArt(root = document) {
-    if (typeof Image === 'undefined') return;
     for (const el of root.querySelectorAll('[data-art]')) {
-        const img = new Image();
-        img.alt = '';
-        img.decoding = 'async';
-        img.className = 'art-icon';
-        img.addEventListener('load', () => {
-            el.textContent = '';
-            el.append(img);
-            el.classList.add('has-art');
-        }, { once: true });
-        img.src = iconUrl(el.dataset.art);
+        applyArt(el, iconUrl(el.dataset.art));
     }
 }

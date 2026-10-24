@@ -5,8 +5,9 @@ import { existsSync, readFileSync } from 'node:fs';
 
 import { GAME_CONFIG } from '../js/config.js';
 import {
-    FACTORY_STAGES, factoryStage, factoryStageUrl, iconUrl,
+    FACTORY_STAGES, factoryStage, factoryStageUrl, iconUrl, badgeUrl, trophyUrl, eventUrl,
 } from '../js/art.js';
+import { ACHIEVEMENTS } from '../js/achievements.js';
 
 const ROOT = new URL('../', import.meta.url);
 
@@ -39,5 +40,34 @@ test('every data-art icon in the markup has a shipped picture', () => {
     assert.ok(names.length > 0);
     for (const name of names) {
         assert.ok(existsSync(new URL(iconUrl(name), ROOT)), name);
+    }
+});
+
+test('every achievement, the locked state and each trophy has a picture', () => {
+    for (const { id } of ACHIEVEMENTS) {
+        assert.ok(existsSync(new URL(badgeUrl(id), ROOT)), id);
+    }
+    assert.ok(existsSync(new URL(badgeUrl('locked'), ROOT)));
+    for (const tier of ['bronze', 'silver', 'gold']) {
+        assert.ok(existsSync(new URL(trophyUrl(tier), ROOT)), tier);
+    }
+});
+
+// Scene, trophy and app-icon art is referenced by literal path.
+test('every image path named in the markup, manifest and styles exists', () => {
+    for (const file of ['index.html', 'manifest.json', 'css/styles.css']) {
+        const text = readFileSync(new URL(file, ROOT), 'utf8');
+        for (const [path] of text.matchAll(/assets\/images\/[\w./-]+\.(?:webp|png)/g)) {
+            assert.ok(existsSync(new URL(path, ROOT)), `${file}: ${path}`);
+        }
+    }
+});
+
+test('every incident in events.js has a picture', () => {
+    const text = readFileSync(new URL('js/events.js', ROOT), 'utf8');
+    const names = [...text.matchAll(/eventUrl\('([^']+)'\)/g)].map((m) => m[1]);
+    assert.equal(names.length, 4);
+    for (const name of names) {
+        assert.ok(existsSync(new URL(eventUrl(name), ROOT)), name);
     }
 });
